@@ -61,8 +61,8 @@ function initPropertyCatalog(options) {
 
   function getFilterState() {
     return {
-      minValue: areaMinInput?.value ? Number(areaMinInput.value) : null,
-      maxValue: areaMaxInput?.value ? Number(areaMaxInput.value) : null,
+      minValue: areaMinInput?.value ? parseArea(areaMinInput.value) : null,
+      maxValue: areaMaxInput?.value ? parseArea(areaMaxInput.value) : null,
       flatTypes: isComplexCatalog ? getCheckedValues('.flat-type-filter') : [],
       districts: getCheckedValues('.district-filter'),
       sort: sortSelect?.value || 'default',

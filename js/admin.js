@@ -154,17 +154,17 @@ function renderPropertiesAdmin() {
                 </div>
                 <div class="form-group">
                   <label>Площадь от, м²</label>
-                  <input type="number" name="areaMin" min="0" step="0.1">
+                  <input type="number" name="areaMin" min="0" step="0.001">
                 </div>
                 <div class="form-group">
                   <label>Площадь до, м²</label>
-                  <input type="number" name="areaMax" min="0" step="0.1">
+                  <input type="number" name="areaMax" min="0" step="0.001">
                 </div>
               </div>
             </div>
             <div class="form-group" id="areaField">
               <label>Площадь, м²</label>
-              <input type="number" name="area" min="1" step="0.1">
+              <input type="number" name="area" min="0.001" step="0.001">
             </div>
             <div class="form-group">
               <label>Цена, ₽</label>
@@ -248,7 +248,7 @@ function renderPropertyRow(property) {
   const stats = isComplex(property) ? getComplexStats(property) : null;
   const sizeCell = isComplex(property)
     ? stats.totalApartments
-    : `${property.area} м²`;
+    : `${formatArea(property.area)} м²`;
   const breakdownCell = isComplex(property)
     ? `1к: ${stats.count1room}, 2к: ${stats.count2room}, 3к: ${stats.count3room}, евро: ${stats.countEuroTwo}`
     : '—';
@@ -478,8 +478,8 @@ function bindPropertiesAdmin() {
       property.count3room = count3room || 0;
       property.countEuroTwo = countEuroTwo || 0;
 
-      const areaMin = Number(formData.get('areaMin')) || 0;
-      const areaMax = Number(formData.get('areaMax')) || 0;
+      const areaMin = parseArea(formData.get('areaMin')) ?? 0;
+      const areaMax = parseArea(formData.get('areaMax')) ?? 0;
       if (areaMin && areaMax && areaMin > areaMax) {
         showToast('Минимальная площадь не может быть больше максимальной', 'error');
         return;
@@ -487,8 +487,8 @@ function bindPropertiesAdmin() {
       property.areaMin = areaMin;
       property.areaMax = areaMax || areaMin;
     } else {
-      const area = Number(formData.get('area'));
-      if (!area || area <= 0) {
+      const area = parseArea(formData.get('area'));
+      if (area == null || area <= 0) {
         showToast('Укажите корректную площадь', 'error');
         return;
       }

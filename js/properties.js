@@ -86,7 +86,7 @@ function initPropertyPage() {
     : `
       <div class="property-spec-row">
         <span class="property-spec-label">Площадь</span>
-        <span class="property-spec-value">${property.area} м²</span>
+        <span class="property-spec-value">${formatArea(property.area)} м²</span>
       </div>
     `;
 

@@ -33,7 +33,7 @@ function renderPropertyCard(property) {
     attrsHtml = renderComplexStatsTags(property);
   } else {
     attrsHtml = `
-      <span class="property-attr-tag">${property.area} м²</span>
+      <span class="property-attr-tag">${formatArea(property.area)} м²</span>
       ${districtHtml}
       ${addressHtml}
     `;

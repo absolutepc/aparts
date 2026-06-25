@@ -136,6 +136,22 @@ function formatPrice(price) {
   }).format(price);
 }
 
+function formatArea(value) {
+  const num = Number(value);
+  if (Number.isNaN(num) || num <= 0) return '';
+  return new Intl.NumberFormat('ru-RU', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 3,
+  }).format(num);
+}
+
+function parseArea(value) {
+  if (value == null || value === '') return null;
+  const normalized = String(value).trim().replace(',', '.');
+  const num = Number(normalized);
+  return Number.isFinite(num) ? num : null;
+}
+
 function isComplex(property) {
   return COMPLEX_TYPES.includes(property.type);
 }
@@ -171,8 +187,10 @@ function complexMatchesAreaFilter(property, filterMin, filterMax) {
 function formatComplexAreaRange(property) {
   const { areaMin, areaMax } = getComplexAreaRange(property);
   if (!areaMin && !areaMax) return '';
-  if (areaMin && areaMax && areaMin !== areaMax) return `${areaMin}–${areaMax} м²`;
-  return `${areaMin || areaMax} м²`;
+  if (areaMin && areaMax && areaMin !== areaMax) {
+    return `${formatArea(areaMin)}–${formatArea(areaMax)} м²`;
+  }
+  return `${formatArea(areaMin || areaMax)} м²`;
 }
 
 function complexHasFlatType(property, flatType) {
