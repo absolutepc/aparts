@@ -179,23 +179,10 @@ function renderPropertiesAdmin() {
               <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
             </div>
             <div class="form-group admin-form-full">
-              <label>Изображение (URL или путь)</label>
-              <input type="text" name="imageUrl" value="img/default.svg" placeholder="img/default.svg или https://...">
-            </div>
-            <div class="form-group admin-form-full">
-              <label>Загрузить с компьютера</label>
-              <input type="file" id="propertyImageFile" accept="image/*">
-              <p class="form-hint">Можно указать путь к файлу в папке img/ или загрузить фото с компьютера</p>
-            </div>
-            <div class="form-group admin-form-full">
-              <label>Галерея изображений</label>
-              <textarea name="images" rows="4" placeholder="По одному пути на строку&#10;img/default.svg&#10;https://example.com/photo.jpg"></textarea>
-            </div>
-            <div class="form-group admin-form-full">
-              <label>Предпросмотр фото</label>
-              <div class="admin-img-preview">
-                <img id="propertyImgPreview" src="${resolveImageSrc(DEFAULT_IMG)}" alt="Предпросмотр">
-              </div>
+              <label>Фотографии</label>
+              <input type="file" id="propertyImageFiles" accept="image/*" multiple>
+              <p class="form-hint">Выберите одно или несколько фото с компьютера (до 2 МБ каждое)</p>
+              <div class="admin-img-gallery" id="propertyImgGallery"></div>
             </div>
             <div class="form-group admin-form-full">
               <label>Описание</label>
@@ -276,53 +263,89 @@ function renderPropertyRow(property) {
   `;
 }
 
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
 function bindPropertiesAdmin() {
   const formWrap = document.getElementById('propertyFormWrap');
   const form = document.getElementById('propertyEditForm');
   const addBtn = document.getElementById('addPropertyBtn');
   const cancelBtn = document.getElementById('cancelPropertyBtn');
   const typeSelect = form?.querySelector('[name="type"]');
-  const imageInput = form?.querySelector('[name="imageUrl"]');
-  const imageFileInput = document.getElementById('propertyImageFile');
-  const imagePreview = document.getElementById('propertyImgPreview');
+  const imageFilesInput = document.getElementById('propertyImageFiles');
+  const imageGallery = document.getElementById('propertyImgGallery');
+  let propertyImagesDraft = [];
 
-  function updatePropertyImagePreview(src) {
-    if (!imagePreview) return;
-    imagePreview.src = resolveImageSrc(src || DEFAULT_IMG);
-    imagePreview.onerror = () => {
-      imagePreview.src = resolveImageSrc(DEFAULT_IMG);
-    };
+  function renderPropertyImagesGallery() {
+    if (!imageGallery) return;
+
+    if (!propertyImagesDraft.length) {
+      imageGallery.innerHTML = '<p class="admin-img-gallery-empty">Фото не добавлены — будет показано изображение по умолчанию</p>';
+      return;
+    }
+
+    imageGallery.innerHTML = propertyImagesDraft.map((src, index) => `
+      <div class="admin-img-gallery-item">
+        <img src="${escapeHtml(resolveImageSrc(src))}" alt="Фото ${index + 1}">
+        <button type="button" class="admin-img-remove" data-index="${index}" aria-label="Удалить фото">×</button>
+      </div>
+    `).join('');
+
+    imageGallery.querySelectorAll('.admin-img-remove').forEach(button => {
+      button.addEventListener('click', () => {
+        propertyImagesDraft.splice(Number(button.dataset.index), 1);
+        renderPropertyImagesGallery();
+      });
+    });
   }
 
-  function bindImagePreview() {
-    imageInput?.addEventListener('input', () => {
-      updatePropertyImagePreview(imageInput.value.trim());
-    });
+  function setPropertyImagesDraft(images) {
+    propertyImagesDraft = Array.isArray(images) ? [...images] : [];
+    renderPropertyImagesGallery();
+  }
 
-    imageFileInput?.addEventListener('change', () => {
-      const file = imageFileInput.files?.[0];
-      if (!file) return;
+  async function handleImageFilesSelected() {
+    const files = [...(imageFilesInput?.files || [])];
+    if (!files.length) return;
 
+    let added = 0;
+    for (const file of files) {
       if (!file.type.startsWith('image/')) {
-        showToast('Выберите файл изображения', 'error');
-        imageFileInput.value = '';
-        return;
+        showToast(`Файл «${file.name}» не является изображением`, 'error');
+        continue;
       }
 
       if (file.size > 2 * 1024 * 1024) {
-        showToast('Файл слишком большой. Максимум 2 МБ', 'error');
-        imageFileInput.value = '';
-        return;
+        showToast(`Файл «${file.name}» слишком большой (макс. 2 МБ)`, 'error');
+        continue;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (imageInput) imageInput.value = reader.result;
-        updatePropertyImagePreview(reader.result);
-        showToast('Изображение загружено', 'success');
-      };
-      reader.onerror = () => showToast('Не удалось прочитать файл', 'error');
-      reader.readAsDataURL(file);
+      try {
+        const dataUrl = await readImageFile(file);
+        propertyImagesDraft.push(dataUrl);
+        added += 1;
+      } catch {
+        showToast(`Не удалось загрузить «${file.name}»`, 'error');
+      }
+    }
+
+    if (imageFilesInput) imageFilesInput.value = '';
+    renderPropertyImagesGallery();
+
+    if (added) {
+      showToast(added === 1 ? 'Фото добавлено' : `Добавлено фото: ${added}`, 'success');
+    }
+  }
+
+  function bindImageUpload() {
+    imageFilesInput?.addEventListener('change', () => {
+      handleImageFilesSelected();
     });
   }
 
@@ -354,13 +377,12 @@ function bindPropertiesAdmin() {
     form.reset();
     form.editId.value = '';
     form.type.value = 'jk';
-    form.imageUrl.value = DEFAULT_IMG;
     form.published.checked = true;
-    if (imageFileInput) imageFileInput.value = '';
+    if (imageFilesInput) imageFilesInput.value = '';
+    setPropertyImagesDraft([]);
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
     toggleTypeFields();
-    updatePropertyImagePreview(DEFAULT_IMG);
   });
 
   cancelBtn?.addEventListener('click', () => {
@@ -369,7 +391,7 @@ function bindPropertiesAdmin() {
 
   typeSelect?.addEventListener('change', () => toggleTypeFields(true));
   toggleTypeFields();
-  bindImagePreview();
+  bindImageUpload();
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -382,8 +404,8 @@ function bindPropertiesAdmin() {
       return;
     }
 
-    const images = parsePropertyImages(formData.get('images')?.toString());
-    const imageUrl = formData.get('imageUrl')?.toString().trim() || images?.[0] || DEFAULT_IMG;
+    const images = propertyImagesDraft.length ? [...propertyImagesDraft] : [DEFAULT_IMG];
+    const imageUrl = images[0];
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
@@ -394,7 +416,7 @@ function bindPropertiesAdmin() {
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
       imageUrl,
-      images: images || [imageUrl],
+      images,
       published: formData.get('published') === 'on',
     };
 
@@ -490,16 +512,14 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      form.imageUrl.value = getPropertyImg(property);
-      form.images.value = formatPropertyImages(property.images);
+      setPropertyImagesDraft(getPropertyImages(property));
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
-      if (imageFileInput) imageFileInput.value = '';
+      if (imageFilesInput) imageFilesInput.value = '';
 
       document.getElementById('propertyFormTitle').textContent = 'Редактировать объект';
       formWrap.style.display = 'block';
       toggleTypeFields();
-      updatePropertyImagePreview(getPropertyImg(property));
     });
   });
 
