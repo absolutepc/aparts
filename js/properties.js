@@ -74,6 +74,18 @@ function initPropertyPage() {
     ? `<div class="property-spec-row"><span class="property-spec-label">Адрес</span><span class="property-spec-value">${escapeHtml(property.address)}</span></div>`
     : '';
 
+  const images = getPropertyImages(property);
+  const mainImage = images[0];
+  const galleryHtml = images.length > 1
+    ? `<div class="property-gallery-thumbs" id="propertyGalleryThumbs">
+        ${images.map((src, index) => `
+          <button type="button" class="property-gallery-thumb ${index === 0 ? 'active' : ''}" data-src="${escapeHtml(resolveImageSrc(src))}">
+            ${renderPropertyImg(src, `${property.title} ${index + 1}`)}
+          </button>
+        `).join('')}
+      </div>`
+    : '';
+
   container.innerHTML = `
     <div class="container property-detail-page">
       <div class="breadcrumbs">
@@ -84,7 +96,8 @@ function initPropertyPage() {
 
       <div class="property-detail-hero">
         <div class="property-detail-image">
-          ${renderPropertyImg(getPropertyImg(property), property.title)}
+          <img id="propertyMainImage" src="${escapeHtml(resolveImageSrc(mainImage))}" alt="${escapeHtml(property.title)}">
+          ${galleryHtml}
         </div>
         <div class="property-detail-info">
           <div class="property-category">${escapeHtml(typeLabel)}</div>
@@ -105,4 +118,13 @@ function initPropertyPage() {
       </div>
     </div>
   `;
+
+  document.querySelectorAll('.property-gallery-thumb').forEach(button => {
+    button.addEventListener('click', () => {
+      const mainImageEl = document.getElementById('propertyMainImage');
+      if (mainImageEl) mainImageEl.src = button.dataset.src;
+      document.querySelectorAll('.property-gallery-thumb').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
 }

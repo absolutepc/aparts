@@ -94,21 +94,63 @@ function formatPrice(price) {
 
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
-  return {
+  const merged = {
     ...defaults,
     ...property,
     district: property.district || defaults?.district || '',
   };
+
+  if (!Array.isArray(merged.images) || !merged.images.length) {
+    merged.images = merged.imageUrl ? [merged.imageUrl] : defaults?.images || [DEFAULT_IMG];
+  }
+
+  if (!merged.imageUrl) {
+    merged.imageUrl = merged.images[0] || DEFAULT_IMG;
+  }
+
+  return merged;
 }
 
 function getPropertyImg(property) {
+  if (Array.isArray(property.images) && property.images.length) {
+    return property.images[0];
+  }
   return property.imageUrl || DEFAULT_IMG;
+}
+
+function getPropertyImages(property) {
+  if (Array.isArray(property.images) && property.images.length) {
+    return property.images;
+  }
+  if (property.imageUrl) {
+    return [property.imageUrl];
+  }
+  return [DEFAULT_IMG];
+}
+
+function resolveImageSrc(src) {
+  if (!src) return assetPath(DEFAULT_IMG);
+  if (/^(https?:|data:|\/\/)/.test(src)) return src;
+  return assetPath(src);
+}
+
+function parsePropertyImages(raw) {
+  if (!raw || !raw.trim()) return undefined;
+  const images = raw.trim().split('\n').map(line => line.trim()).filter(Boolean);
+  return images.length ? images : undefined;
+}
+
+function formatPropertyImages(images) {
+  if (!images?.length) return '';
+  return images.join('\n');
 }
 
 function renderPropertyImg(src, alt = '') {
   const safeAlt = escapeHtml(alt);
-  const safeSrc = escapeHtml(assetPath(src || DEFAULT_IMG));
-  return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${assetPath(DEFAULT_IMG)}'">`;
+  const resolved = resolveImageSrc(src || DEFAULT_IMG);
+  const safeSrc = escapeHtml(resolved);
+  const fallback = escapeHtml(assetPath(DEFAULT_IMG));
+  return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${fallback}'">`;
 }
 
 function renderLogo(alt = 'Aparts') {

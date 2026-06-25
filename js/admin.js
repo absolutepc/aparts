@@ -150,8 +150,23 @@ function renderPropertiesAdmin() {
               <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
             </div>
             <div class="form-group admin-form-full">
-              <label>URL изображения</label>
-              <input type="url" name="imageUrl" placeholder="https://...">
+              <label>Изображение (URL или путь)</label>
+              <input type="text" name="imageUrl" value="img/default.svg" placeholder="img/default.svg или https://...">
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Загрузить с компьютера</label>
+              <input type="file" id="propertyImageFile" accept="image/*">
+              <p class="form-hint">Можно указать путь к файлу в папке img/ или загрузить фото с компьютера</p>
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Галерея изображений</label>
+              <textarea name="images" rows="4" placeholder="По одному пути на строку&#10;img/default.svg&#10;https://example.com/photo.jpg"></textarea>
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Предпросмотр фото</label>
+              <div class="admin-img-preview">
+                <img id="propertyImgPreview" src="${resolveImageSrc(DEFAULT_IMG)}" alt="Предпросмотр">
+              </div>
             </div>
             <div class="form-group admin-form-full">
               <label>Описание</label>
@@ -200,7 +215,10 @@ function renderPropertyRow(property) {
   return `
     <tr>
       <td>
-        <div class="admin-item-title">${escapeHtml(property.title)}</div>
+        <div class="admin-item-title">
+          <img class="admin-product-thumb" src="${escapeHtml(resolveImageSrc(getPropertyImg(property)))}" alt="">
+          ${escapeHtml(property.title)}
+        </div>
         <div class="admin-item-sub">${escapeHtml(property.address || '')}</div>
       </td>
       <td>${escapeHtml(TYPE_LABELS[property.type] || property.type)}</td>
@@ -227,6 +245,49 @@ function bindPropertiesAdmin() {
   const addBtn = document.getElementById('addPropertyBtn');
   const cancelBtn = document.getElementById('cancelPropertyBtn');
   const typeSelect = form?.querySelector('[name="type"]');
+  const imageInput = form?.querySelector('[name="imageUrl"]');
+  const imageFileInput = document.getElementById('propertyImageFile');
+  const imagePreview = document.getElementById('propertyImgPreview');
+
+  function updatePropertyImagePreview(src) {
+    if (!imagePreview) return;
+    imagePreview.src = resolveImageSrc(src || DEFAULT_IMG);
+    imagePreview.onerror = () => {
+      imagePreview.src = resolveImageSrc(DEFAULT_IMG);
+    };
+  }
+
+  function bindImagePreview() {
+    imageInput?.addEventListener('input', () => {
+      updatePropertyImagePreview(imageInput.value.trim());
+    });
+
+    imageFileInput?.addEventListener('change', () => {
+      const file = imageFileInput.files?.[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast('Выберите файл изображения', 'error');
+        imageFileInput.value = '';
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('Файл слишком большой. Максимум 2 МБ', 'error');
+        imageFileInput.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (imageInput) imageInput.value = reader.result;
+        updatePropertyImagePreview(reader.result);
+        showToast('Изображение загружено', 'success');
+      };
+      reader.onerror = () => showToast('Не удалось прочитать файл', 'error');
+      reader.readAsDataURL(file);
+    });
+  }
 
   function toggleRoomsField() {
     const roomsField = document.getElementById('roomsField');
@@ -240,10 +301,13 @@ function bindPropertiesAdmin() {
   addBtn?.addEventListener('click', () => {
     form.reset();
     form.editId.value = '';
+    form.imageUrl.value = DEFAULT_IMG;
     form.published.checked = true;
+    if (imageFileInput) imageFileInput.value = '';
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
     toggleRoomsField();
+    updatePropertyImagePreview(DEFAULT_IMG);
   });
 
   cancelBtn?.addEventListener('click', () => {
@@ -252,6 +316,7 @@ function bindPropertiesAdmin() {
 
   typeSelect?.addEventListener('change', toggleRoomsField);
   toggleRoomsField();
+  bindImagePreview();
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -280,6 +345,9 @@ function bindPropertiesAdmin() {
       }
     }
 
+    const images = parsePropertyImages(formData.get('images')?.toString());
+    const imageUrl = formData.get('imageUrl')?.toString().trim() || images?.[0] || DEFAULT_IMG;
+
     const property = {
       id: formData.get('editId') || generatePropertyId(),
       title: formData.get('title').toString().trim(),
@@ -290,7 +358,8 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
-      imageUrl: formData.get('imageUrl')?.toString().trim() || '',
+      imageUrl,
+      images: images || [imageUrl],
       published: formData.get('published') === 'on',
     };
 
@@ -324,13 +393,16 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      form.imageUrl.value = property.imageUrl || '';
+      form.imageUrl.value = getPropertyImg(property);
+      form.images.value = formatPropertyImages(property.images);
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
+      if (imageFileInput) imageFileInput.value = '';
 
       document.getElementById('propertyFormTitle').textContent = 'Редактировать объект';
       formWrap.style.display = 'block';
       toggleRoomsField();
+      updatePropertyImagePreview(getPropertyImg(property));
     });
   });
 
