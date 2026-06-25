@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum PropertyType {
+  APARTMENT
+  STUDIO
+  COMMERCIAL
+}
+
+model Property {
+  id          Int          @id @default(autoincrement())
+  title       String
+  description String?
+  type        PropertyType
+  area        Float
+  rooms       Int?
+  price       Float?
+  address     String?
+  imageUrl    String?
+  published   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}

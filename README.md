@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Недвижимость — личный сайт-каталог
 
-## Getting Started
+Сайт для публикации квартир, студий и коммерческих помещений с админ-панелью.
 
-First, run the development server:
+## Возможности
+
+- Раздел **Квартиры и студии** с параметрами: площадь (м²) и количество комнат
+- Раздел **Коммерческая недвижимость** (без поля «комнаты»)
+- **Админ-панель** для добавления, редактирования и удаления объектов
+- Карточки объектов с ценой, адресом и фото
+
+## Стек
+
+- Next.js 16 (App Router)
+- TypeScript + Tailwind CSS
+- Prisma + SQLite
+
+## Быстрый старт
 
 ```bash
+npm install
+cp .env.example .env
+npx prisma migrate dev
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Сайт: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Админка: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Пароль по умолчанию:** `admin` (меняется через `ADMIN_PASSWORD` в `.env`)
 
-## Learn More
+## Переменные окружения
 
-To learn more about Next.js, take a look at the following resources:
+| Переменная | Описание |
+|------------|----------|
+| `DATABASE_URL` | Путь к SQLite базе (`file:./dev.db`) |
+| `ADMIN_PASSWORD` | Пароль для входа в админку |
+| `ADMIN_SECRET` | Секрет для подписи сессии |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Структура
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── apartments/      # Квартиры и студии
+│   ├── commercial/        # Коммерческая недвижимость
+│   ├── property/[id]/     # Карточка объекта
+│   └── admin/             # Админ-панель
+├── components/
+└── lib/
+prisma/
+└── schema.prisma          # Модель Property
+```
 
-## Deploy on Vercel
+## Деплой
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Для продакшена рекомендуется PostgreSQL (Neon, Supabase) вместо SQLite.
+Vercel поддерживает деплой Next.js напрямую из GitHub.
