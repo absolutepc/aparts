@@ -263,15 +263,6 @@ function renderPropertyRow(property) {
   `;
 }
 
-function readImageFile(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('read failed'));
-    reader.readAsDataURL(file);
-  });
-}
-
 function bindPropertiesAdmin() {
   const formWrap = document.getElementById('propertyFormWrap');
   const form = document.getElementById('propertyEditForm');
@@ -316,22 +307,18 @@ function bindPropertiesAdmin() {
 
     let added = 0;
     for (const file of files) {
-      if (!file.type.startsWith('image/')) {
-        showToast(`Файл «${file.name}» не является изображением`, 'error');
-        continue;
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        showToast(`Файл «${file.name}» слишком большой (макс. 2 МБ)`, 'error');
-        continue;
-      }
-
       try {
         const dataUrl = await readImageFile(file);
         propertyImagesDraft.push(dataUrl);
         added += 1;
-      } catch {
-        showToast(`Не удалось загрузить «${file.name}»`, 'error');
+      } catch (error) {
+        if (error.message === 'not an image') {
+          showToast(`Файл «${file.name}» не является изображением`, 'error');
+        } else if (error.message === 'too large') {
+          showToast(`Файл «${file.name}» слишком большой (макс. 2 МБ)`, 'error');
+        } else {
+          showToast(`Не удалось загрузить «${file.name}»`, 'error');
+        }
       }
     }
 
@@ -405,7 +392,6 @@ function bindPropertiesAdmin() {
     }
 
     const images = propertyImagesDraft.length ? [...propertyImagesDraft] : [DEFAULT_IMG];
-    const imageUrl = images[0];
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
@@ -415,7 +401,6 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
-      imageUrl,
       images,
       published: formData.get('published') === 'on',
     };
@@ -512,7 +497,7 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      setPropertyImagesDraft(getPropertyImages(property));
+      setPropertyImagesDraft(getEditablePropertyImages(property));
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
       if (imageFilesInput) imageFilesInput.value = '';

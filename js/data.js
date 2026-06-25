@@ -2,6 +2,7 @@ const STORE_KEY = 'aparts_data_v2';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
 const COMPLEX_TYPES = ['jk', 'mfk'];
 
@@ -44,7 +45,6 @@ const DEFAULT_PROPERTIES = [
     price: 8500000,
     address: 'ул. Северная, 15',
     district: 'САО',
-    imageUrl: 'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
     published: true,
   },
   {
@@ -62,7 +62,6 @@ const DEFAULT_PROPERTIES = [
     price: 12400000,
     address: 'Речной бульвар, 3',
     district: 'СЗАО',
-    imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
     published: true,
   },
   {
@@ -80,7 +79,6 @@ const DEFAULT_PROPERTIES = [
     price: 9800000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
     published: true,
   },
   {
@@ -92,7 +90,6 @@ const DEFAULT_PROPERTIES = [
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
     published: true,
   },
 ];
@@ -183,49 +180,68 @@ function enrichProperty(property) {
     merged.areaMax = Number(merged.areaMax) || Number(merged.areaMin) || 0;
   }
 
-  if (!Array.isArray(merged.images) || !merged.images.length) {
-    merged.images = merged.imageUrl ? [merged.imageUrl] : defaults?.images || [DEFAULT_IMG];
-  }
-
-  if (!merged.imageUrl) {
-    merged.imageUrl = merged.images[0] || DEFAULT_IMG;
-  }
+  merged.images = normalizePropertyImages(merged);
+  delete merged.imageUrl;
 
   return merged;
 }
 
-function getPropertyImg(property) {
-  if (Array.isArray(property.images) && property.images.length) {
-    return property.images[0];
+function isStoredImage(src) {
+  return typeof src === 'string' && (src.startsWith('data:') || src.startsWith('img/'));
+}
+
+function normalizePropertyImages(property) {
+  const images = Array.isArray(property.images)
+    ? property.images.filter(isStoredImage)
+    : [];
+
+  if (!images.length && property.imageUrl && isStoredImage(property.imageUrl)) {
+    images.push(property.imageUrl);
   }
-  return property.imageUrl || DEFAULT_IMG;
+
+  return images.length ? images : [DEFAULT_IMG];
+}
+
+function getPropertyImg(property) {
+  return getPropertyImages(property)[0];
 }
 
 function getPropertyImages(property) {
   if (Array.isArray(property.images) && property.images.length) {
     return property.images;
   }
-  if (property.imageUrl) {
-    return [property.imageUrl];
-  }
   return [DEFAULT_IMG];
+}
+
+function getEditablePropertyImages(property) {
+  const images = getPropertyImages(property);
+  if (images.length === 1 && images[0] === DEFAULT_IMG) return [];
+  return images;
 }
 
 function resolveImageSrc(src) {
   if (!src) return assetPath(DEFAULT_IMG);
-  if (/^(https?:|data:|\/\/)/.test(src)) return src;
-  return assetPath(src);
+  if (src.startsWith('data:')) return src;
+  return assetPath(src.startsWith('img/') ? src : DEFAULT_IMG);
 }
 
-function parsePropertyImages(raw) {
-  if (!raw || !raw.trim()) return undefined;
-  const images = raw.trim().split('\n').map(line => line.trim()).filter(Boolean);
-  return images.length ? images : undefined;
-}
+function readImageFile(file) {
+  return new Promise((resolve, reject) => {
+    if (!file?.type?.startsWith('image/')) {
+      reject(new Error('not an image'));
+      return;
+    }
 
-function formatPropertyImages(images) {
-  if (!images?.length) return '';
-  return images.join('\n');
+    if (file.size > MAX_IMAGE_SIZE) {
+      reject(new Error('too large'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('read failed'));
+    reader.readAsDataURL(file);
+  });
 }
 
 function renderPropertyImg(src, alt = '') {
@@ -311,7 +327,12 @@ function getProperties() {
 
 function saveProperties(properties) {
   initStore();
-  localStorage.setItem(STORE_KEY, JSON.stringify({ properties }));
+  const normalized = properties.map(property => {
+    const item = { ...property, images: normalizePropertyImages(property) };
+    delete item.imageUrl;
+    return item;
+  });
+  localStorage.setItem(STORE_KEY, JSON.stringify({ properties: normalized }));
 }
 
 function getPropertyById(id) {
