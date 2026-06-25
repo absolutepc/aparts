@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квартиры и студии — Aparts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <div class="breadcrumbs"><a href="index.html">Главная</a> / <span>Квартиры и студии</span></div>
+        <h1>Квартиры и студии</h1>
+        <p>Жилая недвижимость с указанием площади и количества комнат</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div id="propertiesList"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/properties.js"></script>
+  <script>
+    initLayout('apartments');
+    initApartmentsPage();
+  </script>
+</body>
+</html>

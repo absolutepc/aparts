@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aparts — Недвижимость</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    
+  <div id="site-header"></div>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-content">
+        <div class="hero-text">
+          <h1>Недвижимость для <span class="highlight">жизни и бизнеса</span></h1>
+          <p>Квартиры, студии и коммерческие помещения в одном каталоге. Удобный поиск и управление через админ-панель.</p>
+          <div class="hero-buttons">
+            <a href="apartments.html" class="btn btn-primary btn-lg">Квартиры и студии</a>
+            <a href="commercial.html" class="btn btn-secondary btn-lg">Коммерческая</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img src="img/default.svg" alt="Недвижимость">
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2>Избранные объекты</h2>
+          <p id="homeStats">Загрузка...</p>
+        </div>
+        <div id="featuredProperties"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/properties.js"></script>
+  <script>
+    initLayout('home');
+    initHomePage();
+  </script>
 </body>
 </html>
