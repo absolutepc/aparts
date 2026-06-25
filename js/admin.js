@@ -179,10 +179,23 @@ function renderPropertiesAdmin() {
               <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
             </div>
             <div class="form-group admin-form-full">
-              <label>Фотографии</label>
-              <input type="file" id="propertyImageFiles" accept="image/*" multiple>
-              <p class="form-hint">Выберите одно или несколько фото с компьютера (до 2 МБ каждое)</p>
-              <div class="admin-img-gallery" id="propertyImgGallery"></div>
+              <label>Изображение (путь к файлу)</label>
+              <input type="text" name="img" value="img/default.svg" placeholder="img/default.svg">
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Загрузить с компьютера</label>
+              <input type="file" id="propertyImageFile" accept="image/*">
+              <p class="form-hint">Или положите файл в папку img/properties/ и укажите путь выше</p>
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Галерея изображений</label>
+              <textarea name="images" rows="4" placeholder="По одному пути на строку&#10;img/properties/photo1.jpg&#10;img/properties/photo2.jpg"></textarea>
+            </div>
+            <div class="form-group admin-form-full">
+              <label>Предпросмотр фото</label>
+              <div class="admin-img-preview">
+                <img id="propertyImgPreview" src="${resolveImageSrc(DEFAULT_IMG)}" alt="Предпросмотр">
+              </div>
             </div>
             <div class="form-group admin-form-full">
               <label>Описание</label>
@@ -269,70 +282,43 @@ function bindPropertiesAdmin() {
   const addBtn = document.getElementById('addPropertyBtn');
   const cancelBtn = document.getElementById('cancelPropertyBtn');
   const typeSelect = form?.querySelector('[name="type"]');
-  const imageFilesInput = document.getElementById('propertyImageFiles');
-  const imageGallery = document.getElementById('propertyImgGallery');
-  let propertyImagesDraft = [];
+  const imgInput = form?.querySelector('[name="img"]');
+  const imageFileInput = document.getElementById('propertyImageFile');
+  const imagePreview = document.getElementById('propertyImgPreview');
 
-  function renderPropertyImagesGallery() {
-    if (!imageGallery) return;
+  function updatePropertyImagePreview(src) {
+    if (!imagePreview) return;
+    imagePreview.src = resolveImageSrc(src || DEFAULT_IMG);
+    imagePreview.onerror = () => {
+      imagePreview.src = resolveImageSrc(DEFAULT_IMG);
+    };
+  }
 
-    if (!propertyImagesDraft.length) {
-      imageGallery.innerHTML = '<p class="admin-img-gallery-empty">Фото не добавлены — будет показано изображение по умолчанию</p>';
-      return;
-    }
-
-    imageGallery.innerHTML = propertyImagesDraft.map((src, index) => `
-      <div class="admin-img-gallery-item">
-        <img src="${escapeHtml(resolveImageSrc(src))}" alt="Фото ${index + 1}">
-        <button type="button" class="admin-img-remove" data-index="${index}" aria-label="Удалить фото">×</button>
-      </div>
-    `).join('');
-
-    imageGallery.querySelectorAll('.admin-img-remove').forEach(button => {
-      button.addEventListener('click', () => {
-        propertyImagesDraft.splice(Number(button.dataset.index), 1);
-        renderPropertyImagesGallery();
-      });
+  function bindImageFields() {
+    imgInput?.addEventListener('input', () => {
+      updatePropertyImagePreview(imgInput.value.trim());
     });
-  }
 
-  function setPropertyImagesDraft(images) {
-    propertyImagesDraft = Array.isArray(images) ? [...images] : [];
-    renderPropertyImagesGallery();
-  }
+    imageFileInput?.addEventListener('change', async () => {
+      const file = imageFileInput.files?.[0];
+      if (!file) return;
 
-  async function handleImageFilesSelected() {
-    const files = [...(imageFilesInput?.files || [])];
-    if (!files.length) return;
-
-    let added = 0;
-    for (const file of files) {
       try {
         const dataUrl = await readImageFile(file);
-        propertyImagesDraft.push(dataUrl);
-        added += 1;
+        if (imgInput) imgInput.value = dataUrl;
+        updatePropertyImagePreview(dataUrl);
+        showToast('Изображение загружено', 'success');
       } catch (error) {
         if (error.message === 'not an image') {
-          showToast(`Файл «${file.name}» не является изображением`, 'error');
+          showToast('Выберите файл изображения', 'error');
         } else if (error.message === 'too large') {
-          showToast(`Файл «${file.name}» слишком большой (макс. 2 МБ)`, 'error');
+          showToast('Файл слишком большой. Максимум 2 МБ', 'error');
         } else {
-          showToast(`Не удалось загрузить «${file.name}»`, 'error');
+          showToast('Не удалось прочитать файл', 'error');
         }
       }
-    }
 
-    if (imageFilesInput) imageFilesInput.value = '';
-    renderPropertyImagesGallery();
-
-    if (added) {
-      showToast(added === 1 ? 'Фото добавлено' : `Добавлено фото: ${added}`, 'success');
-    }
-  }
-
-  function bindImageUpload() {
-    imageFilesInput?.addEventListener('change', () => {
-      handleImageFilesSelected();
+      imageFileInput.value = '';
     });
   }
 
@@ -364,12 +350,14 @@ function bindPropertiesAdmin() {
     form.reset();
     form.editId.value = '';
     form.type.value = 'jk';
+    form.img.value = DEFAULT_IMG;
+    form.images.value = '';
     form.published.checked = true;
-    if (imageFilesInput) imageFilesInput.value = '';
-    setPropertyImagesDraft([]);
+    if (imageFileInput) imageFileInput.value = '';
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
     toggleTypeFields();
+    updatePropertyImagePreview(DEFAULT_IMG);
   });
 
   cancelBtn?.addEventListener('click', () => {
@@ -378,7 +366,7 @@ function bindPropertiesAdmin() {
 
   typeSelect?.addEventListener('change', () => toggleTypeFields(true));
   toggleTypeFields();
-  bindImageUpload();
+  bindImageFields();
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -391,7 +379,8 @@ function bindPropertiesAdmin() {
       return;
     }
 
-    const images = propertyImagesDraft.length ? [...propertyImagesDraft] : [DEFAULT_IMG];
+    const galleryImages = parsePropertyImages(formData.get('images')?.toString());
+    const img = formData.get('img')?.toString().trim() || DEFAULT_IMG;
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
@@ -401,7 +390,8 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
-      images,
+      img,
+      images: galleryImages || [img],
       published: formData.get('published') === 'on',
     };
 
@@ -497,14 +487,16 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      setPropertyImagesDraft(getEditablePropertyImages(property));
+      form.img.value = getPropertyImg(property);
+      form.images.value = formatPropertyImages(property.images);
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
-      if (imageFilesInput) imageFilesInput.value = '';
+      if (imageFileInput) imageFileInput.value = '';
 
       document.getElementById('propertyFormTitle').textContent = 'Редактировать объект';
       formWrap.style.display = 'block';
       toggleTypeFields();
+      updatePropertyImagePreview(getPropertyImg(property));
     });
   });
 

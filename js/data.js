@@ -45,6 +45,7 @@ const DEFAULT_PROPERTIES = [
     price: 8500000,
     address: 'ул. Северная, 15',
     district: 'САО',
+    img: DEFAULT_IMG,
     published: true,
   },
   {
@@ -62,6 +63,7 @@ const DEFAULT_PROPERTIES = [
     price: 12400000,
     address: 'Речной бульвар, 3',
     district: 'СЗАО',
+    img: DEFAULT_IMG,
     published: true,
   },
   {
@@ -79,6 +81,7 @@ const DEFAULT_PROPERTIES = [
     price: 9800000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
+    img: DEFAULT_IMG,
     published: true,
   },
   {
@@ -90,6 +93,7 @@ const DEFAULT_PROPERTIES = [
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
+    img: DEFAULT_IMG,
     published: true,
   },
 ];
@@ -180,49 +184,54 @@ function enrichProperty(property) {
     merged.areaMax = Number(merged.areaMax) || Number(merged.areaMin) || 0;
   }
 
-  merged.images = normalizePropertyImages(merged);
+  merged.img = property.img || property.imageUrl || defaults?.img || DEFAULT_IMG;
+  merged.images = buildPropertyImages(merged);
   delete merged.imageUrl;
 
   return merged;
 }
 
-function isStoredImage(src) {
-  return typeof src === 'string' && (src.startsWith('data:') || src.startsWith('img/'));
+function uniqueImages(list) {
+  const seen = new Set();
+  return list.filter(src => {
+    if (!src || seen.has(src)) return false;
+    seen.add(src);
+    return true;
+  });
 }
 
-function normalizePropertyImages(property) {
-  const images = Array.isArray(property.images)
-    ? property.images.filter(isStoredImage)
-    : [];
+function buildPropertyImages(property) {
+  const main = property.img || DEFAULT_IMG;
+  const gallery = Array.isArray(property.images) ? property.images.filter(Boolean) : [];
+  const built = uniqueImages([main, ...gallery]);
+  return built.length ? built : [DEFAULT_IMG];
+}
 
-  if (!images.length && property.imageUrl && isStoredImage(property.imageUrl)) {
-    images.push(property.imageUrl);
-  }
+function parsePropertyImages(raw) {
+  if (!raw || !raw.trim()) return undefined;
+  const images = raw.trim().split('\n').map(line => line.trim()).filter(Boolean);
+  return images.length ? images : undefined;
+}
 
-  return images.length ? images : [DEFAULT_IMG];
+function formatPropertyImages(images) {
+  if (!images?.length) return '';
+  return images.join('\n');
 }
 
 function getPropertyImg(property) {
-  return getPropertyImages(property)[0];
+  if (property?.img) return property.img;
+  if (Array.isArray(property?.images) && property.images.length) return property.images[0];
+  return DEFAULT_IMG;
 }
 
 function getPropertyImages(property) {
-  if (Array.isArray(property.images) && property.images.length) {
-    return property.images;
-  }
-  return [DEFAULT_IMG];
-}
-
-function getEditablePropertyImages(property) {
-  const images = getPropertyImages(property);
-  if (images.length === 1 && images[0] === DEFAULT_IMG) return [];
-  return images;
+  return buildPropertyImages(property);
 }
 
 function resolveImageSrc(src) {
   if (!src) return assetPath(DEFAULT_IMG);
-  if (src.startsWith('data:')) return src;
-  return assetPath(src.startsWith('img/') ? src : DEFAULT_IMG);
+  if (/^(https?:|data:|\/\/)/.test(src)) return src;
+  return assetPath(src);
 }
 
 function readImageFile(file) {
@@ -245,8 +254,8 @@ function readImageFile(file) {
 }
 
 function renderPropertyImg(src, alt = '') {
-  const safeAlt = escapeHtml(alt);
   const resolved = resolveImageSrc(src || DEFAULT_IMG);
+  const safeAlt = escapeHtml(alt);
   const safeSrc = escapeHtml(resolved);
   const fallback = escapeHtml(assetPath(DEFAULT_IMG));
   return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${fallback}'">`;
@@ -328,7 +337,9 @@ function getProperties() {
 function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
-    const item = { ...property, images: normalizePropertyImages(property) };
+    const item = { ...property };
+    item.img = getPropertyImg(item);
+    item.images = buildPropertyImages(item);
     delete item.imageUrl;
     return item;
   });
