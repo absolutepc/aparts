@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЖК и МФК — Aparts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <div class="page-header">
+      <div class="container">
+        <div class="breadcrumbs"><a href="index.html">Главная</a> / <span>ЖК и МФК</span></div>
+        <h1>ЖК и МФК</h1>
+        <p>Жилые и многофункциональные комплексы с указанием общего количества квартир и разбивкой по типам</p>
+      </div>
+    </div>
+
+    <div class="container page-layout">
+      <aside class="filters-sidebar" id="filtersSidebar">
+        <h3>Фильтры</h3>
+
+        <div class="filter-group" id="areaFilterGroup">
+          <label>Количество квартир</label>
+          <div class="filter-range-inputs">
+            <input type="number" id="areaMin" placeholder="от" min="0" step="1">
+            <input type="number" id="areaMax" placeholder="до" min="0" step="1">
+          </div>
+        </div>
+
+        <div class="filter-group" id="flatTypeFilterGroup">
+          <label>Тип квартир</label>
+          <div class="filter-checkboxes" id="flatTypeFilters"></div>
+        </div>
+
+        <div class="filter-group">
+          <label>Район</label>
+          <div class="filter-checkboxes" id="districtFilters"></div>
+        </div>
+
+        <button class="btn btn-secondary btn-sm" id="resetFilters" style="width:100%;margin-top:8px">Сбросить фильтры</button>
+      </aside>
+
+      <div>
+        <div class="catalog-toolbar">
+          <span class="results-count" id="resultsCount">Найдено: 0</span>
+          <select id="sortSelect">
+            <option value="default">Сортировка: по умолчанию</option>
+            <option value="price-asc">Цена: по возрастанию</option>
+            <option value="price-desc">Цена: по убыванию</option>
+            <option value="total-asc">Квартир: по возрастанию</option>
+            <option value="total-desc">Квартир: по убыванию</option>
+            <option value="title">Название: А–Я</option>
+          </select>
+        </div>
+        <div id="propertiesList"></div>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/properties.js"></script>
+  <script>
+    initLayout('complexes');
+    initComplexesPage();
+  </script>
+</body>
+</html>

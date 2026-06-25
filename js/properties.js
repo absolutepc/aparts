@@ -5,7 +5,7 @@ function initHomePage() {
 
   const statsEl = document.getElementById('homeStats');
   if (statsEl) {
-    statsEl.textContent = `${complexes.length} жилых комплексов и ${commercial.length} коммерческих предложений`;
+    statsEl.textContent = `${complexes.length} комплексов (ЖК и МФК) и ${commercial.length} коммерческих предложений`;
   }
 
   const gridEl = document.getElementById('featuredProperties');
@@ -17,16 +17,9 @@ function initHomePage() {
   }
 }
 
-function initJkPage() {
+function initComplexesPage() {
   initPropertyCatalog({
-    types: ['jk'],
-    catalogMode: 'complex',
-  });
-}
-
-function initMfkPage() {
-  initPropertyCatalog({
-    types: ['mfk'],
+    types: ['jk', 'mfk'],
     catalogMode: 'complex',
   });
 }
@@ -40,14 +33,12 @@ function initCommercialPage() {
 
 function getBackLink(property) {
   if (property.type === 'commercial') return 'commercial.html';
-  if (property.type === 'mfk') return 'mfk.html';
-  return 'jk.html';
+  return 'complexes.html';
 }
 
 function getBackLabel(property) {
   if (property.type === 'commercial') return 'Коммерческая';
-  if (property.type === 'mfk') return 'МФК';
-  return 'ЖК';
+  return 'ЖК и МФК';
 }
 
 function initPropertyPage() {
