@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v2';
+const STORE_KEY = 'aparts_data_v3';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
@@ -45,7 +45,11 @@ const DEFAULT_PROPERTIES = [
     price: 8500000,
     address: 'ул. Северная, 15',
     district: 'САО',
-    img: DEFAULT_IMG,
+    img: 'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+    ],
     published: true,
   },
   {
@@ -63,7 +67,11 @@ const DEFAULT_PROPERTIES = [
     price: 12400000,
     address: 'Речной бульвар, 3',
     district: 'СЗАО',
-    img: DEFAULT_IMG,
+    img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+      'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
+    ],
     published: true,
   },
   {
@@ -81,7 +89,11 @@ const DEFAULT_PROPERTIES = [
     price: 9800000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    img: DEFAULT_IMG,
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    ],
     published: true,
   },
   {
@@ -93,7 +105,10 @@ const DEFAULT_PROPERTIES = [
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    img: DEFAULT_IMG,
+    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    ],
     published: true,
   },
 ];
@@ -105,6 +120,11 @@ function escapeHtml(text) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function escapeAttr(text) {
+  if (text == null) return '';
+  return String(text).replace(/"/g, '&quot;');
 }
 
 function formatPrice(price) {
@@ -186,6 +206,13 @@ function enrichProperty(property) {
 
   merged.img = property.img || property.imageUrl || defaults?.img || DEFAULT_IMG;
   merged.images = buildPropertyImages(merged);
+
+  const onlyPlaceholder = merged.images.length === 1 && merged.images[0] === DEFAULT_IMG;
+  if (onlyPlaceholder && defaults?.images?.length) {
+    merged.img = defaults.img || defaults.images[0];
+    merged.images = defaults.images;
+  }
+
   delete merged.imageUrl;
 
   return merged;
@@ -201,9 +228,13 @@ function uniqueImages(list) {
 }
 
 function buildPropertyImages(property) {
-  const main = property.img || DEFAULT_IMG;
-  const gallery = Array.isArray(property.images) ? property.images.filter(Boolean) : [];
-  const built = uniqueImages([main, ...gallery]);
+  const fromItem = Array.isArray(property.images) ? property.images.filter(Boolean) : [];
+  if (fromItem.length > 1) {
+    return uniqueImages(fromItem);
+  }
+
+  const main = property.img || fromItem[0] || DEFAULT_IMG;
+  const built = uniqueImages([main, ...fromItem]);
   return built.length ? built : [DEFAULT_IMG];
 }
 
@@ -256,8 +287,8 @@ function readImageFile(file) {
 function renderPropertyImg(src, alt = '') {
   const resolved = resolveImageSrc(src || DEFAULT_IMG);
   const safeAlt = escapeHtml(alt);
-  const safeSrc = escapeHtml(resolved);
-  const fallback = escapeHtml(assetPath(DEFAULT_IMG));
+  const safeSrc = escapeAttr(resolved);
+  const fallback = escapeAttr(assetPath(DEFAULT_IMG));
   return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${fallback}'">`;
 }
 
@@ -314,8 +345,29 @@ function renderComplexStatsTable(property) {
 }
 
 function initStore() {
+  migrateStore();
   if (!localStorage.getItem(STORE_KEY)) {
     localStorage.setItem(STORE_KEY, JSON.stringify({ properties: DEFAULT_PROPERTIES }));
+  }
+}
+
+function migrateStore() {
+  if (localStorage.getItem(STORE_KEY)) return;
+
+  const legacyKeys = ['aparts_data_v2', 'aparts_data_v1'];
+  for (const key of legacyKeys) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data?.properties)) {
+        localStorage.setItem(STORE_KEY, JSON.stringify({ properties: data.properties }));
+        return;
+      }
+    } catch {
+      // пробуем следующий ключ
+    }
   }
 }
 

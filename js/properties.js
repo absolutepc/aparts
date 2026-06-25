@@ -92,18 +92,6 @@ function initPropertyPage() {
 
   const pricePrefix = isComplex(property) ? 'от ' : '';
 
-  const images = getPropertyImages(property);
-  const mainImage = images[0];
-  const galleryHtml = images.length > 1
-    ? `<div class="property-gallery-thumbs" id="propertyGalleryThumbs">
-        ${images.map((src, index) => `
-          <button type="button" class="property-gallery-thumb ${index === 0 ? 'active' : ''}" data-src="${escapeHtml(resolveImageSrc(src))}">
-            ${renderPropertyImg(src, `${property.title} ${index + 1}`)}
-          </button>
-        `).join('')}
-      </div>`
-    : '';
-
   container.innerHTML = `
     <div class="container property-detail-page">
       <div class="breadcrumbs">
@@ -113,10 +101,7 @@ function initPropertyPage() {
       </div>
 
       <div class="property-detail-hero">
-        <div class="property-detail-image">
-          <img id="propertyMainImage" src="${escapeHtml(resolveImageSrc(mainImage))}" alt="${escapeHtml(property.title)}">
-          ${galleryHtml}
-        </div>
+        ${renderPropertyGalleryBlock(property)}
         <div class="property-detail-info">
           <div class="property-category">${escapeHtml(typeLabel)}</div>
           <h1>${escapeHtml(property.title)}</h1>
@@ -133,12 +118,5 @@ function initPropertyPage() {
     </div>
   `;
 
-  document.querySelectorAll('.property-gallery-thumb').forEach(button => {
-    button.addEventListener('click', () => {
-      const mainImageEl = document.getElementById('propertyMainImage');
-      if (mainImageEl) mainImageEl.src = button.dataset.src;
-      document.querySelectorAll('.property-gallery-thumb').forEach(item => item.classList.remove('active'));
-      button.classList.add('active');
-    });
-  });
+  bindPropertyGallery(container, property);
 }

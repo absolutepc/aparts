@@ -184,12 +184,16 @@ function renderPropertiesAdmin() {
             </div>
             <div class="form-group admin-form-full">
               <label>Загрузить с компьютера</label>
-              <input type="file" id="propertyImageFile" accept="image/*">
-              <p class="form-hint">Или положите файл в папку img/properties/ и укажите путь выше</p>
+              <input type="file" id="propertyImageFile" accept="image/*" multiple>
+              <p class="form-hint">Можно выбрать несколько фото. Или положите файлы в img/properties/ и укажите пути ниже</p>
             </div>
             <div class="form-group admin-form-full">
               <label>Галерея изображений</label>
-              <textarea name="images" rows="4" placeholder="По одному пути на строку&#10;img/properties/photo1.jpg&#10;img/properties/photo2.jpg"></textarea>
+              <textarea name="images" id="propertyImagesField" rows="4" placeholder="По одному пути на строку&#10;img/properties/photo1.jpg&#10;img/properties/photo2.jpg"></textarea>
+            </div>
+            <div class="form-group admin-form-full" id="propertyGalleryPreviewWrap" style="display:none">
+              <label>Миниатюры галереи</label>
+              <div class="admin-img-gallery" id="propertyGalleryPreview"></div>
             </div>
             <div class="form-group admin-form-full">
               <label>Предпросмотр фото</label>
@@ -283,8 +287,50 @@ function bindPropertiesAdmin() {
   const cancelBtn = document.getElementById('cancelPropertyBtn');
   const typeSelect = form?.querySelector('[name="type"]');
   const imgInput = form?.querySelector('[name="img"]');
+  const imagesField = document.getElementById('propertyImagesField');
   const imageFileInput = document.getElementById('propertyImageFile');
   const imagePreview = document.getElementById('propertyImgPreview');
+  const galleryPreviewWrap = document.getElementById('propertyGalleryPreviewWrap');
+  const galleryPreview = document.getElementById('propertyGalleryPreview');
+
+  function getFormGalleryImages() {
+    return parsePropertyImages(imagesField?.value) || [];
+  }
+
+  function setFormGalleryImages(images) {
+    if (!imagesField) return;
+    imagesField.value = formatPropertyImages(images);
+    renderGalleryPreview();
+  }
+
+  function appendFormGalleryImages(newImages) {
+    const merged = uniqueImages([...(getFormGalleryImages()), ...newImages.filter(Boolean)]);
+    setFormGalleryImages(merged);
+    return merged;
+  }
+
+  function renderGalleryPreview() {
+    if (!galleryPreview || !galleryPreviewWrap) return;
+
+    const images = uniqueImages([
+      imgInput?.value.trim() || '',
+      ...getFormGalleryImages(),
+    ].filter(Boolean));
+
+    if (images.length < 2) {
+      galleryPreviewWrap.style.display = 'none';
+      galleryPreview.innerHTML = '';
+      return;
+    }
+
+    galleryPreviewWrap.style.display = '';
+    const fallback = escapeAttr(assetPath(DEFAULT_IMG));
+    galleryPreview.innerHTML = images.map((src, index) => `
+      <div class="admin-img-gallery-item">
+        <img src="${escapeAttr(resolveImageSrc(src))}" alt="Фото ${index + 1}" onerror="this.src='${fallback}'">
+      </div>
+    `).join('');
+  }
 
   function updatePropertyImagePreview(src) {
     if (!imagePreview) return;
@@ -292,6 +338,7 @@ function bindPropertiesAdmin() {
     imagePreview.onerror = () => {
       imagePreview.src = resolveImageSrc(DEFAULT_IMG);
     };
+    renderGalleryPreview();
   }
 
   function bindImageFields() {
@@ -299,23 +346,36 @@ function bindPropertiesAdmin() {
       updatePropertyImagePreview(imgInput.value.trim());
     });
 
-    imageFileInput?.addEventListener('change', async () => {
-      const file = imageFileInput.files?.[0];
-      if (!file) return;
+    imagesField?.addEventListener('input', () => {
+      renderGalleryPreview();
+    });
 
-      try {
-        const dataUrl = await readImageFile(file);
-        if (imgInput) imgInput.value = dataUrl;
-        updatePropertyImagePreview(dataUrl);
-        showToast('Изображение загружено', 'success');
-      } catch (error) {
-        if (error.message === 'not an image') {
-          showToast('Выберите файл изображения', 'error');
-        } else if (error.message === 'too large') {
-          showToast('Файл слишком большой. Максимум 2 МБ', 'error');
-        } else {
-          showToast('Не удалось прочитать файл', 'error');
+    imageFileInput?.addEventListener('change', async () => {
+      const files = [...(imageFileInput.files || [])];
+      if (!files.length) return;
+
+      const uploaded = [];
+      for (const file of files) {
+        try {
+          uploaded.push(await readImageFile(file));
+        } catch (error) {
+          if (error.message === 'not an image') {
+            showToast(`Файл «${file.name}» не является изображением`, 'error');
+          } else if (error.message === 'too large') {
+            showToast(`Файл «${file.name}» слишком большой (макс. 2 МБ)`, 'error');
+          } else {
+            showToast(`Не удалось загрузить «${file.name}»`, 'error');
+          }
         }
+      }
+
+      if (uploaded.length) {
+        if (imgInput && !imgInput.value.trim()) {
+          imgInput.value = uploaded[0];
+        }
+        appendFormGalleryImages(uploaded);
+        updatePropertyImagePreview(imgInput?.value.trim() || uploaded[0]);
+        showToast(uploaded.length === 1 ? 'Фото добавлено в галерею' : `Добавлено фото: ${uploaded.length}`, 'success');
       }
 
       imageFileInput.value = '';
@@ -351,9 +411,10 @@ function bindPropertiesAdmin() {
     form.editId.value = '';
     form.type.value = 'jk';
     form.img.value = DEFAULT_IMG;
-    form.images.value = '';
+    if (imagesField) imagesField.value = '';
     form.published.checked = true;
     if (imageFileInput) imageFileInput.value = '';
+    renderGalleryPreview();
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
     toggleTypeFields();
@@ -381,6 +442,7 @@ function bindPropertiesAdmin() {
 
     const galleryImages = parsePropertyImages(formData.get('images')?.toString());
     const img = formData.get('img')?.toString().trim() || DEFAULT_IMG;
+    const images = uniqueImages([img, ...(galleryImages || [])]);
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
@@ -391,7 +453,7 @@ function bindPropertiesAdmin() {
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
       img,
-      images: galleryImages || [img],
+      images,
       published: formData.get('published') === 'on',
     };
 
@@ -488,7 +550,9 @@ function bindPropertiesAdmin() {
       form.address.value = property.address || '';
       form.district.value = property.district || '';
       form.img.value = getPropertyImg(property);
-      form.images.value = formatPropertyImages(property.images);
+      if (imagesField) {
+        imagesField.value = formatPropertyImages(getPropertyImages(property));
+      }
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
       if (imageFileInput) imageFileInput.value = '';
@@ -497,6 +561,7 @@ function bindPropertiesAdmin() {
       formWrap.style.display = 'block';
       toggleTypeFields();
       updatePropertyImagePreview(getPropertyImg(property));
+      renderGalleryPreview();
     });
   });
 
