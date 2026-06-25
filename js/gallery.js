@@ -4,7 +4,7 @@ function getPropertyGalleryImages(property) {
 
 function renderPropertyGalleryBlock(property) {
   const images = getPropertyGalleryImages(property);
-  const mainSrc = resolveImageSrc(images[0] || DEFAULT_IMG);
+  const mainSrc = resolveImageSrc(getPropertyImg(property));
   const fallback = escapeAttr(assetPath(DEFAULT_IMG));
   const safeTitle = escapeHtml(property.title);
 

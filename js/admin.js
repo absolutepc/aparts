@@ -303,12 +303,6 @@ function bindPropertiesAdmin() {
     renderGalleryPreview();
   }
 
-  function appendFormGalleryImages(newImages) {
-    const merged = uniqueImages([...(getFormGalleryImages()), ...newImages.filter(Boolean)]);
-    setFormGalleryImages(merged);
-    return merged;
-  }
-
   function renderGalleryPreview() {
     if (!galleryPreview || !galleryPreviewWrap) return;
 
@@ -316,8 +310,9 @@ function bindPropertiesAdmin() {
       imgInput?.value.trim() || '',
       ...getFormGalleryImages(),
     ].filter(Boolean));
+    const normalized = normalizePropertyImages({ img: images[0], images });
 
-    if (images.length < 2) {
+    if (normalized.images.length < 2) {
       galleryPreviewWrap.style.display = 'none';
       galleryPreview.innerHTML = '';
       return;
@@ -325,7 +320,7 @@ function bindPropertiesAdmin() {
 
     galleryPreviewWrap.style.display = '';
     const fallback = escapeAttr(assetPath(DEFAULT_IMG));
-    galleryPreview.innerHTML = images.map((src, index) => `
+    galleryPreview.innerHTML = normalized.images.map((src, index) => `
       <div class="admin-img-gallery-item">
         <img src="${escapeAttr(resolveImageSrc(src))}" alt="Фото ${index + 1}" onerror="this.src='${fallback}'">
       </div>
@@ -370,11 +365,13 @@ function bindPropertiesAdmin() {
       }
 
       if (uploaded.length) {
-        if (imgInput && !imgInput.value.trim()) {
-          imgInput.value = uploaded[0];
-        }
-        appendFormGalleryImages(uploaded);
-        updatePropertyImagePreview(imgInput?.value.trim() || uploaded[0]);
+        const normalized = normalizePropertyImages({
+          img: isPlaceholderImage(imgInput?.value.trim()) ? uploaded[0] : imgInput.value.trim(),
+          images: [...getFormGalleryImages(), ...uploaded],
+        });
+        if (imgInput) imgInput.value = normalized.img;
+        setFormGalleryImages(normalized.images);
+        updatePropertyImagePreview(normalized.img);
         showToast(uploaded.length === 1 ? 'Фото добавлено в галерею' : `Добавлено фото: ${uploaded.length}`, 'success');
       }
 
@@ -440,9 +437,9 @@ function bindPropertiesAdmin() {
       return;
     }
 
-    const galleryImages = parsePropertyImages(formData.get('images')?.toString());
-    const img = formData.get('img')?.toString().trim() || DEFAULT_IMG;
-    const images = uniqueImages([img, ...(galleryImages || [])]);
+    const galleryImages = parsePropertyImages(formData.get('images')?.toString()) || [];
+    const imgField = formData.get('img')?.toString().trim() || '';
+    const normalizedImages = normalizePropertyImages({ img: imgField, images: galleryImages });
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
@@ -452,8 +449,8 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
-      img,
-      images,
+      img: normalizedImages.img,
+      images: normalizedImages.images,
       published: formData.get('published') === 'on',
     };
 
@@ -549,9 +546,10 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      form.img.value = getPropertyImg(property);
+      const normalizedImages = normalizePropertyImages(property);
+      form.img.value = normalizedImages.img;
       if (imagesField) {
-        imagesField.value = formatPropertyImages(getPropertyImages(property));
+        imagesField.value = formatPropertyImages(normalizedImages.images);
       }
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;
@@ -560,7 +558,7 @@ function bindPropertiesAdmin() {
       document.getElementById('propertyFormTitle').textContent = 'Редактировать объект';
       formWrap.style.display = 'block';
       toggleTypeFields();
-      updatePropertyImagePreview(getPropertyImg(property));
+      updatePropertyImagePreview(normalizedImages.img);
       renderGalleryPreview();
     });
   });

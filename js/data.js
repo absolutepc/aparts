@@ -205,12 +205,19 @@ function enrichProperty(property) {
   }
 
   merged.img = property.img || property.imageUrl || defaults?.img || DEFAULT_IMG;
-  merged.images = buildPropertyImages(merged);
+  const normalized = normalizePropertyImages(merged);
 
-  const onlyPlaceholder = merged.images.length === 1 && merged.images[0] === DEFAULT_IMG;
+  const onlyPlaceholder = normalized.images.length === 1 && isPlaceholderImage(normalized.images[0]);
   if (onlyPlaceholder && defaults?.images?.length) {
-    merged.img = defaults.img || defaults.images[0];
-    merged.images = defaults.images;
+    const fromDefaults = normalizePropertyImages({
+      img: defaults.img,
+      images: defaults.images,
+    });
+    merged.img = fromDefaults.img;
+    merged.images = fromDefaults.images;
+  } else {
+    merged.img = normalized.img;
+    merged.images = normalized.images;
   }
 
   delete merged.imageUrl;
@@ -227,15 +234,36 @@ function uniqueImages(list) {
   });
 }
 
-function buildPropertyImages(property) {
-  const fromItem = Array.isArray(property.images) ? property.images.filter(Boolean) : [];
-  if (fromItem.length > 1) {
-    return uniqueImages(fromItem);
+function isPlaceholderImage(src) {
+  return !src || src === DEFAULT_IMG;
+}
+
+function normalizePropertyImages(property) {
+  const main = property?.img || property?.imageUrl || '';
+  const gallery = Array.isArray(property?.images) ? property.images.filter(Boolean) : [];
+  let combined = uniqueImages([...(main ? [main] : []), ...gallery]);
+
+  const realImages = combined.filter(src => !isPlaceholderImage(src));
+  if (realImages.length) {
+    combined = realImages;
   }
 
-  const main = property.img || fromItem[0] || DEFAULT_IMG;
-  const built = uniqueImages([main, ...fromItem]);
-  return built.length ? built : [DEFAULT_IMG];
+  if (!combined.length) {
+    combined = [DEFAULT_IMG];
+  }
+
+  if (main && !isPlaceholderImage(main)) {
+    combined = uniqueImages([main, ...combined.filter(src => src !== main)]);
+  }
+
+  return {
+    img: combined[0],
+    images: combined,
+  };
+}
+
+function buildPropertyImages(property) {
+  return normalizePropertyImages(property).images;
 }
 
 function parsePropertyImages(raw) {
@@ -250,13 +278,11 @@ function formatPropertyImages(images) {
 }
 
 function getPropertyImg(property) {
-  if (property?.img) return property.img;
-  if (Array.isArray(property?.images) && property.images.length) return property.images[0];
-  return DEFAULT_IMG;
+  return normalizePropertyImages(property).img;
 }
 
 function getPropertyImages(property) {
-  return buildPropertyImages(property);
+  return normalizePropertyImages(property).images;
 }
 
 function resolveImageSrc(src) {
@@ -390,8 +416,9 @@ function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
     const item = { ...property };
-    item.img = getPropertyImg(item);
-    item.images = buildPropertyImages(item);
+    const images = normalizePropertyImages(item);
+    item.img = images.img;
+    item.images = images.images;
     delete item.imageUrl;
     return item;
   });
