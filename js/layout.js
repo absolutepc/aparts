@@ -35,19 +35,54 @@ function renderFooter() {
             <div class="logo-icon">${renderLogo('Aparts')}</div>
             <span>Aparts</span>
           </a>
-          <p>Личный каталог квартир, студий и коммерческих помещений.</p>
+          <p>Ваш надёжный каталог недвижимости. Квартиры, студии и коммерческие помещения с удобным управлением через админ-панель.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Telegram" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
+            <a href="#" aria-label="VK" title="VKontakte"><i class="fab fa-vk"></i></a>
+            <a href="#" aria-label="WhatsApp" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" aria-label="Instagram" title="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
         </div>
+
         <div class="footer-col">
-          <h4>Разделы</h4>
+          <h4>Каталог</h4>
           <ul>
-            <li><a href="apartments.html">Квартиры и студии</a></li>
+            <li><a href="apartments.html">Квартиры</a></li>
+            <li><a href="apartments.html">Студии</a></li>
             <li><a href="commercial.html">Коммерческая</a></li>
+            <li><a href="index.html">Избранное</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Сервис</h4>
+          <ul>
             <li><a href="admin.html">Админ-панель</a></li>
+            <li><a href="admin.html">Добавить объект</a></li>
+            <li><a href="apartments.html">Жилая недвижимость</a></li>
+            <li><a href="commercial.html">Для бизнеса</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <ul>
+            <li><a href="tel:+74951234567">+7 (495) 123-45-67</a></li>
+            <li><a href="mailto:info@aparts.ru">info@aparts.ru</a></li>
+            <li><a href="#">Москва, ул. Примерная, 1</a></li>
+            <li><a href="#">Пн–Сб: 10:00–20:00</a></li>
           </ul>
         </div>
       </div>
+
       <div class="container footer-bottom">
         <p>&copy; 2026 Aparts. Все права защищены.</p>
+        <div class="footer-payments">
+          <span>Ипотека</span>
+          <span>Аренда</span>
+          <span>Продажа</span>
+          <span>Коммерция</span>
+        </div>
       </div>
     </footer>
   `;
