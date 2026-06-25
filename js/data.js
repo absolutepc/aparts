@@ -1,6 +1,12 @@
 const STORE_KEY = 'aparts_data_v1';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
+const LOGO_IMG = 'img/logo.svg';
+
+function assetPath(relativePath) {
+  const base = window.location.pathname.replace(/[^/]*$/, '');
+  return `${base}${relativePath}`;
+}
 
 const TYPE_LABELS = {
   apartment: 'Квартира',
@@ -76,8 +82,14 @@ function getPropertyImg(property) {
 
 function renderPropertyImg(src, alt = '') {
   const safeAlt = escapeHtml(alt);
-  const safeSrc = escapeHtml(src || DEFAULT_IMG);
-  return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${DEFAULT_IMG}'">`;
+  const safeSrc = escapeHtml(assetPath(src || DEFAULT_IMG));
+  return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${assetPath(DEFAULT_IMG)}'">`;
+}
+
+function renderLogo(alt = 'Aparts') {
+  const safeAlt = escapeHtml(alt);
+  const safeSrc = escapeHtml(assetPath(LOGO_IMG));
+  return `<img src="${safeSrc}" alt="${safeAlt}">`;
 }
 
 function initStore() {

@@ -13,7 +13,7 @@ function renderHeader(activePage) {
     <header class="site-header">
       <div class="container header-inner">
         <a href="index.html" class="logo">
-          <div class="logo-icon">${renderPropertyImg('img/default.svg', 'Aparts')}</div>
+          <div class="logo-icon">${renderLogo('Aparts')}</div>
           <span>Aparts</span>
         </a>
         <nav class="main-nav" id="mainNav">${navLinks}</nav>
@@ -32,7 +32,7 @@ function renderFooter() {
       <div class="container footer-top">
         <div class="footer-brand">
           <a href="index.html" class="logo">
-            <div class="logo-icon">${renderPropertyImg('img/default.svg', 'Aparts')}</div>
+            <div class="logo-icon">${renderLogo('Aparts')}</div>
             <span>Aparts</span>
           </a>
           <p>Личный каталог квартир, студий и коммерческих помещений.</p>
