@@ -339,6 +339,8 @@ function bindPropertiesAdmin() {
     const totalApartmentsInput = form.querySelector('[name="totalApartments"]');
     if (totalApartmentsInput) totalApartmentsInput.required = !isCommercial;
 
+    const complexInputs = form.querySelectorAll('#complexFields input');
+
     if (clearValues) {
       if (isCommercial) {
         complexInputs.forEach(input => { input.value = ''; });
