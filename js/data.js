@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v4';
+const STORE_KEY = 'aparts_data_v5';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
@@ -222,9 +222,11 @@ function enrichProperty(property) {
     merged.areaMax = Number(merged.areaMax) || Number(merged.areaMin) || 0;
   }
 
-  merged.img = property.img || property.imageUrl || defaults?.img || DEFAULT_IMG;
-  merged.images = property.images || defaults?.images || [merged.img];
-  const repaired = repairPropertyImages(merged);
+  const repaired = repairPropertyImages({
+    ...merged,
+    img: property.img ?? property.imageUrl ?? '',
+    images: Array.isArray(property.images) ? property.images : undefined,
+  });
   merged.img = repaired.img;
   merged.images = repaired.images;
   delete merged.imageUrl;
@@ -267,9 +269,16 @@ function repairPropertyImages(property) {
 }
 
 function normalizePropertyImages(property) {
-  const main = property?.img || property?.imageUrl || '';
-  const gallery = Array.isArray(property?.images) ? property.images.filter(Boolean) : [];
-  let combined = uniqueImages([...(main ? [main] : []), ...gallery]);
+  const mainField = String(property?.img || property?.imageUrl || '').trim();
+  const gallery = Array.isArray(property?.images)
+    ? property.images.map(src => String(src).trim()).filter(Boolean)
+    : [];
+
+  // Порядок в галерее — главный; поле img синхронизируется с images[0]
+  let combined = uniqueImages([
+    ...gallery,
+    ...(mainField ? [mainField] : []),
+  ]);
 
   const realImages = combined.filter(src => !isBrokenImageSrc(src));
   if (realImages.length) {
@@ -278,10 +287,6 @@ function normalizePropertyImages(property) {
 
   if (!combined.length) {
     combined = [DEFAULT_IMG];
-  }
-
-  if (main && !isBrokenImageSrc(main)) {
-    combined = uniqueImages([main, ...combined.filter(src => src !== main)]);
   }
 
   return {
@@ -408,7 +413,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -416,7 +421,15 @@ function migrateStore() {
     try {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
-        localStorage.setItem(STORE_KEY, JSON.stringify({ properties: data.properties }));
+        const repaired = data.properties.map(property => {
+          const item = { ...property };
+          const images = repairPropertyImages(item);
+          item.img = images.img;
+          item.images = images.images;
+          delete item.imageUrl;
+          return item;
+        });
+        localStorage.setItem(STORE_KEY, JSON.stringify({ properties: repaired }));
         return;
       }
     } catch {
@@ -431,7 +444,19 @@ function getProperties() {
     const raw = localStorage.getItem(STORE_KEY);
     const data = raw ? JSON.parse(raw) : null;
     const properties = Array.isArray(data?.properties) ? data.properties : DEFAULT_PROPERTIES;
-    return properties.map(enrichProperty);
+    const enriched = properties.map(enrichProperty);
+
+    const needsPersist = enriched.some((property, index) => {
+      const source = properties[index];
+      return property.img !== source.img
+        || JSON.stringify(property.images) !== JSON.stringify(source.images);
+    });
+
+    if (needsPersist) {
+      saveProperties(enriched);
+    }
+
+    return enriched;
   } catch (error) {
     console.warn('Aparts: повреждённые данные, восстанавливаем по умолчанию', error);
     localStorage.removeItem(STORE_KEY);
