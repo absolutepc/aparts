@@ -145,6 +145,10 @@ function renderPropertiesAdmin() {
               <label>Адрес</label>
               <input type="text" name="address">
             </div>
+            <div class="form-group">
+              <label>Район</label>
+              <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
+            </div>
             <div class="form-group admin-form-full">
               <label>URL изображения</label>
               <input type="url" name="imageUrl" placeholder="https://...">
@@ -176,6 +180,7 @@ function renderPropertiesAdmin() {
             <th>Тип</th>
             <th>м²</th>
             <th>Комнат</th>
+            <th>Район</th>
             <th>Цена</th>
             <th>Статус</th>
             <th></th>
@@ -183,7 +188,7 @@ function renderPropertiesAdmin() {
         </thead>
         <tbody>
           ${properties.length ? properties.map(renderPropertyRow).join('') : `
-            <tr><td colspan="7" class="empty-cell">Объектов пока нет</td></tr>
+            <tr><td colspan="8" class="empty-cell">Объектов пока нет</td></tr>
           `}
         </tbody>
       </table>
@@ -201,6 +206,7 @@ function renderPropertyRow(property) {
       <td>${escapeHtml(TYPE_LABELS[property.type] || property.type)}</td>
       <td>${property.area}</td>
       <td>${property.rooms ?? '—'}</td>
+      <td>${escapeHtml(property.district || '—')}</td>
       <td>${formatPrice(property.price)}</td>
       <td>
         <span class="status-badge ${property.published !== false ? 'published' : 'draft'}">
@@ -283,6 +289,7 @@ function bindPropertiesAdmin() {
       rooms,
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
+      district: formData.get('district')?.toString().trim() || '',
       imageUrl: formData.get('imageUrl')?.toString().trim() || '',
       published: formData.get('published') === 'on',
     };
@@ -316,6 +323,7 @@ function bindPropertiesAdmin() {
       form.rooms.value = property.rooms ?? '';
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
+      form.district.value = property.district || '';
       form.imageUrl.value = property.imageUrl || '';
       form.description.value = property.description || '';
       form.published.checked = property.published !== false;

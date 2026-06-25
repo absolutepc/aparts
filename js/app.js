@@ -24,6 +24,9 @@ function renderPropertyCard(property) {
   const roomsHtml = property.type !== 'commercial' && property.rooms != null
     ? `<span class="property-attr-tag">${property.rooms} комн.</span>`
     : '';
+  const districtHtml = property.district
+    ? `<span class="property-attr-tag">${escapeHtml(property.district)}</span>`
+    : '';
   const addressHtml = property.address
     ? `<span class="property-attr-tag">${escapeHtml(property.address)}</span>`
     : '';
@@ -39,6 +42,7 @@ function renderPropertyCard(property) {
         <div class="property-attrs">
           <span class="property-attr-tag">${property.area} м²</span>
           ${roomsHtml}
+          ${districtHtml}
           ${addressHtml}
         </div>
         <p>${escapeHtml(property.description || '')}</p>

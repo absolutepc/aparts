@@ -29,6 +29,7 @@ const DEFAULT_PROPERTIES = [
     rooms: 2,
     price: 18500000,
     address: 'ул. Арбат, 12',
+    district: 'ЦАО',
     imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
     published: true,
   },
@@ -41,6 +42,7 @@ const DEFAULT_PROPERTIES = [
     rooms: 1,
     price: 7200000,
     address: 'ул. Стромынка, 18',
+    district: 'ВАО',
     imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
     published: true,
   },
@@ -53,7 +55,21 @@ const DEFAULT_PROPERTIES = [
     rooms: null,
     price: 25000000,
     address: 'Ленинградский пр., 39',
+    district: 'САО',
     imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    published: true,
+  },
+  {
+    id: 'prop4',
+    title: '3-комнатная квартира в Хорошёво',
+    description: 'Просторная квартира рядом с парком, свежий ремонт, панорамные окна.',
+    type: 'apartment',
+    area: 92,
+    rooms: 3,
+    price: 21500000,
+    address: 'ул. Народного Ополчения, 44',
+    district: 'СЗАО',
+    imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
     published: true,
   },
 ];
@@ -74,6 +90,15 @@ function formatPrice(price) {
     currency: 'RUB',
     maximumFractionDigits: 0,
   }).format(price);
+}
+
+function enrichProperty(property) {
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  return {
+    ...defaults,
+    ...property,
+    district: property.district || defaults?.district || '',
+  };
 }
 
 function getPropertyImg(property) {
@@ -104,12 +129,12 @@ function getProperties() {
     const raw = localStorage.getItem(STORE_KEY);
     const data = raw ? JSON.parse(raw) : null;
     const properties = Array.isArray(data?.properties) ? data.properties : DEFAULT_PROPERTIES;
-    return properties.map(item => ({ ...item }));
+    return properties.map(enrichProperty);
   } catch (error) {
     console.warn('Aparts: повреждённые данные, восстанавливаем по умолчанию', error);
     localStorage.removeItem(STORE_KEY);
     initStore();
-    return DEFAULT_PROPERTIES.map(item => ({ ...item }));
+    return DEFAULT_PROPERTIES.map(enrichProperty);
   }
 }
 
@@ -124,6 +149,25 @@ function getPropertyById(id) {
 
 function getPublishedProperties(types) {
   return getProperties().filter(item => item.published !== false && types.includes(item.type));
+}
+
+function getUniqueDistricts(properties) {
+  return [...new Set(
+    properties
+      .map(item => item.district)
+      .filter(Boolean)
+  )].sort((a, b) => a.localeCompare(b, 'ru'));
+}
+
+function getUniqueRoomOptions(properties) {
+  const rooms = properties
+    .map(item => item.rooms)
+    .filter(value => value != null);
+  const unique = [...new Set(rooms)].sort((a, b) => a - b);
+  const hasFourPlus = unique.some(value => value >= 4);
+  const base = unique.filter(value => value < 4);
+  if (hasFourPlus) base.push('4+');
+  return base.map(String);
 }
 
 function generatePropertyId() {

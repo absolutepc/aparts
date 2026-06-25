@@ -18,25 +18,17 @@ function initHomePage() {
 }
 
 function initApartmentsPage() {
-  const properties = getPublishedProperties(['apartment', 'studio']);
-  const gridEl = document.getElementById('propertiesList');
-  if (gridEl) {
-    gridEl.innerHTML = renderPropertiesGrid(
-      properties,
-      'Пока нет опубликованных объектов в этом разделе.'
-    );
-  }
+  initPropertyCatalog({
+    types: ['apartment', 'studio'],
+    showRoomsFilter: true,
+  });
 }
 
 function initCommercialPage() {
-  const properties = getPublishedProperties(['commercial']);
-  const gridEl = document.getElementById('propertiesList');
-  if (gridEl) {
-    gridEl.innerHTML = renderPropertiesGrid(
-      properties,
-      'Пока нет опубликованных объектов в этом разделе.'
-    );
-  }
+  initPropertyCatalog({
+    types: ['commercial'],
+    showRoomsFilter: false,
+  });
 }
 
 function initPropertyPage() {
@@ -75,6 +67,9 @@ function initPropertyPage() {
   const roomsRow = property.type !== 'commercial' && property.rooms != null
     ? `<div class="property-spec-row"><span class="property-spec-label">Комнат</span><span class="property-spec-value">${property.rooms}</span></div>`
     : '';
+  const districtRow = property.district
+    ? `<div class="property-spec-row"><span class="property-spec-label">Район</span><span class="property-spec-value">${escapeHtml(property.district)}</span></div>`
+    : '';
   const addressRow = property.address
     ? `<div class="property-spec-row"><span class="property-spec-label">Адрес</span><span class="property-spec-value">${escapeHtml(property.address)}</span></div>`
     : '';
@@ -101,6 +96,7 @@ function initPropertyPage() {
               <span class="property-spec-value">${property.area} м²</span>
             </div>
             ${roomsRow}
+            ${districtRow}
             ${addressRow}
           </div>
           ${property.description ? `<p class="property-detail-desc">${escapeHtml(property.description)}</p>` : ''}
