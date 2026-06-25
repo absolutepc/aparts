@@ -152,6 +152,14 @@ function renderPropertiesAdmin() {
                   <label>Евродвушки</label>
                   <input type="number" name="countEuroTwo" min="0" step="1">
                 </div>
+                <div class="form-group">
+                  <label>Площадь от, м²</label>
+                  <input type="number" name="areaMin" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label>Площадь до, м²</label>
+                  <input type="number" name="areaMax" min="0" step="0.1">
+                </div>
               </div>
             </div>
             <div class="form-group" id="areaField">
@@ -328,10 +336,8 @@ function bindPropertiesAdmin() {
     if (areaField) areaField.style.display = isCommercial ? '' : 'none';
     if (areaInput) areaInput.required = isCommercial;
 
-    const complexInputs = form.querySelectorAll('#complexFields input');
-    complexInputs.forEach(input => {
-      input.required = !isCommercial;
-    });
+    const totalApartmentsInput = form.querySelector('[name="totalApartments"]');
+    if (totalApartmentsInput) totalApartmentsInput.required = !isCommercial;
 
     if (clearValues) {
       if (isCommercial) {
@@ -413,6 +419,15 @@ function bindPropertiesAdmin() {
       property.count2room = count2room || 0;
       property.count3room = count3room || 0;
       property.countEuroTwo = countEuroTwo || 0;
+
+      const areaMin = Number(formData.get('areaMin')) || 0;
+      const areaMax = Number(formData.get('areaMax')) || 0;
+      if (areaMin && areaMax && areaMin > areaMax) {
+        showToast('Минимальная площадь не может быть больше максимальной', 'error');
+        return;
+      }
+      property.areaMin = areaMin;
+      property.areaMax = areaMax || areaMin;
     } else {
       const area = Number(formData.get('area'));
       if (!area || area <= 0) {
@@ -455,6 +470,9 @@ function bindPropertiesAdmin() {
         form.count2room.value = stats.count2room || '';
         form.count3room.value = stats.count3room || '';
         form.countEuroTwo.value = stats.countEuroTwo || '';
+        const areaRange = getComplexAreaRange(property);
+        form.areaMin.value = areaRange.areaMin || '';
+        form.areaMax.value = areaRange.areaMax || '';
         form.area.value = '';
       } else {
         form.area.value = property.area ?? '';
@@ -463,6 +481,8 @@ function bindPropertiesAdmin() {
         form.count2room.value = '';
         form.count3room.value = '';
         form.countEuroTwo.value = '';
+        form.areaMin.value = '';
+        form.areaMax.value = '';
       }
 
       form.price.value = property.price ?? '';

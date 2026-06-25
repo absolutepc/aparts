@@ -39,6 +39,8 @@ const DEFAULT_PROPERTIES = [
     count2room: 150,
     count3room: 90,
     countEuroTwo: 60,
+    areaMin: 28,
+    areaMax: 95,
     price: 8500000,
     address: 'ул. Северная, 15',
     district: 'САО',
@@ -55,6 +57,8 @@ const DEFAULT_PROPERTIES = [
     count2room: 110,
     count3room: 60,
     countEuroTwo: 40,
+    areaMin: 35,
+    areaMax: 120,
     price: 12400000,
     address: 'Речной бульвар, 3',
     district: 'СЗАО',
@@ -71,6 +75,8 @@ const DEFAULT_PROPERTIES = [
     count2room: 55,
     count3room: 35,
     countEuroTwo: 30,
+    areaMin: 30,
+    areaMax: 85,
     price: 9800000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
@@ -123,6 +129,31 @@ function getComplexStats(property) {
   };
 }
 
+function getComplexAreaRange(property) {
+  const areaMin = Number(property.areaMin) || 0;
+  const areaMax = Number(property.areaMax) || areaMin;
+  return { areaMin, areaMax };
+}
+
+function complexMatchesAreaFilter(property, filterMin, filterMax) {
+  const { areaMin, areaMax } = getComplexAreaRange(property);
+  if (!areaMin && !areaMax) return true;
+
+  const rangeMin = areaMin || areaMax;
+  const rangeMax = areaMax || areaMin;
+
+  if (filterMin != null && !Number.isNaN(filterMin) && rangeMax < filterMin) return false;
+  if (filterMax != null && !Number.isNaN(filterMax) && rangeMin > filterMax) return false;
+  return true;
+}
+
+function formatComplexAreaRange(property) {
+  const { areaMin, areaMax } = getComplexAreaRange(property);
+  if (!areaMin && !areaMax) return '';
+  if (areaMin && areaMax && areaMin !== areaMax) return `${areaMin}–${areaMax} м²`;
+  return `${areaMin || areaMax} м²`;
+}
+
 function complexHasFlatType(property, flatType) {
   const stats = getComplexStats(property);
   switch (flatType) {
@@ -148,6 +179,8 @@ function enrichProperty(property) {
     merged.count2room = Number(merged.count2room) || 0;
     merged.count3room = Number(merged.count3room) || 0;
     merged.countEuroTwo = Number(merged.countEuroTwo) || 0;
+    merged.areaMin = Number(merged.areaMin) || 0;
+    merged.areaMax = Number(merged.areaMax) || Number(merged.areaMin) || 0;
   }
 
   if (!Array.isArray(merged.images) || !merged.images.length) {
@@ -211,7 +244,12 @@ function renderLogo(alt = 'Aparts') {
 
 function renderComplexStatsTags(property) {
   const stats = getComplexStats(property);
+  const areaLabel = formatComplexAreaRange(property);
+  const areaTag = areaLabel
+    ? `<span class="property-attr-tag">${areaLabel}</span>`
+    : '';
   return `
+    ${areaTag}
     <span class="property-attr-tag">Всего: ${stats.totalApartments}</span>
     <span class="property-attr-tag">1к: ${stats.count1room}</span>
     <span class="property-attr-tag">2к: ${stats.count2room}</span>
@@ -223,6 +261,10 @@ function renderComplexStatsTags(property) {
 function renderComplexStatsTable(property) {
   const stats = getComplexStats(property);
   return `
+    <div class="property-spec-row">
+      <span class="property-spec-label">Площадь квартир</span>
+      <span class="property-spec-value">${formatComplexAreaRange(property) || '—'}</span>
+    </div>
     <div class="property-spec-row">
       <span class="property-spec-label">Всего квартир</span>
       <span class="property-spec-value">${stats.totalApartments}</span>

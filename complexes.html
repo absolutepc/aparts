@@ -23,10 +23,10 @@
         <h3>Фильтры</h3>
 
         <div class="filter-group" id="areaFilterGroup">
-          <label>Количество квартир</label>
+          <label>Площадь, м²</label>
           <div class="filter-range-inputs">
-            <input type="number" id="areaMin" placeholder="от" min="0" step="1">
-            <input type="number" id="areaMax" placeholder="до" min="0" step="1">
+            <input type="number" id="areaMin" placeholder="от" min="0" step="0.1">
+            <input type="number" id="areaMax" placeholder="до" min="0" step="0.1">
           </div>
         </div>
 
@@ -50,6 +50,8 @@
             <option value="default">Сортировка: по умолчанию</option>
             <option value="price-asc">Цена: по возрастанию</option>
             <option value="price-desc">Цена: по убыванию</option>
+            <option value="area-asc">Площадь: по возрастанию</option>
+            <option value="area-desc">Площадь: по убыванию</option>
             <option value="total-asc">Квартир: по возрастанию</option>
             <option value="total-desc">Квартир: по убыванию</option>
             <option value="title">Название: А–Я</option>
