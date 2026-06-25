@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v3';
+const STORE_KEY = 'aparts_data_v4';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
@@ -45,10 +45,10 @@ const DEFAULT_PROPERTIES = [
     price: 8500000,
     address: 'ул. Северная, 15',
     district: 'САО',
-    img: 'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
+    img: 'img/properties/jk1.jpg',
     images: [
-      'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
-      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+      'img/properties/jk1.jpg',
+      'img/properties/jk1-2.jpg',
     ],
     published: true,
   },
@@ -67,10 +67,10 @@ const DEFAULT_PROPERTIES = [
     price: 12400000,
     address: 'Речной бульвар, 3',
     district: 'СЗАО',
-    img: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
+    img: 'img/properties/jk2.jpg',
     images: [
-      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
-      'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
+      'img/properties/jk2.jpg',
+      'img/properties/jk2-2.jpg',
     ],
     published: true,
   },
@@ -89,10 +89,10 @@ const DEFAULT_PROPERTIES = [
     price: 9800000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+    img: 'img/properties/mfk1.jpg',
     images: [
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+      'img/properties/mfk1.jpg',
+      'img/properties/comm1.jpg',
     ],
     published: true,
   },
@@ -105,9 +105,9 @@ const DEFAULT_PROPERTIES = [
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
-    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+    img: 'img/properties/comm1.jpg',
     images: [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
+      'img/properties/comm1.jpg',
     ],
     published: true,
   },
@@ -205,21 +205,10 @@ function enrichProperty(property) {
   }
 
   merged.img = property.img || property.imageUrl || defaults?.img || DEFAULT_IMG;
-  const normalized = normalizePropertyImages(merged);
-
-  const onlyPlaceholder = normalized.images.length === 1 && isPlaceholderImage(normalized.images[0]);
-  if (onlyPlaceholder && defaults?.images?.length) {
-    const fromDefaults = normalizePropertyImages({
-      img: defaults.img,
-      images: defaults.images,
-    });
-    merged.img = fromDefaults.img;
-    merged.images = fromDefaults.images;
-  } else {
-    merged.img = normalized.img;
-    merged.images = normalized.images;
-  }
-
+  merged.images = property.images || defaults?.images || [merged.img];
+  const repaired = repairPropertyImages(merged);
+  merged.img = repaired.img;
+  merged.images = repaired.images;
   delete merged.imageUrl;
 
   return merged;
@@ -238,12 +227,33 @@ function isPlaceholderImage(src) {
   return !src || src === DEFAULT_IMG;
 }
 
+function isBrokenImageSrc(src) {
+  return isPlaceholderImage(src)
+    || (typeof src === 'string' && /unsplash\.com/i.test(src));
+}
+
+function repairPropertyImages(property) {
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const normalized = normalizePropertyImages(property);
+  const needsRepair = normalized.images.every(isBrokenImageSrc);
+
+  if (needsRepair && defaults) {
+    return normalizePropertyImages({
+      ...property,
+      img: defaults.img,
+      images: defaults.images,
+    });
+  }
+
+  return normalized;
+}
+
 function normalizePropertyImages(property) {
   const main = property?.img || property?.imageUrl || '';
   const gallery = Array.isArray(property?.images) ? property.images.filter(Boolean) : [];
   let combined = uniqueImages([...(main ? [main] : []), ...gallery]);
 
-  const realImages = combined.filter(src => !isPlaceholderImage(src));
+  const realImages = combined.filter(src => !isBrokenImageSrc(src));
   if (realImages.length) {
     combined = realImages;
   }
@@ -252,7 +262,7 @@ function normalizePropertyImages(property) {
     combined = [DEFAULT_IMG];
   }
 
-  if (main && !isPlaceholderImage(main)) {
+  if (main && !isBrokenImageSrc(main)) {
     combined = uniqueImages([main, ...combined.filter(src => src !== main)]);
   }
 
@@ -380,7 +390,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -416,7 +426,7 @@ function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
     const item = { ...property };
-    const images = normalizePropertyImages(item);
+    const images = repairPropertyImages(item);
     item.img = images.img;
     item.images = images.images;
     delete item.imageUrl;
