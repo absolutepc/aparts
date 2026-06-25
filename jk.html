@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Коммерческая недвижимость — Aparts</title>
+  <title>ЖК — Aparts</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,9 +12,9 @@
   <main>
     <div class="page-header">
       <div class="container">
-        <div class="breadcrumbs"><a href="index.html">Главная</a> / <span>Коммерческая</span></div>
-        <h1>Коммерческая недвижимость</h1>
-        <p>Офисы, торговые и другие коммерческие помещения</p>
+        <div class="breadcrumbs"><a href="index.html">Главная</a> / <span>ЖК</span></div>
+        <h1>Жилые комплексы</h1>
+        <p>Каталог ЖК с указанием общего количества квартир и разбивкой по типам</p>
       </div>
     </div>
 
@@ -23,14 +23,14 @@
         <h3>Фильтры</h3>
 
         <div class="filter-group" id="areaFilterGroup">
-          <label>Площадь, м²</label>
+          <label>Количество квартир</label>
           <div class="filter-range-inputs">
             <input type="number" id="areaMin" placeholder="от" min="0" step="1">
             <input type="number" id="areaMax" placeholder="до" min="0" step="1">
           </div>
         </div>
 
-        <div class="filter-group" id="flatTypeFilterGroup" style="display:none">
+        <div class="filter-group" id="flatTypeFilterGroup">
           <label>Тип квартир</label>
           <div class="filter-checkboxes" id="flatTypeFilters"></div>
         </div>
@@ -50,8 +50,8 @@
             <option value="default">Сортировка: по умолчанию</option>
             <option value="price-asc">Цена: по возрастанию</option>
             <option value="price-desc">Цена: по убыванию</option>
-            <option value="area-asc">Площадь: по возрастанию</option>
-            <option value="area-desc">Площадь: по убыванию</option>
+            <option value="total-asc">Квартир: по возрастанию</option>
+            <option value="total-desc">Квартир: по убыванию</option>
             <option value="title">Название: А–Я</option>
           </select>
         </div>
@@ -68,8 +68,8 @@
   <script src="js/filters.js"></script>
   <script src="js/properties.js"></script>
   <script>
-    initLayout('commercial');
-    initCommercialPage();
+    initLayout('jk');
+    initJkPage();
   </script>
 </body>
 </html>

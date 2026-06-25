@@ -1,6 +1,7 @@
 const NAV_ITEMS = [
   { href: 'index.html', label: 'Главная', page: 'home' },
-  { href: 'apartments.html', label: 'Квартиры и студии', page: 'apartments' },
+  { href: 'jk.html', label: 'ЖК', page: 'jk' },
+  { href: 'mfk.html', label: 'МФК', page: 'mfk' },
   { href: 'commercial.html', label: 'Коммерческая', page: 'commercial' },
 ];
 
@@ -35,7 +36,7 @@ function renderFooter() {
             <div class="logo-icon">${renderLogo('Aparts')}</div>
             <span>Aparts</span>
           </a>
-          <p>Ваш надёжный каталог недвижимости. Квартиры, студии и коммерческие помещения с удобным управлением через админ-панель.</p>
+          <p>Ваш надёжный каталог недвижимости. ЖК, МФК и коммерческие помещения с удобным управлением через админ-панель.</p>
           <div class="footer-social">
             <a href="#" aria-label="Telegram" title="Telegram"><i class="fab fa-telegram-plane"></i></a>
             <a href="#" aria-label="VK" title="VKontakte"><i class="fab fa-vk"></i></a>
@@ -47,8 +48,8 @@ function renderFooter() {
         <div class="footer-col">
           <h4>Каталог</h4>
           <ul>
-            <li><a href="apartments.html">Квартиры</a></li>
-            <li><a href="apartments.html">Студии</a></li>
+            <li><a href="jk.html">ЖК</a></li>
+            <li><a href="mfk.html">МФК</a></li>
             <li><a href="commercial.html">Коммерческая</a></li>
             <li><a href="index.html">Избранное</a></li>
           </ul>
@@ -59,7 +60,8 @@ function renderFooter() {
           <ul>
             <li><a href="admin.html">Админ-панель</a></li>
             <li><a href="admin.html">Добавить объект</a></li>
-            <li><a href="apartments.html">Жилая недвижимость</a></li>
+            <li><a href="jk.html">Жилые комплексы</a></li>
+            <li><a href="mfk.html">МФК</a></li>
             <li><a href="commercial.html">Для бизнеса</a></li>
           </ul>
         </div>

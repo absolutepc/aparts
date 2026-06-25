@@ -76,7 +76,8 @@ function renderAdminSection(section) {
 function renderDashboard() {
   const properties = getProperties();
   const published = properties.filter(item => item.published !== false).length;
-  const residential = properties.filter(item => item.type === 'apartment' || item.type === 'studio').length;
+  const jkCount = properties.filter(item => item.type === 'jk').length;
+  const mfkCount = properties.filter(item => item.type === 'mfk').length;
   const commercial = properties.filter(item => item.type === 'commercial').length;
 
   return `
@@ -91,12 +92,12 @@ function renderDashboard() {
         <div class="stat-value">${published}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Жилая</div>
-        <div class="stat-value">${residential}</div>
+        <div class="stat-label">ЖК</div>
+        <div class="stat-value">${jkCount}</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Коммерческая</div>
-        <div class="stat-value">${commercial}</div>
+        <div class="stat-label">МФК / Коммерция</div>
+        <div class="stat-value">${mfkCount} / ${commercial}</div>
       </div>
     </div>
   `;
@@ -124,18 +125,38 @@ function renderPropertiesAdmin() {
             <div class="form-group">
               <label>Тип</label>
               <select name="type" required>
-                <option value="apartment">Квартира</option>
-                <option value="studio">Студия</option>
+                <option value="jk">ЖК</option>
+                <option value="mfk">МФК</option>
                 <option value="commercial">Коммерческое</option>
               </select>
             </div>
-            <div class="form-group">
-              <label>Площадь, м²</label>
-              <input type="number" name="area" min="1" step="0.1" required>
+            <div id="complexFields" class="admin-form-full">
+              <div class="admin-form-grid">
+                <div class="form-group">
+                  <label>Всего квартир</label>
+                  <input type="number" name="totalApartments" min="0" step="1">
+                </div>
+                <div class="form-group">
+                  <label>Однокомнатные</label>
+                  <input type="number" name="count1room" min="0" step="1">
+                </div>
+                <div class="form-group">
+                  <label>Двухкомнатные</label>
+                  <input type="number" name="count2room" min="0" step="1">
+                </div>
+                <div class="form-group">
+                  <label>Трёхкомнатные</label>
+                  <input type="number" name="count3room" min="0" step="1">
+                </div>
+                <div class="form-group">
+                  <label>Евродвушки</label>
+                  <input type="number" name="countEuroTwo" min="0" step="1">
+                </div>
+              </div>
             </div>
-            <div class="form-group" id="roomsField">
-              <label>Количество комнат</label>
-              <input type="number" name="rooms" min="1">
+            <div class="form-group" id="areaField">
+              <label>Площадь, м²</label>
+              <input type="number" name="area" min="1" step="0.1">
             </div>
             <div class="form-group">
               <label>Цена, ₽</label>
@@ -193,8 +214,8 @@ function renderPropertiesAdmin() {
           <tr>
             <th>Объект</th>
             <th>Тип</th>
-            <th>м²</th>
-            <th>Комнат</th>
+            <th>Квартир / м²</th>
+            <th>Разбивка</th>
             <th>Район</th>
             <th>Цена</th>
             <th>Статус</th>
@@ -212,6 +233,14 @@ function renderPropertiesAdmin() {
 }
 
 function renderPropertyRow(property) {
+  const stats = isComplex(property) ? getComplexStats(property) : null;
+  const sizeCell = isComplex(property)
+    ? stats.totalApartments
+    : `${property.area} м²`;
+  const breakdownCell = isComplex(property)
+    ? `1к: ${stats.count1room}, 2к: ${stats.count2room}, 3к: ${stats.count3room}, евро: ${stats.countEuroTwo}`
+    : '—';
+
   return `
     <tr>
       <td>
@@ -222,8 +251,8 @@ function renderPropertyRow(property) {
         <div class="admin-item-sub">${escapeHtml(property.address || '')}</div>
       </td>
       <td>${escapeHtml(TYPE_LABELS[property.type] || property.type)}</td>
-      <td>${property.area}</td>
-      <td>${property.rooms ?? '—'}</td>
+      <td>${sizeCell}</td>
+      <td>${breakdownCell}</td>
       <td>${escapeHtml(property.district || '—')}</td>
       <td>${formatPrice(property.price)}</td>
       <td>
@@ -289,24 +318,40 @@ function bindPropertiesAdmin() {
     });
   }
 
-  function toggleRoomsField() {
-    const roomsField = document.getElementById('roomsField');
-    const roomsInput = form.querySelector('[name="rooms"]');
+  function toggleTypeFields(clearValues = false) {
+    const complexFields = document.getElementById('complexFields');
+    const areaField = document.getElementById('areaField');
+    const areaInput = form.querySelector('[name="area"]');
     const isCommercial = typeSelect.value === 'commercial';
-    roomsField.style.display = isCommercial ? 'none' : '';
-    roomsInput.required = !isCommercial;
-    if (isCommercial) roomsInput.value = '';
+
+    if (complexFields) complexFields.style.display = isCommercial ? 'none' : '';
+    if (areaField) areaField.style.display = isCommercial ? '' : 'none';
+    if (areaInput) areaInput.required = isCommercial;
+
+    const complexInputs = form.querySelectorAll('#complexFields input');
+    complexInputs.forEach(input => {
+      input.required = !isCommercial;
+    });
+
+    if (clearValues) {
+      if (isCommercial) {
+        complexInputs.forEach(input => { input.value = ''; });
+      } else if (areaInput) {
+        areaInput.value = '';
+      }
+    }
   }
 
   addBtn?.addEventListener('click', () => {
     form.reset();
     form.editId.value = '';
+    form.type.value = 'jk';
     form.imageUrl.value = DEFAULT_IMG;
     form.published.checked = true;
     if (imageFileInput) imageFileInput.value = '';
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
-    toggleRoomsField();
+    toggleTypeFields();
     updatePropertyImagePreview(DEFAULT_IMG);
   });
 
@@ -314,35 +359,19 @@ function bindPropertiesAdmin() {
     formWrap.style.display = 'none';
   });
 
-  typeSelect?.addEventListener('change', toggleRoomsField);
-  toggleRoomsField();
+  typeSelect?.addEventListener('change', () => toggleTypeFields(true));
+  toggleTypeFields();
   bindImagePreview();
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(form);
     const type = formData.get('type');
-    const area = Number(formData.get('area'));
-    const roomsValue = formData.get('rooms');
     const priceValue = formData.get('price');
 
     if (!formData.get('title')?.toString().trim()) {
       showToast('Укажите название объекта', 'error');
       return;
-    }
-
-    if (!area || area <= 0) {
-      showToast('Укажите корректную площадь', 'error');
-      return;
-    }
-
-    let rooms = null;
-    if (type !== 'commercial') {
-      rooms = Number(roomsValue);
-      if (!rooms || rooms < 1) {
-        showToast('Укажите количество комнат', 'error');
-        return;
-      }
     }
 
     const images = parsePropertyImages(formData.get('images')?.toString());
@@ -353,8 +382,6 @@ function bindPropertiesAdmin() {
       title: formData.get('title').toString().trim(),
       description: formData.get('description')?.toString().trim() || '',
       type,
-      area,
-      rooms,
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
@@ -362,6 +389,38 @@ function bindPropertiesAdmin() {
       images: images || [imageUrl],
       published: formData.get('published') === 'on',
     };
+
+    if (isComplex({ type })) {
+      const totalApartments = Number(formData.get('totalApartments'));
+      const count1room = Number(formData.get('count1room'));
+      const count2room = Number(formData.get('count2room'));
+      const count3room = Number(formData.get('count3room'));
+      const countEuroTwo = Number(formData.get('countEuroTwo'));
+
+      if (!totalApartments || totalApartments < 1) {
+        showToast('Укажите общее количество квартир', 'error');
+        return;
+      }
+
+      const sumByType = count1room + count2room + count3room + countEuroTwo;
+      if (sumByType > totalApartments) {
+        showToast('Сумма по типам не может превышать общее количество квартир', 'error');
+        return;
+      }
+
+      property.totalApartments = totalApartments;
+      property.count1room = count1room || 0;
+      property.count2room = count2room || 0;
+      property.count3room = count3room || 0;
+      property.countEuroTwo = countEuroTwo || 0;
+    } else {
+      const area = Number(formData.get('area'));
+      if (!area || area <= 0) {
+        showToast('Укажите корректную площадь', 'error');
+        return;
+      }
+      property.area = area;
+    }
 
     let properties = getProperties();
     const editId = formData.get('editId');
@@ -388,8 +447,24 @@ function bindPropertiesAdmin() {
       form.editId.value = property.id;
       form.title.value = property.title;
       form.type.value = property.type;
-      form.area.value = property.area;
-      form.rooms.value = property.rooms ?? '';
+
+      if (isComplex(property)) {
+        const stats = getComplexStats(property);
+        form.totalApartments.value = stats.totalApartments || '';
+        form.count1room.value = stats.count1room || '';
+        form.count2room.value = stats.count2room || '';
+        form.count3room.value = stats.count3room || '';
+        form.countEuroTwo.value = stats.countEuroTwo || '';
+        form.area.value = '';
+      } else {
+        form.area.value = property.area ?? '';
+        form.totalApartments.value = '';
+        form.count1room.value = '';
+        form.count2room.value = '';
+        form.count3room.value = '';
+        form.countEuroTwo.value = '';
+      }
+
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
@@ -401,7 +476,7 @@ function bindPropertiesAdmin() {
 
       document.getElementById('propertyFormTitle').textContent = 'Редактировать объект';
       formWrap.style.display = 'block';
-      toggleRoomsField();
+      toggleTypeFields();
       updatePropertyImagePreview(getPropertyImg(property));
     });
   });

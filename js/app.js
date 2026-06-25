@@ -21,15 +21,25 @@ function showToast(message, type = 'info') {
 
 function renderPropertyCard(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
-  const roomsHtml = property.type !== 'commercial' && property.rooms != null
-    ? `<span class="property-attr-tag">${property.rooms} комн.</span>`
-    : '';
   const districtHtml = property.district
     ? `<span class="property-attr-tag">${escapeHtml(property.district)}</span>`
     : '';
   const addressHtml = property.address
     ? `<span class="property-attr-tag">${escapeHtml(property.address)}</span>`
     : '';
+
+  let attrsHtml = '';
+  if (isComplex(property)) {
+    attrsHtml = renderComplexStatsTags(property);
+  } else {
+    attrsHtml = `
+      <span class="property-attr-tag">${property.area} м²</span>
+      ${districtHtml}
+      ${addressHtml}
+    `;
+  }
+
+  const priceLabel = isComplex(property) ? 'от ' : '';
 
   return `
     <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card">
@@ -39,15 +49,10 @@ function renderPropertyCard(property) {
       <div class="property-info">
         <div class="property-category">${escapeHtml(typeLabel)}</div>
         <h3>${escapeHtml(property.title)}</h3>
-        <div class="property-attrs">
-          <span class="property-attr-tag">${property.area} м²</span>
-          ${roomsHtml}
-          ${districtHtml}
-          ${addressHtml}
-        </div>
+        <div class="property-attrs">${attrsHtml}</div>
         <p>${escapeHtml(property.description || '')}</p>
         <div class="property-footer">
-          <div class="property-price">${formatPrice(property.price)}</div>
+          <div class="property-price">${priceLabel}${formatPrice(property.price)}</div>
           <span class="btn btn-secondary btn-sm">Подробнее</span>
         </div>
       </div>

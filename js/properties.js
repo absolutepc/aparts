@@ -1,11 +1,11 @@
 function initHomePage() {
-  const residential = getPublishedProperties(['apartment', 'studio']);
+  const complexes = getPublishedProperties(['jk', 'mfk']);
   const commercial = getPublishedProperties(['commercial']);
-  const featured = [...residential.slice(0, 2), ...commercial.slice(0, 1)];
+  const featured = [...complexes.slice(0, 2), ...commercial.slice(0, 1)];
 
   const statsEl = document.getElementById('homeStats');
   if (statsEl) {
-    statsEl.textContent = `${residential.length} жилых и ${commercial.length} коммерческих предложений`;
+    statsEl.textContent = `${complexes.length} жилых комплексов и ${commercial.length} коммерческих предложений`;
   }
 
   const gridEl = document.getElementById('featuredProperties');
@@ -17,18 +17,37 @@ function initHomePage() {
   }
 }
 
-function initApartmentsPage() {
+function initJkPage() {
   initPropertyCatalog({
-    types: ['apartment', 'studio'],
-    showRoomsFilter: true,
+    types: ['jk'],
+    catalogMode: 'complex',
+  });
+}
+
+function initMfkPage() {
+  initPropertyCatalog({
+    types: ['mfk'],
+    catalogMode: 'complex',
   });
 }
 
 function initCommercialPage() {
   initPropertyCatalog({
     types: ['commercial'],
-    showRoomsFilter: false,
+    catalogMode: 'commercial',
   });
+}
+
+function getBackLink(property) {
+  if (property.type === 'commercial') return 'commercial.html';
+  if (property.type === 'mfk') return 'mfk.html';
+  return 'jk.html';
+}
+
+function getBackLabel(property) {
+  if (property.type === 'commercial') return 'Коммерческая';
+  if (property.type === 'mfk') return 'МФК';
+  return 'ЖК';
 }
 
 function initPropertyPage() {
@@ -62,17 +81,25 @@ function initPropertyPage() {
   document.title = `${property.title} — Aparts`;
 
   const typeLabel = TYPE_LABELS[property.type] || property.type;
-  const backLink = property.type === 'commercial' ? 'commercial.html' : 'apartments.html';
-  const backLabel = property.type === 'commercial' ? 'Коммерческая' : 'Квартиры и студии';
-  const roomsRow = property.type !== 'commercial' && property.rooms != null
-    ? `<div class="property-spec-row"><span class="property-spec-label">Комнат</span><span class="property-spec-value">${property.rooms}</span></div>`
-    : '';
+  const backLink = getBackLink(property);
+  const backLabel = getBackLabel(property);
   const districtRow = property.district
     ? `<div class="property-spec-row"><span class="property-spec-label">Район</span><span class="property-spec-value">${escapeHtml(property.district)}</span></div>`
     : '';
   const addressRow = property.address
     ? `<div class="property-spec-row"><span class="property-spec-label">Адрес</span><span class="property-spec-value">${escapeHtml(property.address)}</span></div>`
     : '';
+
+  const specsHtml = isComplex(property)
+    ? renderComplexStatsTable(property)
+    : `
+      <div class="property-spec-row">
+        <span class="property-spec-label">Площадь</span>
+        <span class="property-spec-value">${property.area} м²</span>
+      </div>
+    `;
+
+  const pricePrefix = isComplex(property) ? 'от ' : '';
 
   const images = getPropertyImages(property);
   const mainImage = images[0];
@@ -102,13 +129,9 @@ function initPropertyPage() {
         <div class="property-detail-info">
           <div class="property-category">${escapeHtml(typeLabel)}</div>
           <h1>${escapeHtml(property.title)}</h1>
-          <div class="property-price property-detail-price">${formatPrice(property.price)}</div>
+          <div class="property-price property-detail-price">${pricePrefix}${formatPrice(property.price)}</div>
           <div class="property-specs-table">
-            <div class="property-spec-row">
-              <span class="property-spec-label">Площадь</span>
-              <span class="property-spec-value">${property.area} м²</span>
-            </div>
-            ${roomsRow}
+            ${specsHtml}
             ${districtRow}
             ${addressRow}
           </div>

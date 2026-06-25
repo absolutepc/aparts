@@ -1,7 +1,16 @@
-const STORE_KEY = 'aparts_data_v1';
+const STORE_KEY = 'aparts_data_v2';
 const USER_KEY = 'aparts_user';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
+
+const COMPLEX_TYPES = ['jk', 'mfk'];
+
+const FLAT_TYPE_LABELS = {
+  '1room': 'Однокомнатные',
+  '2room': 'Двухкомнатные',
+  '3room': 'Трехкомнатные',
+  euro2: 'Евродвушки',
+};
 
 function assetPath(relativePath) {
   const base = window.location.pathname.replace(/[^/]*$/, '');
@@ -9,8 +18,8 @@ function assetPath(relativePath) {
 }
 
 const TYPE_LABELS = {
-  apartment: 'Квартира',
-  studio: 'Студия',
+  jk: 'ЖК',
+  mfk: 'МФК',
   commercial: 'Коммерческое',
 };
 
@@ -21,55 +30,63 @@ const ADMIN_CREDENTIALS = {
 
 const DEFAULT_PROPERTIES = [
   {
-    id: 'prop1',
-    title: '2-комнатная квартира на Арбате',
-    description: 'Светлая квартира в историческом центре с высокими потолками и видом на двор.',
-    type: 'apartment',
-    area: 68,
-    rooms: 2,
-    price: 18500000,
-    address: 'ул. Арбат, 12',
-    district: 'ЦАО',
-    imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&q=80',
+    id: 'jk1',
+    title: 'ЖК «Северный парк»',
+    description: 'Современный жилой комплекс с благоустроенной территорией, детскими площадками и подземным паркингом.',
+    type: 'jk',
+    totalApartments: 420,
+    count1room: 120,
+    count2room: 150,
+    count3room: 90,
+    countEuroTwo: 60,
+    price: 8500000,
+    address: 'ул. Северная, 15',
+    district: 'САО',
+    imageUrl: 'https://images.unsplash.com/photo-1545324415-ccade1effe2b?w=800&q=80',
     published: true,
   },
   {
-    id: 'prop2',
-    title: 'Студия у метро Сокольники',
-    description: 'Компактная студия с современным ремонтом, идеально для одного или пары.',
-    type: 'studio',
-    area: 28,
-    rooms: 1,
-    price: 7200000,
-    address: 'ул. Стромынка, 18',
-    district: 'ВАО',
-    imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    id: 'jk2',
+    title: 'ЖК «Речной бульвар»',
+    description: 'Комплекс бизнес-класса с видом на набережную, собственной инфраструктурой и охраняемой территорией.',
+    type: 'jk',
+    totalApartments: 280,
+    count1room: 70,
+    count2room: 110,
+    count3room: 60,
+    countEuroTwo: 40,
+    price: 12400000,
+    address: 'Речной бульвар, 3',
+    district: 'СЗАО',
+    imageUrl: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&q=80',
     published: true,
   },
   {
-    id: 'prop3',
+    id: 'mfk1',
+    title: 'МФК «Городской квартал»',
+    description: 'Многофункциональный комплекс: жильё, офисы и торговые галереи в одном пространстве.',
+    type: 'mfk',
+    totalApartments: 160,
+    count1room: 40,
+    count2room: 55,
+    count3room: 35,
+    countEuroTwo: 30,
+    price: 9800000,
+    address: 'Ленинградский пр., 39',
+    district: 'САО',
+    imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80',
+    published: true,
+  },
+  {
+    id: 'comm1',
     title: 'Офисное помещение в БЦ',
     description: 'Открытая планировка, отдельный вход, подходит под офис или шоурум.',
     type: 'commercial',
     area: 120,
-    rooms: null,
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
     imageUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-    published: true,
-  },
-  {
-    id: 'prop4',
-    title: '3-комнатная квартира в Хорошёво',
-    description: 'Просторная квартира рядом с парком, свежий ремонт, панорамные окна.',
-    type: 'apartment',
-    area: 92,
-    rooms: 3,
-    price: 21500000,
-    address: 'ул. Народного Ополчения, 44',
-    district: 'СЗАО',
-    imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
     published: true,
   },
 ];
@@ -92,6 +109,31 @@ function formatPrice(price) {
   }).format(price);
 }
 
+function isComplex(property) {
+  return COMPLEX_TYPES.includes(property.type);
+}
+
+function getComplexStats(property) {
+  return {
+    totalApartments: Number(property.totalApartments) || 0,
+    count1room: Number(property.count1room) || 0,
+    count2room: Number(property.count2room) || 0,
+    count3room: Number(property.count3room) || 0,
+    countEuroTwo: Number(property.countEuroTwo) || 0,
+  };
+}
+
+function complexHasFlatType(property, flatType) {
+  const stats = getComplexStats(property);
+  switch (flatType) {
+    case '1room': return stats.count1room > 0;
+    case '2room': return stats.count2room > 0;
+    case '3room': return stats.count3room > 0;
+    case 'euro2': return stats.countEuroTwo > 0;
+    default: return true;
+  }
+}
+
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const merged = {
@@ -99,6 +141,14 @@ function enrichProperty(property) {
     ...property,
     district: property.district || defaults?.district || '',
   };
+
+  if (isComplex(merged)) {
+    merged.totalApartments = Number(merged.totalApartments) || 0;
+    merged.count1room = Number(merged.count1room) || 0;
+    merged.count2room = Number(merged.count2room) || 0;
+    merged.count3room = Number(merged.count3room) || 0;
+    merged.countEuroTwo = Number(merged.countEuroTwo) || 0;
+  }
 
   if (!Array.isArray(merged.images) || !merged.images.length) {
     merged.images = merged.imageUrl ? [merged.imageUrl] : defaults?.images || [DEFAULT_IMG];
@@ -159,6 +209,43 @@ function renderLogo(alt = 'Aparts') {
   return `<img src="${safeSrc}" alt="${safeAlt}">`;
 }
 
+function renderComplexStatsTags(property) {
+  const stats = getComplexStats(property);
+  return `
+    <span class="property-attr-tag">Всего: ${stats.totalApartments}</span>
+    <span class="property-attr-tag">1к: ${stats.count1room}</span>
+    <span class="property-attr-tag">2к: ${stats.count2room}</span>
+    <span class="property-attr-tag">3к: ${stats.count3room}</span>
+    <span class="property-attr-tag">Евро-2: ${stats.countEuroTwo}</span>
+  `;
+}
+
+function renderComplexStatsTable(property) {
+  const stats = getComplexStats(property);
+  return `
+    <div class="property-spec-row">
+      <span class="property-spec-label">Всего квартир</span>
+      <span class="property-spec-value">${stats.totalApartments}</span>
+    </div>
+    <div class="property-spec-row">
+      <span class="property-spec-label">Однокомнатные</span>
+      <span class="property-spec-value">${stats.count1room}</span>
+    </div>
+    <div class="property-spec-row">
+      <span class="property-spec-label">Двухкомнатные</span>
+      <span class="property-spec-value">${stats.count2room}</span>
+    </div>
+    <div class="property-spec-row">
+      <span class="property-spec-label">Трёхкомнатные</span>
+      <span class="property-spec-value">${stats.count3room}</span>
+    </div>
+    <div class="property-spec-row">
+      <span class="property-spec-label">Евродвушки</span>
+      <span class="property-spec-value">${stats.countEuroTwo}</span>
+    </div>
+  `;
+}
+
 function initStore() {
   if (!localStorage.getItem(STORE_KEY)) {
     localStorage.setItem(STORE_KEY, JSON.stringify({ properties: DEFAULT_PROPERTIES }));
@@ -199,17 +286,6 @@ function getUniqueDistricts(properties) {
       .map(item => item.district)
       .filter(Boolean)
   )].sort((a, b) => a.localeCompare(b, 'ru'));
-}
-
-function getUniqueRoomOptions(properties) {
-  const rooms = properties
-    .map(item => item.rooms)
-    .filter(value => value != null);
-  const unique = [...new Set(rooms)].sort((a, b) => a - b);
-  const hasFourPlus = unique.some(value => value >= 4);
-  const base = unique.filter(value => value < 4);
-  if (hasFourPlus) base.push('4+');
-  return base.map(String);
 }
 
 function generatePropertyId() {
