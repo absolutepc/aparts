@@ -1,18 +1,28 @@
 function initHomePage() {
+  const jkProperties = getPublishedProperties(['jk']).slice(0, 3);
+  const commercialProperties = getPublishedProperties(['commercial']).slice(0, 3);
   const complexes = getPublishedProperties(['jk', 'mfk']);
   const commercial = getPublishedProperties(['commercial']);
-  const featured = [...complexes.slice(0, 2), ...commercial.slice(0, 1)];
 
   const statsEl = document.getElementById('homeStats');
   if (statsEl) {
     statsEl.textContent = `${complexes.length} комплексов (ЖК и МФК) и ${commercial.length} коммерческих предложений`;
   }
 
-  const gridEl = document.getElementById('featuredProperties');
-  if (gridEl) {
-    gridEl.innerHTML = renderPropertiesGrid(
-      featured,
-      'Объектов пока нет. Добавьте первый через админ-панель.'
+  const jkGridEl = document.getElementById('featuredJkProperties');
+  if (jkGridEl) {
+    jkGridEl.innerHTML = renderFeaturedJkGrid(
+      jkProperties,
+      'ЖК пока нет. Добавьте объекты через админ-панель.'
+    );
+    bindFeaturedJkCards(jkGridEl);
+  }
+
+  const commercialGridEl = document.getElementById('featuredCommercialProperties');
+  if (commercialGridEl) {
+    commercialGridEl.innerHTML = renderPropertiesGrid(
+      commercialProperties,
+      'Коммерческих объектов пока нет. Добавьте через админ-панель.'
     );
   }
 }

@@ -279,6 +279,44 @@ main { flex: 1; }
   box-shadow: var(--shadow-md);
 }
 
+.property-card--featured-jk h3 a {
+  color: inherit;
+}
+
+.property-card--featured-jk h3 a:hover {
+  color: var(--accent-light);
+}
+
+.property-card-media {
+  display: block;
+  color: inherit;
+}
+
+.property-variant-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.property-variant-btn {
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.property-variant-btn:hover,
+.property-variant-btn.active {
+  border-color: var(--accent-light);
+  background: var(--accent-bg-soft);
+  color: var(--text-primary);
+}
+
 .property-image {
   height: 220px;
   background: var(--bg-secondary);

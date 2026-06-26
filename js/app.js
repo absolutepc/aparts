@@ -19,6 +19,85 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
+function renderFeaturedJkCard(property) {
+  const variants = getComplexFlatVariants(property);
+  const activeVariant = variants[0];
+  const variantButtons = variants.map((variant, index) => `
+    <button
+      type="button"
+      class="property-variant-btn ${index === 0 ? 'active' : ''}"
+      data-index="${index}"
+      aria-label="${escapeAttr(variant.flatTypeLabel)}"
+    >${escapeHtml(variant.flatTypeShortLabel)}</button>
+  `).join('');
+
+  const attrsHtml = renderFeaturedVariantTags(activeVariant);
+
+  return `
+    <article
+      class="property-card property-card--featured-jk"
+      data-property-id="${escapeAttr(property.id)}"
+      data-variants="${escapeAttr(JSON.stringify(variants))}"
+    >
+      <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card-media">
+        <div class="property-image">
+          ${renderPropertyImg(getPropertyImg(property), property.title)}
+        </div>
+      </a>
+      <div class="property-info">
+        <div class="property-category">${escapeHtml(TYPE_LABELS.jk)}</div>
+        <h3><a href="property.html?id=${encodeURIComponent(property.id)}">${escapeHtml(property.title)}</a></h3>
+        <div class="property-variant-picker">${variantButtons}</div>
+        <div class="property-attrs" data-variant-attrs>${attrsHtml}</div>
+        <p>${escapeHtml(property.description || '')}</p>
+        <div class="property-footer">
+          <div class="property-price">от ${formatPrice(property.price)}</div>
+          <a href="property.html?id=${encodeURIComponent(property.id)}" class="btn btn-secondary btn-sm">Подробнее</a>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function renderFeaturedVariantTags(variant) {
+  if (!variant) return '';
+  const areaLabel = formatVariantAreaRange(variant);
+  return `
+    ${areaLabel ? `<span class="property-attr-tag">${areaLabel}</span>` : ''}
+    <span class="property-attr-tag">${escapeHtml(variant.flatTypeLabel)}</span>
+    <span class="property-attr-tag">${variant.totalApartments} кв.</span>
+  `;
+}
+
+function bindFeaturedJkCards(container) {
+  container?.querySelectorAll('.property-card--featured-jk').forEach(card => {
+    const variants = JSON.parse(card.dataset.variants || '[]');
+    const attrsEl = card.querySelector('[data-variant-attrs]');
+
+    card.querySelectorAll('.property-variant-btn').forEach(button => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const index = Number(button.dataset.index);
+        const variant = variants[index];
+        if (!variant || !attrsEl) return;
+
+        card.querySelectorAll('.property-variant-btn').forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        attrsEl.innerHTML = renderFeaturedVariantTags(variant);
+      });
+    });
+  });
+}
+
+function renderFeaturedJkGrid(properties, emptyMessage) {
+  if (!properties.length) {
+    return `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
+  }
+  return `<div class="properties-grid">${properties.map(renderFeaturedJkCard).join('')}</div>`;
+}
+
 function renderPropertyCard(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const districtHtml = property.district

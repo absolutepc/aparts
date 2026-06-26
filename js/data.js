@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v6';
+const STORE_KEY = 'aparts_data_v7';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -38,8 +38,14 @@ const DEFAULT_PROPERTIES = [
     title: '«Ан-Нур»',
     description: 'Современный жилой комплекс с благоустроенной территорией, детскими площадками и подземным паркингом.',
     type: 'jk',
-    flatType: '2room',
-    totalApartments: 150,
+    flatType: '1room',
+    totalApartments: 120,
+    flatVariants: [
+      { flatType: '1room', totalApartments: 120, areaMin: 28, areaMax: 42 },
+      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65 },
+      { flatType: '3room', totalApartments: 90, areaMin: 70, areaMax: 95 },
+      { flatType: 'euro2', totalApartments: 60, areaMin: 38, areaMax: 52 },
+    ],
     areaMin: 28,
     areaMax: 95,
     price: 8500000,
@@ -61,6 +67,12 @@ const DEFAULT_PROPERTIES = [
     type: 'jk',
     flatType: '2room',
     totalApartments: 110,
+    flatVariants: [
+      { flatType: '1room', totalApartments: 70, areaMin: 35, areaMax: 48 },
+      { flatType: '2room', totalApartments: 110, areaMin: 52, areaMax: 78 },
+      { flatType: '3room', totalApartments: 60, areaMin: 80, areaMax: 120 },
+      { flatType: 'euro2', totalApartments: 40, areaMin: 42, areaMax: 58 },
+    ],
     areaMin: 35,
     areaMax: 120,
     price: 12400000,
@@ -76,10 +88,16 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk3',
     title: '«Дубайский»',
-    description: 'Жилой комплекс: жильё, офисы и торговые галереи в одном пространстве.',
-    type: 'mfk',
+    description: 'Жилой комплекс с разными планировками и развитой инфраструктурой на территории.',
+    type: 'jk',
     flatType: '2room',
     totalApartments: 55,
+    flatVariants: [
+      { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44 },
+      { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68 },
+      { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85 },
+      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55 },
+    ],
     areaMin: 30,
     areaMax: 85,
     price: 9800000,
@@ -105,6 +123,32 @@ const DEFAULT_PROPERTIES = [
     images: [
       'img/properties/comm1.jpg',
     ],
+    published: true,
+  },
+  {
+    id: 'comm2',
+    title: 'Торговое помещение на первой линии',
+    description: 'Высокий пешеходный трафик, витринные окна, готовность к открытию.',
+    type: 'commercial',
+    area: 85,
+    price: 18500000,
+    address: 'ул. Тверская, 12',
+    district: 'ЦАО',
+    img: 'img/default.svg',
+    images: ['img/default.svg'],
+    published: true,
+  },
+  {
+    id: 'comm3',
+    title: 'Помещение свободного назначения',
+    description: 'Универсальная планировка, отдельный вход, подойдёт под сервис или retail.',
+    type: 'commercial',
+    area: 210,
+    price: 32000000,
+    address: 'Ленинградский пр., 39',
+    district: 'САО',
+    img: 'img/default.svg',
+    images: ['img/default.svg'],
     published: true,
   },
 ];
@@ -177,6 +221,69 @@ function getFlatTypeLabel(flatType) {
   return FLAT_TYPE_LABELS[flatType] || flatType || '';
 }
 
+function getFlatTypeShortLabel(flatType) {
+  switch (flatType) {
+    case '1room': return '1к';
+    case '2room': return '2к';
+    case '3room': return '3к';
+    case 'euro2': return 'Евро-2';
+    default: return getFlatTypeLabel(flatType);
+  }
+}
+
+function normalizeFlatVariant(variant) {
+  const flatType = FLAT_TYPE_LABELS[variant?.flatType] ? variant.flatType : null;
+  if (!flatType) return null;
+
+  const areaMin = Number(variant.areaMin) || 0;
+  const areaMax = Number(variant.areaMax) || areaMin;
+
+  return {
+    flatType,
+    flatTypeLabel: getFlatTypeLabel(flatType),
+    flatTypeShortLabel: getFlatTypeShortLabel(flatType),
+    totalApartments: Number(variant.totalApartments) || 0,
+    areaMin,
+    areaMax,
+  };
+}
+
+function formatVariantAreaRange(variant) {
+  if (!variant) return '';
+  const areaMin = Number(variant.areaMin) || 0;
+  const areaMax = Number(variant.areaMax) || areaMin;
+  if (!areaMin && !areaMax) return '';
+  if (areaMin && areaMax && areaMin !== areaMax) {
+    return `${formatArea(areaMin)}–${formatArea(areaMax)} м²`;
+  }
+  return `${formatArea(areaMin || areaMax)} м²`;
+}
+
+function getComplexFlatVariants(property) {
+  if (!isComplex(property)) return [];
+
+  if (Array.isArray(property.flatVariants) && property.flatVariants.length) {
+    const seen = new Set();
+    return property.flatVariants
+      .map(normalizeFlatVariant)
+      .filter(variant => {
+        if (!variant || seen.has(variant.flatType)) return false;
+        seen.add(variant.flatType);
+        return true;
+      });
+  }
+
+  const flatType = FLAT_TYPE_LABELS[property.flatType] ? property.flatType : '1room';
+  return [{
+    flatType,
+    flatTypeLabel: getFlatTypeLabel(flatType),
+    flatTypeShortLabel: getFlatTypeShortLabel(flatType),
+    totalApartments: Number(property.totalApartments) || 0,
+    areaMin: Number(property.areaMin) || 0,
+    areaMax: Number(property.areaMax) || Number(property.areaMin) || 0,
+  }];
+}
+
 function normalizeComplexProperty(property) {
   if (!isComplex(property)) {
     const item = { ...property };
@@ -201,6 +308,26 @@ function normalizeComplexProperty(property) {
   item.flatType = flatType;
   item.areaMin = Number(item.areaMin) || 0;
   item.areaMax = Number(item.areaMax) || Number(item.areaMin) || 0;
+
+  if (Array.isArray(item.flatVariants) && item.flatVariants.length) {
+    const seen = new Set();
+    item.flatVariants = item.flatVariants
+      .map(normalizeFlatVariant)
+      .filter(variant => {
+        if (!variant || seen.has(variant.flatType)) return false;
+        seen.add(variant.flatType);
+        return true;
+      });
+
+    const primary = item.flatVariants.find(variant => variant.flatType === item.flatType)
+      || item.flatVariants[0];
+    if (primary) {
+      item.flatType = primary.flatType;
+      item.totalApartments = primary.totalApartments;
+      item.areaMin = primary.areaMin;
+      item.areaMax = primary.areaMax;
+    }
+  }
 
   delete item.count1room;
   delete item.count2room;
@@ -248,7 +375,7 @@ function formatComplexAreaRange(property) {
 
 function complexHasFlatType(property, flatType) {
   if (!isComplex(property)) return false;
-  return getComplexStats(property).flatType === flatType;
+  return getComplexFlatVariants(property).some(variant => variant.flatType === flatType);
 }
 
 function enrichProperty(property) {
@@ -412,6 +539,17 @@ function renderComplexStatsTags(property) {
 }
 
 function renderComplexStatsTable(property) {
+  const variants = getComplexFlatVariants(property);
+
+  if (variants.length > 1) {
+    return variants.map(variant => `
+      <div class="property-spec-row">
+        <span class="property-spec-label">${escapeHtml(variant.flatTypeLabel)}</span>
+        <span class="property-spec-value">${variant.totalApartments} кв. · ${formatVariantAreaRange(variant) || '—'}</span>
+      </div>
+    `).join('');
+  }
+
   const stats = getComplexStats(property);
   return `
     <div class="property-spec-row">
@@ -439,7 +577,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
