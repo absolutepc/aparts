@@ -22,6 +22,7 @@ const PAGE_LABELS_BY_PAGE = {
 let pageTransitionLinksBound = false;
 let pageTransitionFinishing = false;
 let pageTransitionNavigating = false;
+let pageTransitionWaitToken = 0;
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -93,14 +94,20 @@ function resetTransitionVisuals(overlay) {
     el.style.animation = '';
   });
 
-  const progressBar = overlay.querySelector('.page-transition__progress-bar');
-  if (progressBar) {
-    progressBar.style.width = '';
-    progressBar.style.animation = '';
-  }
+  restartProgressBar(overlay);
 }
 
-function waitForTransitionAssets(overlay) {
+function restartProgressBar(overlay) {
+  const progress = overlay?.querySelector('.page-transition__progress');
+  const progressBar = progress?.querySelector('.page-transition__progress-bar');
+  if (!progress || !progressBar) return;
+
+  const freshBar = progressBar.cloneNode(true);
+  progressBar.replaceWith(freshBar);
+}
+
+function waitForInitialTransition(overlay) {
+  const token = ++pageTransitionWaitToken;
   const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
   const logo = overlay?.querySelector('.page-transition__logo img');
   const logoReady = !logo || logo.complete
@@ -114,7 +121,7 @@ function waitForTransitionAssets(overlay) {
     const bar = overlay?.querySelector('.page-transition__progress-bar');
     let finished = false;
     const finish = () => {
-      if (finished) return;
+      if (finished || token !== pageTransitionWaitToken) return;
       finished = true;
       resolve();
     };
@@ -126,6 +133,12 @@ function waitForTransitionAssets(overlay) {
   });
 
   return Promise.all([logoReady, animationDone]);
+}
+
+function waitForOutgoingTransition() {
+  pageTransitionWaitToken += 1;
+  const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
+  return new Promise((resolve) => setTimeout(resolve, minMs));
 }
 
 function showPageTransition(label, { animate = true } = {}) {
@@ -181,7 +194,7 @@ async function navigateWithTransition(href, label) {
 
   overlay.dataset.transitionMode = 'outgoing';
 
-  await waitForTransitionAssets(overlay);
+  await waitForOutgoingTransition();
   window.location.href = href;
 }
 
@@ -237,7 +250,7 @@ async function finishPageTransition(defaultLabel) {
       requestAnimationFrame(() => overlay.classList.add('page-transition--animate'));
     }
 
-    await waitForTransitionAssets(overlay);
+    await waitForInitialTransition(overlay);
 
     if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
       return;
