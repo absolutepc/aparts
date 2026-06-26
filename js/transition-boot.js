@@ -27,8 +27,6 @@
 
   if (isNavEnter) {
     overlay.dataset.transitionMode = 'nav';
-    overlay.classList.add('page-transition--ready');
-    return;
   }
 
   overlay.classList.add('page-transition--animate');
