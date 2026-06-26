@@ -1309,6 +1309,17 @@ body.page-transition-active > :not(#page-transition) {
   animation: page-transition-progress 2s cubic-bezier(0.4, 0, 0.2, 1) 0.35s forwards;
 }
 
+.page-transition--ready .page-transition__logo,
+.page-transition--ready .page-transition__label {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.page-transition--ready .page-transition__progress {
+  display: none;
+}
+
 @keyframes page-transition-logo {
   from { opacity: 0; transform: scale(0.86); }
   to { opacity: 1; transform: scale(1); }

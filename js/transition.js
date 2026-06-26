@@ -1,6 +1,8 @@
 const PAGE_TRANSITION_KEY = 'pageTransitionLabel';
+const PAGE_TRANSITION_NAV_KEY = 'pageTransitionNav';
 const PAGE_TRANSITION_MIN_MS = 2600;
 const PAGE_TRANSITION_REDUCE_MS = 650;
+const PAGE_TRANSITION_NAV_ENTER_MS = 180;
 
 const PAGE_LABELS_BY_HREF = {
   'index.html': 'Главная',
@@ -19,14 +21,16 @@ const PAGE_LABELS_BY_PAGE = {
 
 let pageTransitionLinksBound = false;
 let pageTransitionFinishing = false;
+let pageTransitionNavigating = false;
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-function storeTransitionLabel(label) {
+function storeNavigationTransition(label) {
   try {
     sessionStorage.setItem(PAGE_TRANSITION_KEY, label);
+    sessionStorage.setItem(PAGE_TRANSITION_NAV_KEY, '1');
   } catch {
     // sessionStorage недоступен
   }
@@ -36,7 +40,9 @@ function normalizeHref(href) {
   if (!href) return '';
   const url = new URL(href, window.location.href);
   if (url.origin !== window.location.origin) return '';
-  return url.pathname.split('/').pop() || 'index.html';
+  const file = url.pathname.split('/').pop() || '';
+  if (!file || file === '/') return 'index.html';
+  return file;
 }
 
 function getLabelFromHref(href) {
@@ -76,24 +82,22 @@ function updatePageTransitionLabel(label) {
   setPageTransitionLabel(label);
 }
 
-function restartTransitionAnimations(overlay) {
+function resetTransitionVisuals(overlay) {
   if (!overlay) return;
 
-  overlay.classList.remove('page-transition--animate');
+  overlay.classList.remove('page-transition--animate', 'page-transition--ready');
+  overlay.querySelectorAll('.page-transition__logo, .page-transition__label, .page-transition__progress').forEach((el) => {
+    el.style.opacity = '';
+    el.style.transform = '';
+    el.style.filter = '';
+    el.style.animation = '';
+  });
+
   const progressBar = overlay.querySelector('.page-transition__progress-bar');
-  if (progressBar) {
-    progressBar.style.width = '0';
-    progressBar.style.animation = 'none';
-  }
-
-  void overlay.offsetWidth;
-
   if (progressBar) {
     progressBar.style.width = '';
     progressBar.style.animation = '';
   }
-
-  overlay.classList.add('page-transition--animate');
 }
 
 function waitForTransitionAssets(overlay) {
@@ -124,8 +128,8 @@ function waitForTransitionAssets(overlay) {
   return Promise.all([logoReady, animationDone]);
 }
 
-function showPageTransition(label) {
-  let overlay = getPageTransitionOverlay();
+function showPageTransition(label, { animate = true } = {}) {
+  const overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
   overlay.style.display = '';
@@ -134,7 +138,15 @@ function showPageTransition(label) {
   overlay.classList.add('page-transition--visible');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('page-transition-active');
-  restartTransitionAnimations(overlay);
+
+  resetTransitionVisuals(overlay);
+  if (animate) {
+    requestAnimationFrame(() => {
+      overlay.classList.add('page-transition--animate');
+    });
+  } else {
+    overlay.classList.add('page-transition--ready');
+  }
 
   return overlay;
 }
@@ -142,9 +154,10 @@ function showPageTransition(label) {
 function hidePageTransition(overlay) {
   if (!overlay || overlay.classList.contains('page-transition--hide')) return;
 
-  overlay.classList.remove('page-transition--visible', 'page-transition--animate');
+  overlay.classList.remove('page-transition--visible', 'page-transition--animate', 'page-transition--ready');
   overlay.classList.add('page-transition--hide');
   overlay.setAttribute('aria-hidden', 'true');
+  overlay.dataset.transitionMode = '';
   document.body.classList.remove('page-transition-active');
 
   const cleanup = () => {
@@ -156,13 +169,18 @@ function hidePageTransition(overlay) {
 }
 
 async function navigateWithTransition(href, label) {
-  const overlay = showPageTransition(label);
+  pageTransitionNavigating = true;
+  storeNavigationTransition(label);
+  setPageTransitionLabel(label);
+
+  const overlay = showPageTransition(label, { animate: true });
   if (!overlay) {
     window.location.href = href;
     return;
   }
 
-  storeTransitionLabel(label);
+  overlay.dataset.transitionMode = 'outgoing';
+
   await waitForTransitionAssets(overlay);
   window.location.href = href;
 }
@@ -179,8 +197,9 @@ function bindPageTransitionLinks(root = document) {
     if (!isTransitionLink(link)) return;
 
     event.preventDefault();
+    event.stopPropagation();
     navigateWithTransition(link.href, getLabelFromLink(link, link.href));
-  });
+  }, true);
 }
 
 async function finishPageTransition(defaultLabel) {
@@ -190,27 +209,44 @@ async function finishPageTransition(defaultLabel) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) {
     document.body.classList.remove('page-transition-active');
-    bindPageTransitionLinks(document);
     return;
   }
 
   try {
+    const isNavEnter = overlay.dataset.transitionMode === 'nav';
     const labelEl = overlay.querySelector('.page-transition__label');
-    if (labelEl && defaultLabel && !labelEl.textContent.trim()) {
-      setPageTransitionLabel(defaultLabel);
+    const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
+
+    if (isNavEnter) {
+      await new Promise((resolve) => setTimeout(
+        resolve,
+        prefersReducedMotion() ? 80 : PAGE_TRANSITION_NAV_ENTER_MS
+      ));
+      if (!pageTransitionNavigating) hidePageTransition(overlay);
+      return;
+    }
+
+    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
+      return;
     }
 
     if (!overlay.classList.contains('page-transition--visible')) {
-      showPageTransition(labelEl?.textContent.trim() || defaultLabel || 'Dune Base');
+      showPageTransition(currentLabel, { animate: true });
+    } else if (!overlay.classList.contains('page-transition--animate')
+      && !overlay.classList.contains('page-transition--ready')) {
+      requestAnimationFrame(() => overlay.classList.add('page-transition--animate'));
     }
 
     await waitForTransitionAssets(overlay);
+
+    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
+      return;
+    }
+
     hidePageTransition(overlay);
   } catch (error) {
     console.warn(`${typeof SITE_NAME !== 'undefined' ? SITE_NAME : 'Dune Base'}: ошибка анимации перехода`, error);
-    hidePageTransition(overlay);
-  } finally {
-    bindPageTransitionLinks(document);
+    if (!pageTransitionNavigating) hidePageTransition(overlay);
   }
 }
 
@@ -224,3 +260,5 @@ function getPageTransitionLabel(activePage) {
     || NAV_ITEMS?.find((item) => item.page === activePage)?.label
     || 'Dune Base';
 }
+
+bindPageTransitionLinks(document);
