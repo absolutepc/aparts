@@ -216,11 +216,10 @@ function hidePageTransition(overlay) {
 async function navigateWithTransition(href, label) {
   if (pageTransitionOutgoing) return;
 
-  await waitForIntroFinished();
-
   pageTransitionOutgoing = true;
   pageTransitionNavigating = true;
   storeNavigationTransition(label);
+  setPageTransitionLabel(label);
 
   const overlay = showPageTransition(label, { animate: true });
   if (!overlay) {
@@ -264,7 +263,10 @@ function bindPageTransitionLinks(root = document) {
 
     event.preventDefault();
     event.stopPropagation();
-    navigateWithTransition(link.href, getLabelFromLink(link, link.href));
+
+    const label = getLabelFromLink(link, link.href);
+    setPageTransitionLabel(label);
+    navigateWithTransition(link.href, label);
   }, true);
 }
 
@@ -281,7 +283,10 @@ async function finishPageTransition(defaultLabel) {
 
   pageTransitionIntroPromise = (async () => {
     try {
-      const isNavEnter = overlay.dataset.transitionMode === 'nav';
+      if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
+        return;
+      }
+
       const labelEl = overlay.querySelector('.page-transition__label');
       const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
 
