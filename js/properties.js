@@ -80,12 +80,10 @@ function initPropertyPage() {
   }
 
   const flatTypeParam = getQueryParam('flatType');
-  const selectedVariant = isComplex(property)
+  const selectedVariant = isComplex(property) && flatTypeParam
     ? resolveComplexCatalogVariant(property, flatTypeParam)
     : null;
-  const pageTitle = selectedVariant
-    ? getPropertyCardTitle({ ...property, flatType: selectedVariant.flatType })
-    : property.title;
+  const pageTitle = property.title;
 
   if (typeof updatePageTransitionLabel === 'function') {
     updatePageTransitionLabel(pageTitle);
