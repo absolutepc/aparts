@@ -2,8 +2,6 @@ const PAGE_TRANSITION_KEY = 'pageTransitionLabel';
 const PAGE_TRANSITION_NAV_KEY = 'pageTransitionNav';
 const PAGE_TRANSITION_MIN_MS = 2600;
 const PAGE_TRANSITION_REDUCE_MS = 650;
-const PAGE_TRANSITION_NAV_ENTER_MS = 180;
-
 const PAGE_LABELS_BY_HREF = {
   'index.html': 'Главная',
   'complexes.html': 'ЖК и МФК',
@@ -218,11 +216,10 @@ async function finishPageTransition(defaultLabel) {
     const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
 
     if (isNavEnter) {
-      await new Promise((resolve) => setTimeout(
-        resolve,
-        prefersReducedMotion() ? 80 : PAGE_TRANSITION_NAV_ENTER_MS
-      ));
-      if (!pageTransitionNavigating) hidePageTransition(overlay);
+      document.body.classList.remove('page-transition-active');
+      overlay.classList.add('page-transition--hide');
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
       return;
     }
 
