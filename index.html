@@ -5,30 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dune Base — Недвижимость</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    #site-loader {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      background: #12080b;
-    }
-  </style>
 </head>
 <body>
-  <div id="site-loader" class="site-loader site-loader--pending" role="status" aria-live="polite" aria-label="Загрузка Dune Base">
-    <div class="site-loader__inner">
-      <div class="site-loader__logo">
-        <img src="img/logo.svg" alt="">
-      </div>
-      <h1 class="site-loader__title">Dune Base</h1>
-      <p class="site-loader__tagline">Недвижимость для жизни и бизнеса</p>
-      <div class="site-loader__progress" aria-hidden="true">
-        <span class="site-loader__progress-bar"></span>
-      </div>
-    </div>
-    <button type="button" class="site-loader__skip">Пропустить</button>
-  </div>
-
   <div id="site-header"></div>
 
   <main>
@@ -74,10 +52,8 @@
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
   <script src="js/layout.js"></script>
-  <script src="js/loader.js"></script>
   <script src="js/properties.js"></script>
   <script>
-    initSiteLoader();
     initLayout('home');
     initHomePage();
   </script>
