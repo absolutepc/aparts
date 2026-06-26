@@ -20,17 +20,9 @@ const PAGE_LABELS_BY_PAGE = {
 let pageTransitionLinksBound = false;
 let pageTransitionFinishing = false;
 let pageTransitionNavigating = false;
-let pageTransitionOutgoing = false;
-let pageTransitionIntroPromise = null;
-let pageTransitionCleanupTimer = null;
-let pageTransitionHideCleanup = null;
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function getTransitionDurationMs() {
-  return prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
 }
 
 function storeNavigationTransition(label) {
@@ -78,21 +70,6 @@ function getPageTransitionOverlay() {
   return document.getElementById('page-transition');
 }
 
-function cancelPageTransitionCleanup() {
-  if (pageTransitionCleanupTimer) {
-    clearTimeout(pageTransitionCleanupTimer);
-    pageTransitionCleanupTimer = null;
-  }
-
-  if (pageTransitionHideCleanup) {
-    const overlay = getPageTransitionOverlay();
-    if (overlay) {
-      overlay.removeEventListener('transitionend', pageTransitionHideCleanup);
-    }
-    pageTransitionHideCleanup = null;
-  }
-}
-
 function setPageTransitionLabel(label) {
   const overlay = getPageTransitionOverlay();
   const labelEl = overlay?.querySelector('.page-transition__label');
@@ -101,12 +78,6 @@ function setPageTransitionLabel(label) {
 
 function updatePageTransitionLabel(label) {
   setPageTransitionLabel(label);
-}
-
-function restartProgressBar(overlay) {
-  const progress = overlay?.querySelector('.page-transition__progress');
-  if (!progress) return;
-  progress.replaceWith(progress.cloneNode(true));
 }
 
 function resetTransitionVisuals(overlay) {
@@ -120,29 +91,15 @@ function resetTransitionVisuals(overlay) {
     el.style.animation = '';
   });
 
-  restartProgressBar(overlay);
+  const progressBar = overlay.querySelector('.page-transition__progress-bar');
+  if (progressBar) {
+    progressBar.style.width = '';
+    progressBar.style.animation = '';
+  }
 }
 
-function startTransitionAnimations(overlay) {
-  return new Promise((resolve) => {
-    requestAnimationFrame(() => {
-      overlay.classList.add('page-transition--animate');
-      void overlay.offsetWidth;
-      requestAnimationFrame(() => resolve(performance.now()));
-    });
-  });
-}
-
-function waitForTransitionDuration(startedAt) {
-  const minMs = getTransitionDurationMs();
-  const elapsed = performance.now() - startedAt;
-  const remaining = minMs - elapsed;
-  if (remaining <= 0) return Promise.resolve();
-  return new Promise((resolve) => setTimeout(resolve, remaining));
-}
-
-function waitForInitialTransition(overlay) {
-  const minMs = getTransitionDurationMs();
+function waitForTransitionAssets(overlay) {
+  const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
   const logo = overlay?.querySelector('.page-transition__logo img');
   const logoReady = !logo || logo.complete
     ? Promise.resolve()
@@ -152,27 +109,28 @@ function waitForInitialTransition(overlay) {
     });
 
   const animationDone = new Promise((resolve) => {
-    setTimeout(resolve, minMs);
+    const bar = overlay?.querySelector('.page-transition__progress-bar');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    setTimeout(finish, minMs);
+    if (bar && !prefersReducedMotion()) {
+      bar.addEventListener('animationend', finish, { once: true });
+    }
   });
 
   return Promise.all([logoReady, animationDone]);
-}
-
-async function waitForIntroFinished() {
-  if (pageTransitionIntroPromise) {
-    await pageTransitionIntroPromise;
-  }
 }
 
 function showPageTransition(label, { animate = true } = {}) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
-  cancelPageTransitionCleanup();
-
-  overlay.style.transition = 'none';
-  overlay.style.opacity = '';
-  overlay.style.visibility = '';
+  overlay.style.display = '';
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
   overlay.classList.add('page-transition--visible');
@@ -180,21 +138,19 @@ function showPageTransition(label, { animate = true } = {}) {
   document.body.classList.add('page-transition-active');
 
   resetTransitionVisuals(overlay);
-  void overlay.offsetWidth;
-  overlay.style.transition = '';
-
   if (animate) {
-    return overlay;
+    requestAnimationFrame(() => {
+      overlay.classList.add('page-transition--animate');
+    });
+  } else {
+    overlay.classList.add('page-transition--ready');
   }
 
-  overlay.classList.add('page-transition--ready');
   return overlay;
 }
 
 function hidePageTransition(overlay) {
   if (!overlay || overlay.classList.contains('page-transition--hide')) return;
-
-  cancelPageTransitionCleanup();
 
   overlay.classList.remove('page-transition--visible', 'page-transition--animate', 'page-transition--ready');
   overlay.classList.add('page-transition--hide');
@@ -203,19 +159,14 @@ function hidePageTransition(overlay) {
   document.body.classList.remove('page-transition-active');
 
   const cleanup = () => {
-    pageTransitionCleanupTimer = null;
-    pageTransitionHideCleanup = null;
+    overlay.style.display = 'none';
   };
 
-  pageTransitionHideCleanup = cleanup;
   overlay.addEventListener('transitionend', cleanup, { once: true });
-  pageTransitionCleanupTimer = setTimeout(cleanup, 700);
+  setTimeout(cleanup, 700);
 }
 
 async function navigateWithTransition(href, label) {
-  if (pageTransitionOutgoing) return;
-
-  pageTransitionOutgoing = true;
   pageTransitionNavigating = true;
   storeNavigationTransition(label);
   setPageTransitionLabel(label);
@@ -228,25 +179,8 @@ async function navigateWithTransition(href, label) {
 
   overlay.dataset.transitionMode = 'outgoing';
 
-  const startedAt = await startTransitionAnimations(overlay);
-  await waitForTransitionDuration(startedAt);
+  await waitForTransitionAssets(overlay);
   window.location.href = href;
-}
-
-async function playPageTransition(label) {
-  await waitForIntroFinished();
-  pageTransitionNavigating = true;
-
-  const overlay = showPageTransition(label, { animate: true });
-  if (!overlay) {
-    pageTransitionNavigating = false;
-    return;
-  }
-
-  const startedAt = await startTransitionAnimations(overlay);
-  await waitForTransitionDuration(startedAt);
-  hidePageTransition(overlay);
-  pageTransitionNavigating = false;
 }
 
 function bindPageTransitionLinks(root = document) {
@@ -262,10 +196,7 @@ function bindPageTransitionLinks(root = document) {
 
     event.preventDefault();
     event.stopPropagation();
-
-    const label = getLabelFromLink(link, link.href);
-    setPageTransitionLabel(label);
-    navigateWithTransition(link.href, label);
+    navigateWithTransition(link.href, getLabelFromLink(link, link.href));
   }, true);
 }
 
@@ -276,45 +207,44 @@ async function finishPageTransition(defaultLabel) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) {
     document.body.classList.remove('page-transition-active');
-    pageTransitionIntroPromise = Promise.resolve();
     return;
   }
 
-  pageTransitionIntroPromise = (async () => {
-    try {
-      if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
-        return;
-      }
+  try {
+    const isNavEnter = overlay.dataset.transitionMode === 'nav';
+    const labelEl = overlay.querySelector('.page-transition__label');
+    const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
 
-      const labelEl = overlay.querySelector('.page-transition__label');
-      const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
-
-      if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
-        return;
-      }
-
-      if (!overlay.classList.contains('page-transition--visible')) {
-        showPageTransition(currentLabel, { animate: true });
-        await startTransitionAnimations(overlay);
-      } else if (!overlay.classList.contains('page-transition--animate')
-        && !overlay.classList.contains('page-transition--ready')) {
-        await startTransitionAnimations(overlay);
-      }
-
-      await waitForInitialTransition(overlay);
-
-      if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
-        return;
-      }
-
-      hidePageTransition(overlay);
-    } catch (error) {
-      console.warn(`${typeof SITE_NAME !== 'undefined' ? SITE_NAME : 'Dune Base'}: ошибка анимации перехода`, error);
-      if (!pageTransitionNavigating) hidePageTransition(overlay);
+    if (isNavEnter) {
+      document.body.classList.remove('page-transition-active');
+      overlay.classList.add('page-transition--hide');
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+      return;
     }
-  })();
 
-  await pageTransitionIntroPromise;
+    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
+      return;
+    }
+
+    if (!overlay.classList.contains('page-transition--visible')) {
+      showPageTransition(currentLabel, { animate: true });
+    } else if (!overlay.classList.contains('page-transition--animate')
+      && !overlay.classList.contains('page-transition--ready')) {
+      requestAnimationFrame(() => overlay.classList.add('page-transition--animate'));
+    }
+
+    await waitForTransitionAssets(overlay);
+
+    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
+      return;
+    }
+
+    hidePageTransition(overlay);
+  } catch (error) {
+    console.warn(`${typeof SITE_NAME !== 'undefined' ? SITE_NAME : 'Dune Base'}: ошибка анимации перехода`, error);
+    if (!pageTransitionNavigating) hidePageTransition(overlay);
+  }
 }
 
 function initPageTransition(defaultLabel) {
