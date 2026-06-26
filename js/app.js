@@ -39,14 +39,14 @@ function renderFeaturedJkCard(property) {
       data-property-id="${escapeAttr(property.id)}"
       data-variants="${escapeAttr(encodeURIComponent(JSON.stringify(variants)))}"
     >
-      <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card-media">
+      <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card-media" data-transition-label="${escapeAttr(property.title)}">
         <div class="property-image">
           ${renderPropertyImg(getPropertyImg(property), property.title)}
         </div>
       </a>
       <div class="property-info">
         <div class="property-category">${escapeHtml(TYPE_LABELS[property.type] || TYPE_LABELS.jk)}</div>
-        <h3><a href="property.html?id=${encodeURIComponent(property.id)}">${escapeHtml(property.title)}</a></h3>
+        <h3><a href="property.html?id=${encodeURIComponent(property.id)}" data-transition-label="${escapeAttr(property.title)}">${escapeHtml(property.title)}</a></h3>
         <div class="property-variant-picker">${variantButtons}</div>
         <div class="property-attrs">
           <span data-variant-attrs>${attrsHtml}</span>
@@ -55,7 +55,7 @@ function renderFeaturedJkCard(property) {
         <p>${escapeHtml(property.description || '')}</p>
         <div class="property-footer">
           <div class="property-price">от ${formatPrice(property.price)}</div>
-          <a href="property.html?id=${encodeURIComponent(property.id)}" class="btn btn-secondary btn-sm">Подробнее</a>
+          <a href="property.html?id=${encodeURIComponent(property.id)}" class="btn btn-secondary btn-sm" data-transition-label="${escapeAttr(property.title)}">Подробнее</a>
         </div>
       </div>
     </article>
@@ -136,7 +136,7 @@ function renderPropertyCard(property) {
   const priceLabel = isComplex(property) ? 'от ' : '';
 
   return `
-    <a href="${escapeAttr(detailHref)}" class="property-card">
+    <a href="${escapeAttr(detailHref)}" class="property-card" data-transition-label="${escapeAttr(cardTitle)}">
       <div class="property-image">
         ${renderPropertyImg(cardImg, cardTitle)}
       </div>

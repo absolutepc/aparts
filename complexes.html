@@ -5,8 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ЖК и МФК — Dune Base</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>#page-transition{position:fixed;inset:0;z-index:10000;background:#12080b}</style>
 </head>
 <body>
+  <div id="page-transition" class="page-transition" role="status" aria-live="polite" aria-label="Загрузка">
+    <div class="page-transition__inner">
+      <div class="page-transition__logo"><img src="img/logo.svg" alt=""></div>
+      <p class="page-transition__label">ЖК и МФК</p>
+      <div class="page-transition__progress" aria-hidden="true"><span class="page-transition__progress-bar"></span></div>
+    </div>
+  </div>
+
   <div id="site-header"></div>
 
   <main>
@@ -76,6 +85,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/transition.js"></script>
   <script src="js/layout.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/properties.js"></script>

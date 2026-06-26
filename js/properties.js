@@ -87,6 +87,10 @@ function initPropertyPage() {
     ? getPropertyCardTitle({ ...property, flatType: selectedVariant.flatType })
     : property.title;
 
+  if (typeof updatePageTransitionLabel === 'function') {
+    updatePageTransitionLabel(pageTitle);
+  }
+
   document.title = `${pageTitle} — ${SITE_NAME}`;
 
   const typeLabel = TYPE_LABELS[property.type] || property.type;

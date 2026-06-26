@@ -98,4 +98,8 @@ function initLayout(activePage) {
   if (menuBtn && nav) {
     menuBtn.addEventListener('click', () => nav.classList.toggle('open'));
   }
+
+  if (typeof initPageTransition === 'function') {
+    initPageTransition(getPageTransitionLabel(activePage));
+  }
 }
