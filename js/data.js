@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v5';
+const STORE_KEY = 'aparts_data_v6';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -10,9 +10,11 @@ const COMPLEX_TYPES = ['jk', 'mfk'];
 const FLAT_TYPE_LABELS = {
   '1room': 'Однокомнатные',
   '2room': 'Двухкомнатные',
-  '3room': 'Трехкомнатные',
+  '3room': 'Трёхкомнатные',
   euro2: 'Евродвушки',
 };
+
+const FLAT_TYPE_KEYS = Object.keys(FLAT_TYPE_LABELS);
 
 function assetPath(relativePath) {
   const base = window.location.pathname.replace(/[^/]*$/, '');
@@ -36,11 +38,8 @@ const DEFAULT_PROPERTIES = [
     title: '«Ан-Нур»',
     description: 'Современный жилой комплекс с благоустроенной территорией, детскими площадками и подземным паркингом.',
     type: 'jk',
-    totalApartments: 420,
-    count1room: 120,
-    count2room: 150,
-    count3room: 90,
-    countEuroTwo: 60,
+    flatType: '2room',
+    totalApartments: 150,
     areaMin: 28,
     areaMax: 95,
     price: 8500000,
@@ -60,11 +59,8 @@ const DEFAULT_PROPERTIES = [
     title: '«Бомонд»',
     description: 'Комплекс бизнес-класса с видом на набережную, собственной инфраструктурой и охраняемой территорией.',
     type: 'jk',
-    totalApartments: 280,
-    count1room: 70,
-    count2room: 110,
-    count3room: 60,
-    countEuroTwo: 40,
+    flatType: '2room',
+    totalApartments: 110,
     areaMin: 35,
     areaMax: 120,
     price: 12400000,
@@ -82,11 +78,8 @@ const DEFAULT_PROPERTIES = [
     title: '«Дубайский»',
     description: 'Жилой комплекс: жильё, офисы и торговые галереи в одном пространстве.',
     type: 'mfk',
-    totalApartments: 160,
-    count1room: 40,
-    count2room: 55,
-    count3room: 35,
-    countEuroTwo: 30,
+    flatType: '2room',
+    totalApartments: 55,
     areaMin: 30,
     areaMax: 85,
     price: 9800000,
@@ -159,13 +152,70 @@ function isComplex(property) {
   return COMPLEX_TYPES.includes(property.type);
 }
 
+function getLegacyCountForFlatType(property, flatType) {
+  switch (flatType) {
+    case '1room': return Number(property.count1room) || 0;
+    case '2room': return Number(property.count2room) || 0;
+    case '3room': return Number(property.count3room) || 0;
+    case 'euro2': return Number(property.countEuroTwo) || 0;
+    default: return 0;
+  }
+}
+
+function inferFlatTypeFromLegacy(property) {
+  const ranked = FLAT_TYPE_KEYS
+    .map(flatType => ({
+      flatType,
+      count: getLegacyCountForFlatType(property, flatType),
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  return ranked[0]?.count > 0 ? ranked[0].flatType : '1room';
+}
+
+function getFlatTypeLabel(flatType) {
+  return FLAT_TYPE_LABELS[flatType] || flatType || '';
+}
+
+function normalizeComplexProperty(property) {
+  if (!isComplex(property)) {
+    const item = { ...property };
+    delete item.flatType;
+    delete item.count1room;
+    delete item.count2room;
+    delete item.count3room;
+    delete item.countEuroTwo;
+    return item;
+  }
+
+  const item = { ...property };
+  const hasLegacyCounts = FLAT_TYPE_KEYS.some(flatType => getLegacyCountForFlatType(item, flatType) > 0);
+  let flatType = FLAT_TYPE_LABELS[item.flatType] ? item.flatType : inferFlatTypeFromLegacy(item);
+
+  if (!FLAT_TYPE_LABELS[item.flatType] && hasLegacyCounts) {
+    item.totalApartments = getLegacyCountForFlatType(item, flatType) || Number(item.totalApartments) || 0;
+  } else {
+    item.totalApartments = Number(item.totalApartments) || 0;
+  }
+
+  item.flatType = flatType;
+  item.areaMin = Number(item.areaMin) || 0;
+  item.areaMax = Number(item.areaMax) || Number(item.areaMin) || 0;
+
+  delete item.count1room;
+  delete item.count2room;
+  delete item.count3room;
+  delete item.countEuroTwo;
+
+  return item;
+}
+
 function getComplexStats(property) {
+  const normalized = normalizeComplexProperty(property);
   return {
-    totalApartments: Number(property.totalApartments) || 0,
-    count1room: Number(property.count1room) || 0,
-    count2room: Number(property.count2room) || 0,
-    count3room: Number(property.count3room) || 0,
-    countEuroTwo: Number(property.countEuroTwo) || 0,
+    flatType: normalized.flatType,
+    flatTypeLabel: getFlatTypeLabel(normalized.flatType),
+    totalApartments: Number(normalized.totalApartments) || 0,
   };
 }
 
@@ -197,14 +247,8 @@ function formatComplexAreaRange(property) {
 }
 
 function complexHasFlatType(property, flatType) {
-  const stats = getComplexStats(property);
-  switch (flatType) {
-    case '1room': return stats.count1room > 0;
-    case '2room': return stats.count2room > 0;
-    case '3room': return stats.count3room > 0;
-    case 'euro2': return stats.countEuroTwo > 0;
-    default: return true;
-  }
+  if (!isComplex(property)) return false;
+  return getComplexStats(property).flatType === flatType;
 }
 
 function enrichProperty(property) {
@@ -216,13 +260,7 @@ function enrichProperty(property) {
   };
 
   if (isComplex(merged)) {
-    merged.totalApartments = Number(merged.totalApartments) || 0;
-    merged.count1room = Number(merged.count1room) || 0;
-    merged.count2room = Number(merged.count2room) || 0;
-    merged.count3room = Number(merged.count3room) || 0;
-    merged.countEuroTwo = Number(merged.countEuroTwo) || 0;
-    merged.areaMin = Number(merged.areaMin) || 0;
-    merged.areaMax = Number(merged.areaMax) || Number(merged.areaMin) || 0;
+    Object.assign(merged, normalizeComplexProperty(merged));
   }
 
   const repaired = repairPropertyImages({
@@ -368,11 +406,8 @@ function renderComplexStatsTags(property) {
     : '';
   return `
     ${areaTag}
-    <span class="property-attr-tag">Всего: ${stats.totalApartments}</span>
-    <span class="property-attr-tag">1к: ${stats.count1room}</span>
-    <span class="property-attr-tag">2к: ${stats.count2room}</span>
-    <span class="property-attr-tag">3к: ${stats.count3room}</span>
-    <span class="property-attr-tag">Евро-2: ${stats.countEuroTwo}</span>
+    <span class="property-attr-tag">${escapeHtml(stats.flatTypeLabel)}</span>
+    <span class="property-attr-tag">${stats.totalApartments} кв.</span>
   `;
 }
 
@@ -380,28 +415,16 @@ function renderComplexStatsTable(property) {
   const stats = getComplexStats(property);
   return `
     <div class="property-spec-row">
+      <span class="property-spec-label">Тип квартир</span>
+      <span class="property-spec-value">${escapeHtml(stats.flatTypeLabel) || '—'}</span>
+    </div>
+    <div class="property-spec-row">
       <span class="property-spec-label">Площадь квартир</span>
       <span class="property-spec-value">${formatComplexAreaRange(property) || '—'}</span>
     </div>
     <div class="property-spec-row">
-      <span class="property-spec-label">Всего квартир</span>
+      <span class="property-spec-label">Количество</span>
       <span class="property-spec-value">${stats.totalApartments}</span>
-    </div>
-    <div class="property-spec-row">
-      <span class="property-spec-label">Однокомнатные</span>
-      <span class="property-spec-value">${stats.count1room}</span>
-    </div>
-    <div class="property-spec-row">
-      <span class="property-spec-label">Двухкомнатные</span>
-      <span class="property-spec-value">${stats.count2room}</span>
-    </div>
-    <div class="property-spec-row">
-      <span class="property-spec-label">Трёхкомнатные</span>
-      <span class="property-spec-value">${stats.count3room}</span>
-    </div>
-    <div class="property-spec-row">
-      <span class="property-spec-label">Евродвушки</span>
-      <span class="property-spec-value">${stats.countEuroTwo}</span>
     </div>
   `;
 }
@@ -416,7 +439,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -425,7 +448,7 @@ function migrateStore() {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
         const repaired = data.properties.map(property => {
-          const item = { ...property };
+          const item = normalizeComplexProperty({ ...property });
           const images = repairPropertyImages(item);
           item.img = images.img;
           item.images = images.images;
@@ -452,7 +475,12 @@ function getProperties() {
     const needsPersist = enriched.some((property, index) => {
       const source = properties[index];
       return property.img !== source.img
-        || JSON.stringify(property.images) !== JSON.stringify(source.images);
+        || JSON.stringify(property.images) !== JSON.stringify(source.images)
+        || property.flatType !== source.flatType
+        || source.count1room != null
+        || source.count2room != null
+        || source.count3room != null
+        || source.countEuroTwo != null;
     });
 
     if (needsPersist) {
@@ -471,7 +499,7 @@ function getProperties() {
 function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
-    const item = { ...property };
+    const item = normalizeComplexProperty({ ...property });
     const images = repairPropertyImages(item);
     item.img = images.img;
     item.images = images.images;
