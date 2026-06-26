@@ -908,6 +908,34 @@ main { flex: 1; }
 
 .admin-form-full { grid-column: 1 / -1; }
 
+.admin-variant-editor-title {
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.admin-variant-editor .form-hint {
+  margin-bottom: 16px;
+}
+
+.admin-flat-variant-row {
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.admin-flat-variant-row legend {
+  padding: 0 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-flat-variant-row .form-group:last-child {
+  margin-bottom: 0;
+}
+
 .admin-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);

@@ -103,6 +103,120 @@ function renderDashboard() {
   `;
 }
 
+function renderAdminFlatVariantRow(flatType) {
+  const label = getFlatTypeLabel(flatType);
+  return `
+    <fieldset class="admin-flat-variant-row" data-flat-type="${escapeHtml(flatType)}">
+      <legend>${escapeHtml(label)}</legend>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label>Количество квартир</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_totalApartments" min="0" step="1" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Площадь от, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_areaMin" min="0" step="0.001" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Площадь до, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_areaMax" min="0" step="0.001" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Цена от, ₽</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_price" min="0" placeholder="—">
+        </div>
+        <div class="form-group admin-form-full">
+          <label>Планировка (путь к файлу)</label>
+          <input type="text" name="variant_${escapeHtml(flatType)}_planImg" placeholder="img/properties/plan.jpg">
+        </div>
+      </div>
+    </fieldset>
+  `;
+}
+
+function collectFlatVariantsFromForm(form) {
+  const variants = [];
+
+  for (const flatType of FLAT_TYPE_KEYS) {
+    const totalApartments = Number(form.querySelector(`[name="variant_${flatType}_totalApartments"]`)?.value);
+    if (!totalApartments || totalApartments < 1) continue;
+
+    const areaMin = parseArea(form.querySelector(`[name="variant_${flatType}_areaMin"]`)?.value) ?? 0;
+    const areaMax = parseArea(form.querySelector(`[name="variant_${flatType}_areaMax"]`)?.value) ?? 0;
+    if (areaMin && areaMax && areaMin > areaMax) {
+      return { error: `Площадь «${getFlatTypeLabel(flatType)}»: минимум больше максимума` };
+    }
+
+    const planImg = form.querySelector(`[name="variant_${flatType}_planImg"]`)?.value?.trim() || '';
+    const priceRaw = form.querySelector(`[name="variant_${flatType}_price"]`)?.value;
+    const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
+
+    const variant = {
+      flatType,
+      totalApartments,
+      areaMin,
+      areaMax: areaMax || areaMin,
+    };
+    if (planImg) variant.planImg = planImg;
+    if (Number.isFinite(price)) variant.price = price;
+    variants.push(variant);
+  }
+
+  return { variants };
+}
+
+function fillFlatVariantsForm(form, property) {
+  if (!form) return;
+
+  const variants = isComplex(property) ? getComplexFlatVariants(property) : [];
+  const byType = Object.fromEntries(variants.map(variant => [variant.flatType, variant]));
+
+  for (const flatType of FLAT_TYPE_KEYS) {
+    const variant = byType[flatType];
+    const totalInput = form.querySelector(`[name="variant_${flatType}_totalApartments"]`);
+    const areaMinInput = form.querySelector(`[name="variant_${flatType}_areaMin"]`);
+    const areaMaxInput = form.querySelector(`[name="variant_${flatType}_areaMax"]`);
+    const planImgInput = form.querySelector(`[name="variant_${flatType}_planImg"]`);
+    const priceInput = form.querySelector(`[name="variant_${flatType}_price"]`);
+
+    if (totalInput) totalInput.value = variant?.totalApartments || '';
+    if (areaMinInput) areaMinInput.value = variant?.areaMin || '';
+    if (areaMaxInput) areaMaxInput.value = variant?.areaMax || '';
+    if (planImgInput) planImgInput.value = variant?.planImg || '';
+    if (priceInput) priceInput.value = variant?.price ?? '';
+  }
+
+  if (form.flatType) {
+    form.flatType.value = property.flatType || variants[0]?.flatType || '1room';
+  }
+}
+
+function clearFlatVariantsForm(form) {
+  if (!form) return;
+
+  for (const flatType of FLAT_TYPE_KEYS) {
+    const totalInput = form.querySelector(`[name="variant_${flatType}_totalApartments"]`);
+    const areaMinInput = form.querySelector(`[name="variant_${flatType}_areaMin"]`);
+    const areaMaxInput = form.querySelector(`[name="variant_${flatType}_areaMax"]`);
+    const planImgInput = form.querySelector(`[name="variant_${flatType}_planImg"]`);
+    const priceInput = form.querySelector(`[name="variant_${flatType}_price"]`);
+
+    if (totalInput) totalInput.value = '';
+    if (areaMinInput) areaMinInput.value = '';
+    if (areaMaxInput) areaMaxInput.value = '';
+    if (planImgInput) planImgInput.value = '';
+    if (priceInput) priceInput.value = '';
+  }
+
+  if (form.flatType) form.flatType.value = '1room';
+}
+
+function formatComplexVariantsAdminSummary(property) {
+  return getComplexFlatVariants(property)
+    .map(variant => `${variant.flatTypeShortLabel} · ${variant.totalApartments}`)
+    .join(', ');
+}
+
 function renderPropertiesAdmin() {
   const properties = getProperties();
 
@@ -131,26 +245,19 @@ function renderPropertiesAdmin() {
               </select>
             </div>
             <div id="complexFields" class="admin-form-full">
-              <div class="admin-form-grid">
+              <div class="admin-variant-editor">
+                <h3 class="admin-variant-editor-title">Типы квартир</h3>
+                <p class="form-hint">Заполните параметры для каждого типа. Пустое количество — тип не будет показан на сайте.</p>
+                <div id="flatVariantRows">
+                  ${FLAT_TYPE_KEYS.map(renderAdminFlatVariantRow).join('')}
+                </div>
                 <div class="form-group">
-                  <label>Тип квартир</label>
-                  <select name="flatType" required>
+                  <label>Основной тип для карточки</label>
+                  <select name="flatType">
                     ${Object.entries(FLAT_TYPE_LABELS).map(([value, label]) => `
                       <option value="${value}">${escapeHtml(label)}</option>
                     `).join('')}
                   </select>
-                </div>
-                <div class="form-group">
-                  <label>Количество квартир</label>
-                  <input type="number" name="totalApartments" min="1" step="1">
-                </div>
-                <div class="form-group">
-                  <label>Площадь от, м²</label>
-                  <input type="number" name="areaMin" min="0" step="0.001">
-                </div>
-                <div class="form-group">
-                  <label>Площадь до, м²</label>
-                  <input type="number" name="areaMax" min="0" step="0.001">
                 </div>
               </div>
             </div>
@@ -253,12 +360,11 @@ function renderPropertiesAdmin() {
 }
 
 function renderPropertyRow(property) {
-  const stats = isComplex(property) ? getComplexStats(property) : null;
   const sizeCell = isComplex(property)
-    ? stats.totalApartments
+    ? getComplexFlatVariants(property).reduce((sum, variant) => sum + (Number(variant.totalApartments) || 0), 0)
     : `${formatArea(property.area)} м²`;
   const breakdownCell = isComplex(property)
-    ? `${stats.flatTypeLabel} · ${stats.totalApartments} кв.`
+    ? formatComplexVariantsAdminSummary(property) || '—'
     : '—';
 
   return `
@@ -423,19 +529,13 @@ function bindPropertiesAdmin() {
     if (areaField) areaField.style.display = isCommercial ? '' : 'none';
     if (areaInput) areaInput.required = isCommercial;
 
-    const flatTypeSelect = form.querySelector('[name="flatType"]');
-    const totalApartmentsInput = form.querySelector('[name="totalApartments"]');
-    if (flatTypeSelect) flatTypeSelect.required = !isCommercial;
-    if (totalApartmentsInput) totalApartmentsInput.required = !isCommercial;
-
-    const complexInputs = form.querySelectorAll('#complexFields input');
-
     if (clearValues) {
       if (isCommercial) {
-        complexInputs.forEach(input => { input.value = ''; });
-        if (flatTypeSelect) flatTypeSelect.value = '1room';
-      } else if (areaInput) {
-        areaInput.value = '';
+        clearFlatVariantsForm(form);
+        if (areaInput) areaInput.value = '';
+      } else {
+        clearFlatVariantsForm(form);
+        if (areaInput) areaInput.value = '';
       }
     }
   }
@@ -448,6 +548,7 @@ function bindPropertiesAdmin() {
     if (imagesField) imagesField.value = '';
     form.published.checked = true;
     if (imageFileInput) imageFileInput.value = '';
+    clearFlatVariantsForm(form);
     renderGalleryPreview();
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
@@ -508,30 +609,33 @@ function bindPropertiesAdmin() {
     };
 
     if (isComplex({ type })) {
+      const variantResult = collectFlatVariantsFromForm(form);
+      if (variantResult.error) {
+        showToast(variantResult.error, 'error');
+        return;
+      }
+
+      const variants = variantResult.variants;
+      if (!variants.length) {
+        showToast('Укажите хотя бы один тип квартир с количеством', 'error');
+        return;
+      }
+
       const flatType = formData.get('flatType')?.toString();
-      const totalApartments = Number(formData.get('totalApartments'));
+      const primary = variants.find(variant => variant.flatType === flatType) || variants[0];
 
-      if (!flatType || !FLAT_TYPE_LABELS[flatType]) {
-        showToast('Выберите тип квартир', 'error');
+      if (flatType && !variants.some(variant => variant.flatType === flatType)) {
+        showToast('Основной тип должен быть среди заполненных', 'error');
         return;
       }
 
-      if (!totalApartments || totalApartments < 1) {
-        showToast('Укажите количество квартир', 'error');
-        return;
-      }
-
-      property.flatType = flatType;
-      property.totalApartments = totalApartments;
-
-      const areaMin = parseArea(formData.get('areaMin')) ?? 0;
-      const areaMax = parseArea(formData.get('areaMax')) ?? 0;
-      if (areaMin && areaMax && areaMin > areaMax) {
-        showToast('Минимальная площадь не может быть больше максимальной', 'error');
-        return;
-      }
-      property.areaMin = areaMin;
-      property.areaMax = areaMax || areaMin;
+      property.flatVariants = variants;
+      property.flatType = primary.flatType;
+      property.totalApartments = primary.totalApartments;
+      property.areaMin = Math.min(...variants.map(variant => Number(variant.areaMin) || 0).filter(Boolean));
+      property.areaMax = Math.max(...variants.map(variant => Number(variant.areaMax) || 0).filter(Boolean));
+      if (!property.areaMin) property.areaMin = primary.areaMin;
+      if (!property.areaMax) property.areaMax = primary.areaMax || primary.areaMin;
     } else {
       const area = parseArea(formData.get('area'));
       if (area == null || area <= 0) {
@@ -543,19 +647,6 @@ function bindPropertiesAdmin() {
 
     let properties = getProperties();
     const editId = formData.get('editId');
-    const existingProperty = editId ? getPropertyById(editId) : null;
-
-    if (isComplex({ type }) && existingProperty?.flatVariants?.length) {
-      property.flatVariants = existingProperty.flatVariants.map(variant => {
-        if (variant.flatType !== property.flatType) return variant;
-        return {
-          ...variant,
-          totalApartments: property.totalApartments,
-          areaMin: property.areaMin,
-          areaMax: property.areaMax,
-        };
-      });
-    }
 
     if (editId) {
       properties = properties.map(item => item.id === editId ? property : item);
@@ -581,19 +672,11 @@ function bindPropertiesAdmin() {
       form.type.value = property.type;
 
       if (isComplex(property)) {
-        const stats = getComplexStats(property);
-        form.flatType.value = stats.flatType || '1room';
-        form.totalApartments.value = stats.totalApartments || '';
-        const areaRange = getComplexAreaRange(property);
-        form.areaMin.value = areaRange.areaMin || '';
-        form.areaMax.value = areaRange.areaMax || '';
+        fillFlatVariantsForm(form, property);
         form.area.value = '';
       } else {
         form.area.value = property.area ?? '';
-        form.flatType.value = '1room';
-        form.totalApartments.value = '';
-        form.areaMin.value = '';
-        form.areaMax.value = '';
+        clearFlatVariantsForm(form);
       }
 
       form.price.value = property.price ?? '';
