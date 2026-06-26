@@ -1195,6 +1195,10 @@ body.page-transition-active {
   overflow: hidden;
 }
 
+body.page-transition-active > :not(#page-transition) {
+  visibility: hidden;
+}
+
 .page-transition {
   position: fixed;
   inset: 0;
@@ -1302,7 +1306,7 @@ body.page-transition-active {
 }
 
 .page-transition--animate .page-transition__progress-bar {
-  animation: page-transition-progress 1.7s cubic-bezier(0.4, 0, 0.2, 1) 0.35s forwards;
+  animation: page-transition-progress 2s cubic-bezier(0.4, 0, 0.2, 1) 0.35s forwards;
 }
 
 @keyframes page-transition-logo {

@@ -1,7 +1,6 @@
 const PAGE_TRANSITION_KEY = 'pageTransitionLabel';
-const PAGE_TRANSITION_MIN_MS = 1800;
-const PAGE_TRANSITION_REDUCE_MS = 500;
-const PAGE_TRANSITION_NAV_MS = 520;
+const PAGE_TRANSITION_MIN_MS = 2600;
+const PAGE_TRANSITION_REDUCE_MS = 650;
 
 const PAGE_LABELS_BY_HREF = {
   'index.html': 'Главная',
@@ -18,18 +17,11 @@ const PAGE_LABELS_BY_PAGE = {
   admin: 'Админ-панель',
 };
 
+let pageTransitionLinksBound = false;
+let pageTransitionFinishing = false;
+
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function getStoredTransitionLabel() {
-  try {
-    const label = sessionStorage.getItem(PAGE_TRANSITION_KEY);
-    if (label) sessionStorage.removeItem(PAGE_TRANSITION_KEY);
-    return label;
-  } catch {
-    return null;
-  }
 }
 
 function storeTransitionLabel(label) {
@@ -70,34 +62,13 @@ function isTransitionLink(link) {
   return Boolean(normalizeHref(href));
 }
 
-function ensurePageTransitionOverlay() {
-  let overlay = document.getElementById('page-transition');
-  if (overlay) return overlay;
-
-  overlay = document.createElement('div');
-  overlay.id = 'page-transition';
-  overlay.className = 'page-transition';
-  overlay.setAttribute('role', 'status');
-  overlay.setAttribute('aria-live', 'polite');
-  overlay.setAttribute('aria-hidden', 'true');
-  overlay.innerHTML = `
-    <div class="page-transition__inner">
-      <div class="page-transition__logo">
-        <img src="img/logo.svg" alt="">
-      </div>
-      <p class="page-transition__label">Dune Base</p>
-      <div class="page-transition__progress" aria-hidden="true">
-        <span class="page-transition__progress-bar"></span>
-      </div>
-    </div>
-  `;
-  document.body.prepend(overlay);
-  return overlay;
+function getPageTransitionOverlay() {
+  return document.getElementById('page-transition');
 }
 
 function setPageTransitionLabel(label) {
-  const overlay = ensurePageTransitionOverlay();
-  const labelEl = overlay.querySelector('.page-transition__label');
+  const overlay = getPageTransitionOverlay();
+  const labelEl = overlay?.querySelector('.page-transition__label');
   if (labelEl && label) labelEl.textContent = label;
 }
 
@@ -105,9 +76,29 @@ function updatePageTransitionLabel(label) {
   setPageTransitionLabel(label);
 }
 
+function restartTransitionAnimations(overlay) {
+  if (!overlay) return;
+
+  overlay.classList.remove('page-transition--animate');
+  const progressBar = overlay.querySelector('.page-transition__progress-bar');
+  if (progressBar) {
+    progressBar.style.width = '0';
+    progressBar.style.animation = 'none';
+  }
+
+  void overlay.offsetWidth;
+
+  if (progressBar) {
+    progressBar.style.width = '';
+    progressBar.style.animation = '';
+  }
+
+  overlay.classList.add('page-transition--animate');
+}
+
 function waitForTransitionAssets(overlay) {
   const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
-  const logo = overlay.querySelector('.page-transition__logo img');
+  const logo = overlay?.querySelector('.page-transition__logo img');
   const logoReady = !logo || logo.complete
     ? Promise.resolve()
     : new Promise((resolve) => {
@@ -115,57 +106,58 @@ function waitForTransitionAssets(overlay) {
       logo.addEventListener('error', resolve, { once: true });
     });
 
-  const fontsReady = document.fonts?.ready
-    ? Promise.race([
-      document.fonts.ready,
-      new Promise((resolve) => setTimeout(resolve, 800)),
-    ])
-    : Promise.resolve();
+  const animationDone = new Promise((resolve) => {
+    const bar = overlay?.querySelector('.page-transition__progress-bar');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
 
-  return Promise.all([
-    new Promise((resolve) => setTimeout(resolve, minMs)),
-    logoReady,
-    fontsReady,
-  ]);
-}
+    setTimeout(finish, minMs);
+    if (bar && !prefersReducedMotion()) {
+      bar.addEventListener('animationend', finish, { once: true });
+    }
+  });
 
-function hidePageTransition(overlay) {
-  if (!overlay || overlay.classList.contains('page-transition--hide')) return;
-
-  overlay.classList.add('page-transition--hide');
-  overlay.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('page-transition-active');
-
-  const cleanup = () => overlay.remove();
-  overlay.addEventListener('transitionend', cleanup, { once: true });
-  setTimeout(cleanup, 800);
+  return Promise.all([logoReady, animationDone]);
 }
 
 function showPageTransition(label) {
-  const overlay = ensurePageTransitionOverlay();
+  let overlay = getPageTransitionOverlay();
+  if (!overlay) return null;
+
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
   overlay.classList.add('page-transition--visible');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('page-transition-active');
-
-  requestAnimationFrame(() => {
-    overlay.classList.add('page-transition--animate');
-  });
+  restartTransitionAnimations(overlay);
 
   return overlay;
 }
 
-function navigateWithTransition(href, label) {
-  const overlay = showPageTransition(label);
-  storeTransitionLabel(label);
+function hidePageTransition(overlay) {
+  if (!overlay || overlay.classList.contains('page-transition--hide')) return;
 
-  setTimeout(() => {
-    window.location.href = href;
-  }, prefersReducedMotion() ? 180 : PAGE_TRANSITION_NAV_MS);
+  overlay.classList.remove('page-transition--visible', 'page-transition--animate');
+  overlay.classList.add('page-transition--hide');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('page-transition-active');
 }
 
-let pageTransitionLinksBound = false;
+async function navigateWithTransition(href, label) {
+  const overlay = showPageTransition(label);
+  if (!overlay) {
+    window.location.href = href;
+    return;
+  }
+
+  storeTransitionLabel(label);
+  await waitForTransitionAssets(overlay);
+  window.location.href = href;
+}
 
 function bindPageTransitionLinks(root = document) {
   if (pageTransitionLinksBound) return;
@@ -178,30 +170,37 @@ function bindPageTransitionLinks(root = document) {
     const link = event.target.closest('a[href]');
     if (!isTransitionLink(link)) return;
 
-    const href = link.href;
-    const label = getLabelFromLink(link, href);
     event.preventDefault();
-    navigateWithTransition(href, label);
+    navigateWithTransition(link.href, getLabelFromLink(link, link.href));
   });
 }
 
-function initPageTransition(defaultLabel) {
-  const overlay = ensurePageTransitionOverlay();
-  const label = getStoredTransitionLabel() || defaultLabel || 'Dune Base';
-  setPageTransitionLabel(label);
+async function finishPageTransition(defaultLabel) {
+  if (pageTransitionFinishing) return;
+  pageTransitionFinishing = true;
 
-  document.body.classList.add('page-transition-active');
-  overlay.classList.add('page-transition--visible');
-  overlay.setAttribute('aria-hidden', 'false');
+  const overlay = getPageTransitionOverlay();
+  if (!overlay) {
+    bindPageTransitionLinks(document);
+    return;
+  }
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      overlay.classList.add('page-transition--animate');
-      waitForTransitionAssets(overlay).then(() => hidePageTransition(overlay));
-    });
-  });
+  const labelEl = overlay.querySelector('.page-transition__label');
+  if (labelEl && defaultLabel && !labelEl.textContent.trim()) {
+    setPageTransitionLabel(defaultLabel);
+  }
 
+  if (!overlay.classList.contains('page-transition--visible')) {
+    showPageTransition(labelEl?.textContent.trim() || defaultLabel || 'Dune Base');
+  }
+
+  await waitForTransitionAssets(overlay);
+  hidePageTransition(overlay);
   bindPageTransitionLinks(document);
+}
+
+function initPageTransition(defaultLabel) {
+  finishPageTransition(defaultLabel);
 }
 
 function getPageTransitionLabel(activePage) {
