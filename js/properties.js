@@ -126,7 +126,15 @@ function initPropertyPage() {
       </div>
 
       <div class="property-detail-hero">
-        ${renderPropertyGalleryBlock(property)}
+        <div class="property-detail-media">
+          ${renderPropertyGalleryBlock(property)}
+          ${property.description ? `
+            <div class="property-detail-desc-block">
+              <h2>Описание</h2>
+              <p class="property-detail-desc">${escapeHtml(property.description)}</p>
+            </div>
+          ` : ''}
+        </div>
         <div class="property-detail-info">
           <div class="property-category">${escapeHtml(typeLabel)}</div>
           <h1>${escapeHtml(pageTitle)}</h1>
@@ -137,7 +145,6 @@ function initPropertyPage() {
             ${districtRow}
             ${addressRow}
           </div>
-          ${property.description ? `<p class="property-detail-desc">${escapeHtml(property.description)}</p>` : ''}
           <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
         </div>
       </div>
