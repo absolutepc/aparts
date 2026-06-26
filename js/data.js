@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v7';
+const STORE_KEY = 'aparts_data_v8';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -567,6 +567,34 @@ function renderComplexStatsTable(property) {
   `;
 }
 
+function mergeStoredPropertiesWithDefaults(stored) {
+  if (!Array.isArray(stored) || !stored.length) {
+    return DEFAULT_PROPERTIES.map(item => ({ ...item }));
+  }
+
+  const storedById = new Map(stored.map(item => [item.id, item]));
+  const defaultIds = new Set(DEFAULT_PROPERTIES.map(item => item.id));
+  const merged = DEFAULT_PROPERTIES.map(defaults => {
+    const saved = storedById.get(defaults.id);
+    if (!saved) return { ...defaults };
+
+    return {
+      ...defaults,
+      ...saved,
+      type: defaults.type,
+      flatVariants: Array.isArray(saved.flatVariants) && saved.flatVariants.length
+        ? saved.flatVariants
+        : defaults.flatVariants,
+    };
+  });
+
+  for (const item of stored) {
+    if (!defaultIds.has(item.id)) merged.push(item);
+  }
+
+  return merged;
+}
+
 function initStore() {
   migrateStore();
   if (!localStorage.getItem(STORE_KEY)) {
@@ -577,7 +605,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v7', 'aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -585,7 +613,7 @@ function migrateStore() {
     try {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
-        const repaired = data.properties.map(property => {
+        const repaired = mergeStoredPropertiesWithDefaults(data.properties).map(property => {
           const item = normalizeComplexProperty({ ...property });
           const images = repairPropertyImages(item);
           item.img = images.img;
@@ -607,19 +635,25 @@ function getProperties() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     const data = raw ? JSON.parse(raw) : null;
-    const properties = Array.isArray(data?.properties) ? data.properties : DEFAULT_PROPERTIES;
-    const enriched = properties.map(enrichProperty);
+    const stored = Array.isArray(data?.properties) ? data.properties : DEFAULT_PROPERTIES;
+    const merged = mergeStoredPropertiesWithDefaults(stored);
+    const enriched = merged.map(enrichProperty);
 
-    const needsPersist = enriched.some((property, index) => {
-      const source = properties[index];
-      return property.img !== source.img
-        || JSON.stringify(property.images) !== JSON.stringify(source.images)
-        || property.flatType !== source.flatType
-        || source.count1room != null
-        || source.count2room != null
-        || source.count3room != null
-        || source.countEuroTwo != null;
-    });
+    const needsPersist = merged.length !== stored.length
+      || enriched.some((property) => {
+        const source = stored.find(item => item.id === property.id);
+        if (!source) return true;
+        return property.type !== source.type
+          || property.img !== source.img
+          || JSON.stringify(property.images) !== JSON.stringify(source.images)
+          || property.flatType !== source.flatType
+          || JSON.stringify(property.flatVariants) !== JSON.stringify(source.flatVariants)
+          || source.count1room != null
+          || source.count2room != null
+          || source.count3room != null
+          || source.countEuroTwo != null;
+      })
+      || stored.some(item => !merged.some(property => property.id === item.id));
 
     if (needsPersist) {
       saveProperties(enriched);
@@ -653,6 +687,23 @@ function getPropertyById(id) {
 
 function getPublishedProperties(types) {
   return getProperties().filter(item => item.published !== false && types.includes(item.type));
+}
+
+function getFeaturedProperties(types, limit = 3) {
+  const published = getPublishedProperties(types);
+  if (published.length >= limit) return published.slice(0, limit);
+
+  const fallback = DEFAULT_PROPERTIES
+    .filter(item => item.published !== false && types.includes(item.type))
+    .map(item => enrichProperty({ ...item }));
+
+  const combined = [...published];
+  for (const item of fallback) {
+    if (combined.length >= limit) break;
+    if (!combined.some(existing => existing.id === item.id)) combined.push(item);
+  }
+
+  return combined.slice(0, limit);
 }
 
 function getUniqueDistricts(properties) {

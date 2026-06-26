@@ -1,6 +1,6 @@
 function initHomePage() {
-  const jkProperties = getPublishedProperties(['jk']).slice(0, 3);
-  const commercialProperties = getPublishedProperties(['commercial']).slice(0, 3);
+  const jkProperties = getFeaturedProperties(['jk'], 3);
+  const commercialProperties = getFeaturedProperties(['commercial'], 3);
   const complexes = getPublishedProperties(['jk', 'mfk']);
   const commercial = getPublishedProperties(['commercial']);
 

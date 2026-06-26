@@ -37,7 +37,7 @@ function renderFeaturedJkCard(property) {
     <article
       class="property-card property-card--featured-jk"
       data-property-id="${escapeAttr(property.id)}"
-      data-variants="${escapeAttr(JSON.stringify(variants))}"
+      data-variants="${escapeAttr(encodeURIComponent(JSON.stringify(variants)))}"
     >
       <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card-media">
         <div class="property-image">
@@ -71,7 +71,14 @@ function renderFeaturedVariantTags(variant) {
 
 function bindFeaturedJkCards(container) {
   container?.querySelectorAll('.property-card--featured-jk').forEach(card => {
-    const variants = JSON.parse(card.dataset.variants || '[]');
+    let variants = [];
+    try {
+      variants = JSON.parse(decodeURIComponent(card.dataset.variants || '%5B%5D'));
+    } catch (error) {
+      console.warn(`${SITE_NAME}: не удалось прочитать варианты квартир`, error);
+      return;
+    }
+
     const attrsEl = card.querySelector('[data-variant-attrs]');
 
     card.querySelectorAll('.property-variant-btn').forEach(button => {
