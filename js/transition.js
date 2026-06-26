@@ -120,6 +120,21 @@ function resetTransitionVisuals(overlay) {
   restartProgressBar(overlay);
 }
 
+function primeTransitionAnimations(overlay) {
+  overlay.classList.add('page-transition--animate');
+  void overlay.offsetWidth;
+  overlay.classList.remove('page-transition--animate');
+  resetTransitionVisuals(overlay);
+  void overlay.offsetWidth;
+}
+
+function startTransitionAnimations(overlay) {
+  requestAnimationFrame(() => {
+    overlay.classList.add('page-transition--animate');
+    void overlay.offsetWidth;
+  });
+}
+
 function waitForInitialTransition(overlay) {
   const token = ++pageTransitionWaitToken;
   const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
@@ -154,29 +169,21 @@ async function waitForFullTransition(overlay) {
   const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
 
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-  await new Promise((resolve) => {
-    const bar = overlay?.querySelector('.page-transition__progress-bar');
-    let finished = false;
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-      resolve();
-    };
-
-    setTimeout(finish, minMs);
-    if (bar && !prefersReducedMotion()) {
-      bar.addEventListener('animationend', finish, { once: true });
-    }
-  });
+  await new Promise((resolve) => setTimeout(resolve, minMs));
 }
 
 function showPageTransition(label, { animate = true } = {}) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
+  const wasHidden = overlay.style.display === 'none' || overlay.classList.contains('page-transition--hide');
+
   cancelPageTransitionCleanup();
-  overlay.style.display = '';
+
+  overlay.style.transition = 'none';
+  overlay.style.display = 'flex';
+  overlay.style.opacity = '';
+  overlay.style.visibility = '';
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
   overlay.classList.add('page-transition--visible');
@@ -185,11 +192,14 @@ function showPageTransition(label, { animate = true } = {}) {
 
   resetTransitionVisuals(overlay);
   void overlay.offsetWidth;
+  overlay.style.transition = '';
+
+  if (wasHidden) {
+    primeTransitionAnimations(overlay);
+  }
 
   if (animate) {
-    requestAnimationFrame(() => {
-      overlay.classList.add('page-transition--animate');
-    });
+    startTransitionAnimations(overlay);
   } else {
     overlay.classList.add('page-transition--ready');
   }
@@ -222,7 +232,6 @@ function hidePageTransition(overlay) {
 async function navigateWithTransition(href, label) {
   pageTransitionNavigating = true;
   storeNavigationTransition(label);
-  setPageTransitionLabel(label);
 
   const overlay = showPageTransition(label, { animate: true });
   if (!overlay) {
@@ -299,7 +308,7 @@ async function finishPageTransition(defaultLabel) {
       showPageTransition(currentLabel, { animate: true });
     } else if (!overlay.classList.contains('page-transition--animate')
       && !overlay.classList.contains('page-transition--ready')) {
-      requestAnimationFrame(() => overlay.classList.add('page-transition--animate'));
+      startTransitionAnimations(overlay);
     }
 
     await waitForInitialTransition(overlay);
