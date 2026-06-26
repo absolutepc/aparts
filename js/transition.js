@@ -128,6 +128,7 @@ function showPageTransition(label) {
   let overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
+  overlay.style.display = '';
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
   overlay.classList.add('page-transition--visible');
@@ -145,6 +146,13 @@ function hidePageTransition(overlay) {
   overlay.classList.add('page-transition--hide');
   overlay.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('page-transition-active');
+
+  const cleanup = () => {
+    overlay.style.display = 'none';
+  };
+
+  overlay.addEventListener('transitionend', cleanup, { once: true });
+  setTimeout(cleanup, 700);
 }
 
 async function navigateWithTransition(href, label) {
@@ -181,22 +189,29 @@ async function finishPageTransition(defaultLabel) {
 
   const overlay = getPageTransitionOverlay();
   if (!overlay) {
+    document.body.classList.remove('page-transition-active');
     bindPageTransitionLinks(document);
     return;
   }
 
-  const labelEl = overlay.querySelector('.page-transition__label');
-  if (labelEl && defaultLabel && !labelEl.textContent.trim()) {
-    setPageTransitionLabel(defaultLabel);
-  }
+  try {
+    const labelEl = overlay.querySelector('.page-transition__label');
+    if (labelEl && defaultLabel && !labelEl.textContent.trim()) {
+      setPageTransitionLabel(defaultLabel);
+    }
 
-  if (!overlay.classList.contains('page-transition--visible')) {
-    showPageTransition(labelEl?.textContent.trim() || defaultLabel || 'Dune Base');
-  }
+    if (!overlay.classList.contains('page-transition--visible')) {
+      showPageTransition(labelEl?.textContent.trim() || defaultLabel || 'Dune Base');
+    }
 
-  await waitForTransitionAssets(overlay);
-  hidePageTransition(overlay);
-  bindPageTransitionLinks(document);
+    await waitForTransitionAssets(overlay);
+    hidePageTransition(overlay);
+  } catch (error) {
+    console.warn(`${typeof SITE_NAME !== 'undefined' ? SITE_NAME : 'Dune Base'}: ошибка анимации перехода`, error);
+    hidePageTransition(overlay);
+  } finally {
+    bindPageTransitionLinks(document);
+  }
 }
 
 function initPageTransition(defaultLabel) {
