@@ -25,13 +25,10 @@
     if (labelEl && navLabel) {
       labelEl.textContent = navLabel;
     }
-
-    document.body.classList.add('page-transition-active');
-    overlay.style.display = '';
-    overlay.classList.remove('page-transition--hide');
-    overlay.classList.add('page-transition--visible');
-    overlay.setAttribute('aria-hidden', 'false');
-    overlay.classList.add('page-transition--animate');
+    document.body.classList.remove('page-transition-active');
+    overlay.classList.add('page-transition--hide');
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
     return;
   }
 
