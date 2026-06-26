@@ -511,6 +511,19 @@ function bindPropertiesAdmin() {
 
     let properties = getProperties();
     const editId = formData.get('editId');
+    const existingProperty = editId ? getPropertyById(editId) : null;
+
+    if (isComplex({ type }) && existingProperty?.flatVariants?.length) {
+      property.flatVariants = existingProperty.flatVariants.map(variant => {
+        if (variant.flatType !== property.flatType) return variant;
+        return {
+          ...variant,
+          totalApartments: property.totalApartments,
+          areaMin: property.areaMin,
+          areaMax: property.areaMax,
+        };
+      });
+    }
 
     if (editId) {
       properties = properties.map(item => item.id === editId ? property : item);

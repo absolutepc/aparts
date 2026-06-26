@@ -72,7 +72,11 @@ function initPropertyCatalog(options) {
   function filterProperties(properties, state) {
     return properties.filter(property => {
       if (isComplex(property)) {
-        if (!complexMatchesAreaFilter(property, state.minValue, state.maxValue)) {
+        if (!complexMatchesCatalogFilters(property, {
+          flatTypes: isComplexCatalog ? state.flatTypes : [],
+          minValue: state.minValue,
+          maxValue: state.maxValue,
+        })) {
           return false;
         }
       } else {
@@ -87,10 +91,6 @@ function initPropertyCatalog(options) {
 
       if (state.districts.length && !state.districts.includes(property.district)) {
         return false;
-      }
-      if (isComplexCatalog && state.flatTypes.length) {
-        const hasMatch = state.flatTypes.some(flatType => complexHasFlatType(property, flatType));
-        if (!hasMatch) return false;
       }
       return true;
     });
@@ -155,7 +155,7 @@ function initPropertyCatalog(options) {
   });
 
   sidebar?.addEventListener('change', (event) => {
-    if (event.target.matches('input[type="checkbox"]')) applyFilters();
+    if (event.target.matches('#areaMin, #areaMax, input[type="checkbox"]')) applyFilters();
   });
 
   sortSelect?.addEventListener('change', applyFilters);

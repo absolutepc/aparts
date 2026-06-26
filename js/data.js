@@ -375,13 +375,31 @@ function getComplexStats(property) {
 }
 
 function getComplexAreaRange(property) {
+  const variants = getComplexFlatVariants(property);
+  if (variants.length) {
+    const mins = variants
+      .map(variant => Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+    const maxs = variants
+      .map(variant => Number(variant.areaMax) || Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+
+    return {
+      areaMin: mins.length ? Math.min(...mins) : 0,
+      areaMax: maxs.length ? Math.max(...maxs) : 0,
+    };
+  }
+
   const areaMin = Number(property.areaMin) || 0;
   const areaMax = Number(property.areaMax) || areaMin;
   return { areaMin, areaMax };
 }
 
-function complexMatchesAreaFilter(property, filterMin, filterMax) {
-  const { areaMin, areaMax } = getComplexAreaRange(property);
+function variantMatchesAreaFilter(variant, filterMin, filterMax) {
+  if (filterMin == null && filterMax == null) return true;
+
+  const areaMin = Number(variant?.areaMin) || 0;
+  const areaMax = Number(variant?.areaMax) || areaMin;
   if (!areaMin && !areaMax) return true;
 
   const rangeMin = areaMin || areaMax;
@@ -390,6 +408,45 @@ function complexMatchesAreaFilter(property, filterMin, filterMax) {
   if (filterMin != null && !Number.isNaN(filterMin) && rangeMax < filterMin) return false;
   if (filterMax != null && !Number.isNaN(filterMax) && rangeMin > filterMax) return false;
   return true;
+}
+
+function complexMatchesAreaFilter(property, filterMin, filterMax) {
+  if (filterMin == null && filterMax == null) return true;
+
+  if (!isComplex(property)) {
+    const area = Number(property.area) || 0;
+    if (!area) return true;
+    if (filterMin != null && !Number.isNaN(filterMin) && area < filterMin) return false;
+    if (filterMax != null && !Number.isNaN(filterMax) && area > filterMax) return false;
+    return true;
+  }
+
+  const variants = getComplexFlatVariants(property);
+  if (!variants.length) {
+    const { areaMin, areaMax } = getComplexAreaRange(property);
+    return variantMatchesAreaFilter({ areaMin, areaMax }, filterMin, filterMax);
+  }
+
+  return variants.some(variant => variantMatchesAreaFilter(variant, filterMin, filterMax));
+}
+
+function complexMatchesCatalogFilters(property, filters = {}) {
+  if (!isComplex(property)) return false;
+
+  const flatTypes = Array.isArray(filters.flatTypes) ? filters.flatTypes : [];
+  const filterMin = filters.minValue ?? null;
+  const filterMax = filters.maxValue ?? null;
+  const hasFlatFilter = flatTypes.length > 0;
+  const hasAreaFilter = filterMin != null || filterMax != null;
+
+  if (!hasFlatFilter && !hasAreaFilter) return true;
+
+  const variants = getComplexFlatVariants(property);
+  return variants.some(variant => {
+    const flatOk = !hasFlatFilter || flatTypes.includes(variant.flatType);
+    const areaOk = !hasAreaFilter || variantMatchesAreaFilter(variant, filterMin, filterMax);
+    return flatOk && areaOk;
+  });
 }
 
 function formatComplexAreaRange(property) {
