@@ -467,6 +467,11 @@ main { flex: 1; }
   overflow: hidden;
 }
 
+.floor-plan-card--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
 .floor-plan-image {
   background: var(--bg-secondary);
   min-height: 280px;

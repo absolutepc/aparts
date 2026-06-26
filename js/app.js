@@ -107,6 +107,9 @@ function renderFeaturedJkGrid(properties, emptyMessage) {
 
 function renderPropertyCard(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
+  const cardTitle = getPropertyCardTitle(property);
+  const detailHref = getPropertyDetailHref(property);
+  const cardImg = property.listingPlanImg || getPropertyImg(property);
   const districtHtml = property.district
     ? `<span class="property-attr-tag">${escapeHtml(property.district)}</span>`
     : '';
@@ -128,13 +131,13 @@ function renderPropertyCard(property) {
   const priceLabel = isComplex(property) ? 'от ' : '';
 
   return `
-    <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card">
+    <a href="${escapeAttr(detailHref)}" class="property-card">
       <div class="property-image">
-        ${renderPropertyImg(getPropertyImg(property), property.title)}
+        ${renderPropertyImg(cardImg, cardTitle)}
       </div>
       <div class="property-info">
         <div class="property-category">${escapeHtml(typeLabel)}</div>
-        <h3>${escapeHtml(property.title)}</h3>
+        <h3>${escapeHtml(cardTitle)}</h3>
         <div class="property-attrs">${attrsHtml}</div>
         <p>${escapeHtml(property.description || '')}</p>
         <div class="property-footer">

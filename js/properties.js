@@ -79,7 +79,15 @@ function initPropertyPage() {
     return;
   }
 
-  document.title = `${property.title} — ${SITE_NAME}`;
+  const flatTypeParam = getQueryParam('flatType');
+  const selectedVariant = isComplex(property)
+    ? resolveComplexCatalogVariant(property, flatTypeParam)
+    : null;
+  const pageTitle = selectedVariant
+    ? getPropertyCardTitle({ ...property, flatType: selectedVariant.flatType })
+    : property.title;
+
+  document.title = `${pageTitle} — ${SITE_NAME}`;
 
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const backLink = getBackLink(property);
@@ -91,8 +99,13 @@ function initPropertyPage() {
     ? `<div class="property-spec-row"><span class="property-spec-label">Адрес</span><span class="property-spec-value">${escapeHtml(property.address)}</span></div>`
     : '';
 
+  const heroPrice =
+    selectedVariant?.price != null && selectedVariant.price !== ''
+      ? selectedVariant.price
+      : property.price;
+
   const specsHtml = isComplex(property)
-    ? renderComplexStatsTable(property)
+    ? renderComplexStatsTable(property, selectedVariant)
     : `
       <div class="property-spec-row">
         <span class="property-spec-label">Площадь</span>
@@ -107,15 +120,15 @@ function initPropertyPage() {
       <div class="breadcrumbs">
         <a href="index.html">Главная</a> /
         <a href="${backLink}">${backLabel}</a> /
-        <span>${escapeHtml(property.title)}</span>
+        <span>${escapeHtml(pageTitle)}</span>
       </div>
 
       <div class="property-detail-hero">
         ${renderPropertyGalleryBlock(property)}
         <div class="property-detail-info">
           <div class="property-category">${escapeHtml(typeLabel)}</div>
-          <h1>${escapeHtml(property.title)}</h1>
-          <div class="property-price property-detail-price">${pricePrefix}${formatPrice(property.price)}</div>
+          <h1>${escapeHtml(pageTitle)}</h1>
+          <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
           <div class="property-specs-table">
             ${specsHtml}
             ${districtRow}
@@ -126,9 +139,15 @@ function initPropertyPage() {
         </div>
       </div>
 
-      ${isComplex(property) ? renderPropertyFloorPlansBlock(property) : ''}
+      ${isComplex(property) ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType) : ''}
     </div>
   `;
 
   bindPropertyGallery(container, property);
+
+  if (selectedVariant?.flatType) {
+    requestAnimationFrame(() => {
+      document.getElementById('floor-plan-active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
 }

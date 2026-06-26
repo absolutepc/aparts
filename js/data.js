@@ -430,6 +430,77 @@ function complexMatchesAreaFilter(property, filterMin, filterMax) {
   return variants.some(variant => variantMatchesAreaFilter(variant, filterMin, filterMax));
 }
 
+function buildComplexCatalogListing(property, variant) {
+  return {
+    ...property,
+    catalogKey: `${property.id}:${variant.flatType}`,
+    flatType: variant.flatType,
+    totalApartments: variant.totalApartments,
+    areaMin: variant.areaMin,
+    areaMax: variant.areaMax,
+    price: variant.price ?? property.price,
+    flatVariants: [variant],
+    listingPlanImg: getVariantPlanImg(property, variant, 0),
+  };
+}
+
+function expandCatalogListings(properties) {
+  return properties.flatMap(property => {
+    if (!isComplex(property)) return [property];
+    return getComplexFlatVariants(property).map(variant =>
+      buildComplexCatalogListing(property, variant)
+    );
+  });
+}
+
+function catalogListingMatchesFilters(listing, filters = {}) {
+  const flatTypes = Array.isArray(filters.flatTypes) ? filters.flatTypes : [];
+  const filterMin = filters.minValue ?? null;
+  const filterMax = filters.maxValue ?? null;
+  const districts = Array.isArray(filters.districts) ? filters.districts : [];
+
+  if (isComplex(listing)) {
+    if (flatTypes.length && !flatTypes.includes(listing.flatType)) return false;
+    if (!variantMatchesAreaFilter(listing, filterMin, filterMax)) return false;
+  } else {
+    const area = Number(listing.area) || 0;
+    if (filterMin != null && !Number.isNaN(filterMin) && area < filterMin) return false;
+    if (filterMax != null && !Number.isNaN(filterMax) && area > filterMax) return false;
+  }
+
+  if (districts.length && !districts.includes(listing.district)) return false;
+  return true;
+}
+
+function getPropertyCardTitle(property) {
+  if (isComplex(property)) {
+    const label = getFlatTypeLabel(property.flatType);
+    return label ? `${property.title} — ${label}` : property.title;
+  }
+  return property.title;
+}
+
+function getPropertyDetailHref(property) {
+  const params = new URLSearchParams({ id: property.id });
+  if (isComplex(property) && property.flatType) {
+    params.set('flatType', property.flatType);
+  }
+  return `property.html?${params.toString()}`;
+}
+
+function getComplexVariantByFlatType(property, flatType) {
+  if (!isComplex(property) || !flatType) return null;
+  return getComplexFlatVariants(property).find((variant) => variant.flatType === flatType) || null;
+}
+
+function resolveComplexCatalogVariant(property, flatTypeParam) {
+  const variants = getComplexFlatVariants(property);
+  if (!variants.length) return null;
+  const fromParam = getComplexVariantByFlatType(property, flatTypeParam);
+  if (fromParam) return fromParam;
+  return variants[0];
+}
+
 function complexMatchesCatalogFilters(property, filters = {}) {
   if (!isComplex(property)) return false;
 
@@ -623,7 +694,24 @@ function renderComplexStatsTags(property) {
   `;
 }
 
-function renderComplexStatsTable(property) {
+function renderComplexStatsTable(property, selectedVariant) {
+  if (selectedVariant) {
+    return `
+      <div class="property-spec-row">
+        <span class="property-spec-label">Тип квартир</span>
+        <span class="property-spec-value">${escapeHtml(selectedVariant.flatTypeLabel)}</span>
+      </div>
+      <div class="property-spec-row">
+        <span class="property-spec-label">Площадь квартир</span>
+        <span class="property-spec-value">${formatVariantAreaRange(selectedVariant) || '—'}</span>
+      </div>
+      <div class="property-spec-row">
+        <span class="property-spec-label">Количество</span>
+        <span class="property-spec-value">${selectedVariant.totalApartments}</span>
+      </div>
+    `;
+  }
+
   const variants = getComplexFlatVariants(property);
 
   if (variants.length > 1) {
@@ -652,7 +740,7 @@ function renderComplexStatsTable(property) {
   `;
 }
 
-function renderPropertyFloorPlansBlock(property) {
+function renderPropertyFloorPlansBlock(property, selectedFlatType) {
   if (!isComplex(property)) return '';
 
   const variants = getComplexFlatVariants(property);
@@ -662,9 +750,12 @@ function renderPropertyFloorPlansBlock(property) {
     const planImg = getVariantPlanImg(property, variant, index);
     const areaLabel = formatVariantAreaRange(variant) || '—';
     const priceValue = variant.price ?? property.price;
+    const isActive = selectedFlatType && variant.flatType === selectedFlatType;
+    const activeClass = isActive ? ' floor-plan-card--active' : '';
+    const activeId = isActive ? ' id="floor-plan-active"' : '';
 
     return `
-      <article class="floor-plan-card">
+      <article class="floor-plan-card${activeClass}"${activeId}>
         <div class="floor-plan-image">
           ${renderPropertyImg(planImg, `Планировка ${variant.flatTypeLabel}`)}
         </div>
