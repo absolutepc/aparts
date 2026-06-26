@@ -48,7 +48,10 @@ function renderFeaturedJkCard(property) {
         <div class="property-category">${escapeHtml(TYPE_LABELS[property.type] || TYPE_LABELS.jk)}</div>
         <h3><a href="property.html?id=${encodeURIComponent(property.id)}">${escapeHtml(property.title)}</a></h3>
         <div class="property-variant-picker">${variantButtons}</div>
-        <div class="property-attrs" data-variant-attrs>${attrsHtml}${renderPropertyOfferingTags(property)}</div>
+        <div class="property-attrs">
+          <span data-variant-attrs>${attrsHtml}</span>
+          <span data-offering-tags>${renderPropertyOfferingTags(property)}</span>
+        </div>
         <p>${escapeHtml(property.description || '')}</p>
         <div class="property-footer">
           <div class="property-price">от ${formatPrice(property.price)}</div>

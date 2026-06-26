@@ -362,6 +362,11 @@ main { flex: 1; }
   gap: 8px;
 }
 
+.property-attrs > [data-variant-attrs],
+.property-attrs > [data-offering-tags] {
+  display: contents;
+}
+
 .property-attr-tag {
   background: var(--accent-bg-medium);
   color: var(--accent-light);
