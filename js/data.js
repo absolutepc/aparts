@@ -95,8 +95,8 @@ const DEFAULT_PROPERTIES = [
     mandatoryPayment: 4000,
     img: 'img/1111111.jpeg',
     images: [
-      'img/properties/jk2.jpg',
-      'img/properties/jk2-2.jpg',
+      '',
+      '',
     ],
     published: true,
   },
