@@ -45,7 +45,7 @@ function renderFeaturedJkCard(property) {
         </div>
       </a>
       <div class="property-info">
-        <div class="property-category">${escapeHtml(TYPE_LABELS.jk)}</div>
+        <div class="property-category">${escapeHtml(TYPE_LABELS[property.type] || TYPE_LABELS.jk)}</div>
         <h3><a href="property.html?id=${encodeURIComponent(property.id)}">${escapeHtml(property.title)}</a></h3>
         <div class="property-variant-picker">${variantButtons}</div>
         <div class="property-attrs" data-variant-attrs>${attrsHtml}</div>

@@ -1,5 +1,5 @@
 function initHomePage() {
-  const jkProperties = getFeaturedProperties(['jk'], 3);
+  const jkProperties = getFeaturedProperties(['jk', 'mfk'], 3);
   const commercialProperties = getFeaturedProperties(['commercial'], 3);
   const complexes = getPublishedProperties(['jk', 'mfk']);
   const commercial = getPublishedProperties(['commercial']);
