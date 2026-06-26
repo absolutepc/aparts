@@ -2,6 +2,10 @@
   const overlay = document.getElementById('page-transition');
   if (!overlay) return;
 
+  document.body.classList.add('page-transition-active');
+  overlay.classList.add('page-transition--visible');
+  overlay.setAttribute('aria-hidden', 'false');
+
   let isNavEnter = false;
   let navLabel = '';
 
@@ -16,21 +20,16 @@
     // sessionStorage недоступен
   }
 
+  const labelEl = overlay.querySelector('.page-transition__label');
+  if (labelEl && navLabel) {
+    labelEl.textContent = navLabel;
+  }
+
   if (isNavEnter) {
     overlay.dataset.transitionMode = 'nav';
-    const labelEl = overlay.querySelector('.page-transition__label');
-    if (labelEl && navLabel) {
-      labelEl.textContent = navLabel;
-    }
-    document.body.classList.remove('page-transition-active');
-    overlay.classList.add('page-transition--hide');
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden', 'true');
+    overlay.classList.add('page-transition--ready');
     return;
   }
 
-  document.body.classList.add('page-transition-active');
-  overlay.classList.add('page-transition--visible');
-  overlay.setAttribute('aria-hidden', 'false');
   overlay.classList.add('page-transition--animate');
 })();
