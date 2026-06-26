@@ -462,10 +462,7 @@ main { flex: 1; }
 }
 
 .floor-plan-card {
-  display: grid;
-  grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: stretch;
+  display: block;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -477,9 +474,54 @@ main { flex: 1; }
   box-shadow: 0 0 0 1px var(--accent);
 }
 
+.floor-plan-layout-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.floor-plan-layout-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.floor-plan-layout-btn:hover {
+  border-color: var(--border-hover);
+}
+
+.floor-plan-layout-btn.active {
+  border-color: var(--accent);
+  background: rgba(122, 32, 56, 0.12);
+}
+
+.floor-plan-layout-panels {
+  display: grid;
+  gap: 0;
+}
+
+.floor-plan-layout-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.floor-plan-layout-panel--hidden {
+  display: none;
+}
+
 .floor-plan-image {
   background: var(--bg-secondary);
   min-height: 280px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
 }
 
 .floor-plan-image img {
@@ -493,11 +535,11 @@ main { flex: 1; }
   padding: 24px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 16px;
 }
 
 .floor-plan-info h3 {
+  margin: 0;
   font-size: 1.35rem;
   font-weight: 700;
 }
@@ -941,6 +983,36 @@ main { flex: 1; }
   margin-bottom: 0;
 }
 
+.admin-layout-editor {
+  margin-top: 8px;
+}
+
+.admin-layout-editor > .form-hint {
+  margin-bottom: 12px;
+}
+
+.admin-layout-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.admin-layout-row {
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+}
+
+.admin-layout-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
 .admin-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -1151,7 +1223,7 @@ main { flex: 1; }
 @media (max-width: 960px) {
   .hero-content,
   .property-detail-hero,
-  .floor-plan-card,
+  .floor-plan-layout-panel,
   .stats-grid,
   .admin-layout {
     grid-template-columns: 1fr;
