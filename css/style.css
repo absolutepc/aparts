@@ -2,23 +2,26 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css');
 
 :root {
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-card: #1a2234;
-  --bg-card-hover: #1f2a40;
-  --accent: #3b82f6;
-  --accent-light: #60a5fa;
-  --accent-glow: rgba(59, 130, 246, 0.35);
-  --cyan: #06b6d4;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --border: rgba(148, 163, 184, 0.12);
-  --border-hover: rgba(59, 130, 246, 0.4);
+  --bg-primary: #12080b;
+  --bg-secondary: #1c0e13;
+  --bg-card: #261419;
+  --bg-card-hover: #301a21;
+  --accent: #7a2038;
+  --accent-light: #b34a62;
+  --accent-glow: rgba(122, 32, 56, 0.35);
+  --rose: #c96a7a;
+  --text-primary: #f5eef0;
+  --text-secondary: #c9b4b8;
+  --text-muted: #917a80;
+  --border: rgba(201, 180, 184, 0.12);
+  --border-hover: rgba(179, 74, 98, 0.45);
   --success: #22c55e;
   --danger: #ef4444;
-  --gradient-hero: linear-gradient(135deg, #0a0e17 0%, #1e293b 50%, #0f172a 100%);
-  --gradient-accent: linear-gradient(135deg, #3b82f6, #06b6d4);
+  --gradient-hero: linear-gradient(135deg, #12080b 0%, #261419 45%, #180c10 100%);
+  --gradient-accent: linear-gradient(135deg, #5c1528, #7a2038, #b34a62);
+  --accent-bg-soft: rgba(122, 32, 56, 0.1);
+  --accent-bg-medium: rgba(122, 32, 56, 0.12);
+  --header-bg: rgba(18, 8, 11, 0.88);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -59,7 +62,7 @@ main { flex: 1; }
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(10, 14, 23, 0.85);
+  background: var(--header-bg);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   height: var(--header-height);
@@ -116,7 +119,7 @@ main { flex: 1; }
 .main-nav a:hover,
 .main-nav a.active {
   color: var(--accent-light);
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--accent-bg-soft);
 }
 
 .header-actions { display: flex; gap: 8px; }
@@ -322,7 +325,7 @@ main { flex: 1; }
 }
 
 .property-attr-tag {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--accent-bg-medium);
   color: var(--accent-light);
   padding: 4px 10px;
   border-radius: 999px;
@@ -576,7 +579,7 @@ main { flex: 1; }
 
 .footer-social a:hover {
   border-color: var(--accent);
-  background: rgba(59, 130, 246, 0.1);
+  background: var(--accent-bg-soft);
 }
 
 .footer-social a i {
@@ -732,7 +735,7 @@ main { flex: 1; }
 
 .admin-nav button:hover,
 .admin-nav button.active {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--accent-bg-medium);
   color: var(--accent-light);
 }
 

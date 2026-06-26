@@ -13,8 +13,8 @@ function renderHeader(activePage) {
     <header class="site-header">
       <div class="container header-inner">
         <a href="index.html" class="logo">
-          <div class="logo-icon">${renderLogo('Aparts')}</div>
-          <span>Aparts</span>
+          <div class="logo-icon">${renderLogo(SITE_NAME)}</div>
+          <span>${SITE_NAME}</span>
         </a>
         <nav class="main-nav" id="mainNav">${navLinks}</nav>
         <div class="header-actions">
@@ -32,8 +32,8 @@ function renderFooter() {
       <div class="container footer-top">
         <div class="footer-brand">
           <a href="index.html" class="logo">
-            <div class="logo-icon">${renderLogo('Aparts')}</div>
-            <span>Aparts</span>
+            <div class="logo-icon">${renderLogo(SITE_NAME)}</div>
+            <span>${SITE_NAME}</span>
           </a>
           <p>Ваш надёжный каталог недвижимости. ЖК, МФК и коммерческие помещения с удобным управлением через админ-панель.</p>
           <div class="footer-social">
@@ -67,7 +67,7 @@ function renderFooter() {
           <h4>Контакты</h4>
           <ul>
             <li><a href="tel:+74951234567">+7 (495) 123-45-67</a></li>
-            <li><a href="mailto:info@aparts.ru">info@aparts.ru</a></li>
+            <li><a href="mailto:info@dunebase.ru">info@dunebase.ru</a></li>
             <li><a href="#">Москва, ул. Примерная, 1</a></li>
             <li><a href="#">Пн–Сб: 10:00–20:00</a></li>
           </ul>
@@ -75,7 +75,7 @@ function renderFooter() {
       </div>
 
       <div class="container footer-bottom">
-        <p>&copy; 2026 Aparts. Все права защищены.</p>
+        <p>&copy; 2026 ${SITE_NAME}. Все права защищены.</p>
         <div class="footer-payments">
           <span>Ипотека</span>
           <span>Аренда</span>
