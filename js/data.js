@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v8';
+const STORE_KEY = 'aparts_data_v9';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -89,7 +89,7 @@ const DEFAULT_PROPERTIES = [
     id: 'jk3',
     title: '«Дубайский»',
     description: 'Жилой комплекс с разными планировками и развитой инфраструктурой на территории.',
-    type: 'jk',
+    type: 'mfk',
     flatType: '2room',
     totalApartments: 55,
     flatVariants: [
@@ -719,6 +719,7 @@ function mergeStoredPropertiesWithDefaults(stored) {
       ...defaults,
       ...saved,
       type: defaults.type,
+      published: saved.published ?? defaults.published,
       flatVariants: mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
@@ -740,7 +741,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v7', 'aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = ['aparts_data_v8', 'aparts_data_v7', 'aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -839,6 +840,27 @@ function getFeaturedProperties(types, limit = 3) {
   }
 
   return combined.slice(0, limit);
+}
+
+function getCatalogProperties(types) {
+  const all = getProperties();
+  const allIds = new Set(all.map(item => item.id));
+  const published = all.filter(item => item.published !== false && types.includes(item.type));
+  const byId = new Map(published.map(item => [item.id, item]));
+
+  for (const defaults of DEFAULT_PROPERTIES) {
+    if (!types.includes(defaults.type)) continue;
+    if (defaults.published === false) continue;
+    if (byId.has(defaults.id)) continue;
+    if (allIds.has(defaults.id)) continue;
+    byId.set(defaults.id, enrichProperty({ ...defaults }));
+  }
+
+  if (byId.size) return [...byId.values()];
+
+  return DEFAULT_PROPERTIES
+    .filter(item => item.published !== false && types.includes(item.type))
+    .map(item => enrichProperty({ ...item }));
 }
 
 function getUniqueDistricts(properties) {

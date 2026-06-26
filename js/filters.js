@@ -1,7 +1,7 @@
 function initPropertyCatalog(options) {
   const { types, catalogMode = 'commercial' } = options;
   const isComplexCatalog = catalogMode === 'complex';
-  const allProperties = getPublishedProperties(types);
+  const allProperties = getCatalogProperties(types);
 
   const areaMinInput = document.getElementById('areaMin');
   const areaMaxInput = document.getElementById('areaMax');
@@ -60,9 +60,12 @@ function initPropertyCatalog(options) {
   }
 
   function getFilterState() {
+    const minRaw = areaMinInput?.value?.trim() || '';
+    const maxRaw = areaMaxInput?.value?.trim() || '';
+
     return {
-      minValue: areaMinInput?.value ? parseArea(areaMinInput.value) : null,
-      maxValue: areaMaxInput?.value ? parseArea(areaMaxInput.value) : null,
+      minValue: minRaw ? parseArea(minRaw) : null,
+      maxValue: maxRaw ? parseArea(maxRaw) : null,
       flatTypes: isComplexCatalog ? getCheckedValues('.flat-type-filter') : [],
       districts: getCheckedValues('.district-filter'),
       sort: sortSelect?.value || 'default',
