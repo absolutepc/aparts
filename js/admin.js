@@ -9,6 +9,10 @@ function initAdmin() {
     return;
   }
 
+  showAdminPanel();
+}
+
+function showAdminPanel() {
   document.getElementById('adminGate').style.display = 'none';
   document.getElementById('adminPanel').style.display = 'grid';
   renderAdminSection('properties');
@@ -19,15 +23,18 @@ function bindAdminLogin() {
   const form = document.getElementById('adminLoginForm');
   if (!form) return;
 
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = form.email.value.trim();
     const password = form.password.value;
     const result = loginUser(email, password);
 
     if (result.success && result.isAdmin) {
+      if (typeof playPageTransition === 'function') {
+        await playPageTransition('Админ-панель');
+      }
       showToast('Добро пожаловать, администратор!', 'success');
-      initAdmin();
+      showAdminPanel();
       return;
     }
 

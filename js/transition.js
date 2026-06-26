@@ -23,6 +23,8 @@ let pageTransitionLinksBound = false;
 let pageTransitionFinishing = false;
 let pageTransitionNavigating = false;
 let pageTransitionWaitToken = 0;
+let pageTransitionCleanupTimer = null;
+let pageTransitionHideCleanup = null;
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -73,6 +75,21 @@ function getPageTransitionOverlay() {
   return document.getElementById('page-transition');
 }
 
+function cancelPageTransitionCleanup() {
+  if (pageTransitionCleanupTimer) {
+    clearTimeout(pageTransitionCleanupTimer);
+    pageTransitionCleanupTimer = null;
+  }
+
+  if (pageTransitionHideCleanup) {
+    const overlay = getPageTransitionOverlay();
+    if (overlay) {
+      overlay.removeEventListener('transitionend', pageTransitionHideCleanup);
+    }
+    pageTransitionHideCleanup = null;
+  }
+}
+
 function setPageTransitionLabel(label) {
   const overlay = getPageTransitionOverlay();
   const labelEl = overlay?.querySelector('.page-transition__label');
@@ -81,6 +98,12 @@ function setPageTransitionLabel(label) {
 
 function updatePageTransitionLabel(label) {
   setPageTransitionLabel(label);
+}
+
+function restartProgressBar(overlay) {
+  const progress = overlay?.querySelector('.page-transition__progress');
+  if (!progress) return;
+  progress.replaceWith(progress.cloneNode(true));
 }
 
 function resetTransitionVisuals(overlay) {
@@ -95,15 +118,6 @@ function resetTransitionVisuals(overlay) {
   });
 
   restartProgressBar(overlay);
-}
-
-function restartProgressBar(overlay) {
-  const progress = overlay?.querySelector('.page-transition__progress');
-  const progressBar = progress?.querySelector('.page-transition__progress-bar');
-  if (!progress || !progressBar) return;
-
-  const freshBar = progressBar.cloneNode(true);
-  progressBar.replaceWith(freshBar);
 }
 
 function waitForInitialTransition(overlay) {
@@ -135,16 +149,33 @@ function waitForInitialTransition(overlay) {
   return Promise.all([logoReady, animationDone]);
 }
 
-function waitForOutgoingTransition() {
+async function waitForFullTransition(overlay) {
   pageTransitionWaitToken += 1;
   const minMs = prefersReducedMotion() ? PAGE_TRANSITION_REDUCE_MS : PAGE_TRANSITION_MIN_MS;
-  return new Promise((resolve) => setTimeout(resolve, minMs));
+
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+  await new Promise((resolve) => {
+    const bar = overlay?.querySelector('.page-transition__progress-bar');
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve();
+    };
+
+    setTimeout(finish, minMs);
+    if (bar && !prefersReducedMotion()) {
+      bar.addEventListener('animationend', finish, { once: true });
+    }
+  });
 }
 
 function showPageTransition(label, { animate = true } = {}) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
+  cancelPageTransitionCleanup();
   overlay.style.display = '';
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
@@ -153,6 +184,8 @@ function showPageTransition(label, { animate = true } = {}) {
   document.body.classList.add('page-transition-active');
 
   resetTransitionVisuals(overlay);
+  void overlay.offsetWidth;
+
   if (animate) {
     requestAnimationFrame(() => {
       overlay.classList.add('page-transition--animate');
@@ -167,6 +200,8 @@ function showPageTransition(label, { animate = true } = {}) {
 function hidePageTransition(overlay) {
   if (!overlay || overlay.classList.contains('page-transition--hide')) return;
 
+  cancelPageTransitionCleanup();
+
   overlay.classList.remove('page-transition--visible', 'page-transition--animate', 'page-transition--ready');
   overlay.classList.add('page-transition--hide');
   overlay.setAttribute('aria-hidden', 'true');
@@ -174,11 +209,14 @@ function hidePageTransition(overlay) {
   document.body.classList.remove('page-transition-active');
 
   const cleanup = () => {
+    pageTransitionCleanupTimer = null;
+    pageTransitionHideCleanup = null;
     overlay.style.display = 'none';
   };
 
+  pageTransitionHideCleanup = cleanup;
   overlay.addEventListener('transitionend', cleanup, { once: true });
-  setTimeout(cleanup, 700);
+  pageTransitionCleanupTimer = setTimeout(cleanup, 700);
 }
 
 async function navigateWithTransition(href, label) {
@@ -194,8 +232,22 @@ async function navigateWithTransition(href, label) {
 
   overlay.dataset.transitionMode = 'outgoing';
 
-  await waitForOutgoingTransition();
+  await waitForFullTransition(overlay);
   window.location.href = href;
+}
+
+async function playPageTransition(label) {
+  pageTransitionNavigating = true;
+
+  const overlay = showPageTransition(label, { animate: true });
+  if (!overlay) {
+    pageTransitionNavigating = false;
+    return;
+  }
+
+  await waitForFullTransition(overlay);
+  hidePageTransition(overlay);
+  pageTransitionNavigating = false;
 }
 
 function bindPageTransitionLinks(root = document) {
