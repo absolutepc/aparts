@@ -11,6 +11,7 @@ const FLAT_TYPE_LABELS = {
   '1room': 'Однокомнатные',
   '2room': 'Двухкомнатные',
   '3room': 'Трёхкомнатные',
+  '4room': 'Четырёхкомнатные',
   euro2: 'Евродвушки',
 };
 
@@ -53,8 +54,12 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 120,
     flatVariants: [
       { flatType: '1room', totalApartments: 120, areaMin: 28, areaMax: 42, planImg: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg' },
-      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65, planImg: 'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg' },
+      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65, layouts: [
+        { key: 'A', label: 'Вариант A', areaMin: 45, areaMax: 55, planImg: 'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg' },
+        { key: 'B', label: 'Вариант B', areaMin: 56, areaMax: 65, planImg: 'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg' },
+      ] },
       { flatType: '3room', totalApartments: 90, areaMin: 70, areaMax: 95, planImg: 'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg' },
+      { flatType: '4room', totalApartments: 36, areaMin: 95, areaMax: 120, planImg: 'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg' },
       { flatType: 'euro2', totalApartments: 60, areaMin: 38, areaMax: 52, planImg: 'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg' },
     ],
     areaMin: 28,
@@ -249,9 +254,56 @@ function getFlatTypeShortLabel(flatType) {
     case '1room': return '1к';
     case '2room': return '2к';
     case '3room': return '3к';
+    case '4room': return '4к';
     case 'euro2': return 'Евро-2';
     default: return getFlatTypeLabel(flatType);
   }
+}
+
+function getLayoutKey(index) {
+  return String.fromCharCode(65 + index);
+}
+
+function getLayoutLabel(index) {
+  return `Вариант ${getLayoutKey(index)}`;
+}
+
+function normalizeLayoutVariant(layout, index, parentVariant = {}) {
+  const key = layout?.key?.trim() || getLayoutKey(index);
+  const label = layout?.label?.trim() || getLayoutLabel(index);
+  const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
+  const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
+  const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
+  const totalApartments = Number(layout?.totalApartments) || 0;
+  const planImg = String(layout?.planImg || layout?.planImage || parentVariant?.planImg || '').trim();
+
+  return {
+    key,
+    label,
+    areaMin,
+    areaMax,
+    totalApartments,
+    planImg,
+    price: Number.isFinite(price) ? price : null,
+  };
+}
+
+function getVariantLayouts(variant) {
+  if (!variant) return [];
+  if (Array.isArray(variant.layouts) && variant.layouts.length) {
+    return variant.layouts;
+  }
+  return [normalizeLayoutVariant({
+    planImg: variant.planImg,
+    areaMin: variant.areaMin,
+    areaMax: variant.areaMax,
+    price: variant.price,
+    totalApartments: variant.totalApartments,
+  }, 0, variant)];
+}
+
+function variantHasMultipleLayouts(variant) {
+  return getVariantLayouts(variant).length > 1;
 }
 
 function getNoMarkupYearsLabel(years) {
@@ -344,7 +396,7 @@ function normalizeFlatVariant(variant) {
   const areaMax = Number(variant.areaMax) || areaMin;
   const price = variant?.price != null && variant.price !== '' ? Number(variant.price) : null;
 
-  return {
+  const baseVariant = {
     flatType,
     flatTypeLabel: getFlatTypeLabel(flatType),
     flatTypeShortLabel: getFlatTypeShortLabel(flatType),
@@ -354,15 +406,46 @@ function normalizeFlatVariant(variant) {
     planImg: String(variant?.planImg || variant?.planImage || '').trim(),
     price: Number.isFinite(price) ? price : null,
   };
+
+  let layouts = [];
+  if (Array.isArray(variant.layouts) && variant.layouts.length) {
+    layouts = variant.layouts
+      .map((layout, index) => normalizeLayoutVariant(layout, index, baseVariant))
+      .filter(Boolean);
+  }
+
+  if (!layouts.length) {
+    layouts = [normalizeLayoutVariant({
+      key: 'A',
+      label: 'Вариант A',
+      planImg: baseVariant.planImg,
+      areaMin: baseVariant.areaMin,
+      areaMax: baseVariant.areaMax,
+      price: baseVariant.price,
+      totalApartments: baseVariant.totalApartments,
+    }, 0, baseVariant)];
+  }
+
+  return {
+    ...baseVariant,
+    planImg: layouts[0]?.planImg || baseVariant.planImg,
+    layouts,
+  };
 }
 
-function getVariantPlanImg(property, variant, index = 0) {
+function getVariantPlanImg(property, variant, layoutIndex = 0, variantIndex = 0) {
+  const layouts = getVariantLayouts(variant);
+  const layout = layouts[layoutIndex] || layouts[0];
+  if (layout?.planImg && !isBrokenImageSrc(layout.planImg)) {
+    return layout.planImg;
+  }
+
   if (variant?.planImg && !isBrokenImageSrc(variant.planImg)) {
     return variant.planImg;
   }
 
   const images = getPropertyImages(property).filter(src => !isBrokenImageSrc(src));
-  if (images[index]) return images[index];
+  if (images[variantIndex]) return images[variantIndex];
   if (images[0]) return images[0];
   return DEFAULT_IMG;
 }
@@ -852,24 +935,28 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType) {
   if (!variants.length) return '';
 
   const cardsHtml = variants.map((variant, index) => {
-    const planImg = getVariantPlanImg(property, variant, index);
-    const areaLabel = formatVariantAreaRange(variant) || '—';
-    const priceValue = variant.price ?? property.price;
+    const layouts = getVariantLayouts(variant);
+    const hasMultipleLayouts = layouts.length > 1;
     const isActive = selectedFlatType && variant.flatType === selectedFlatType;
     const activeClass = isActive ? ' floor-plan-card--active' : '';
     const activeId = isActive ? ' id="floor-plan-active"' : '';
 
-    return `
-      <article class="floor-plan-card${activeClass}"${activeId}>
-        <div class="floor-plan-image">
-          ${renderPropertyImg(planImg, `Планировка ${variant.flatTypeLabel}`)}
-        </div>
-        <div class="floor-plan-info">
-          <h3>${escapeHtml(variant.flatTypeLabel)}</h3>
+    const layoutPanelsHtml = layouts.map((layout, layoutIndex) => {
+      const planImg = getVariantPlanImg(property, variant, layoutIndex, index);
+      const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '—';
+      const priceValue = layout.price ?? variant.price ?? property.price;
+      const apartmentsValue = layout.totalApartments || variant.totalApartments;
+      const hiddenClass = layoutIndex === 0 ? '' : ' floor-plan-layout-panel--hidden';
+
+      return `
+        <div class="floor-plan-layout-panel${hiddenClass}" data-layout-key="${escapeAttr(layout.key)}">
+          <div class="floor-plan-image">
+            ${renderPropertyImg(planImg, `Планировка ${layout.label}`)}
+          </div>
           <ul class="floor-plan-specs">
             <li>
-              <span class="floor-plan-spec-label">Тип квартир</span>
-              <span class="floor-plan-spec-value">${escapeHtml(variant.flatTypeLabel)}</span>
+              <span class="floor-plan-spec-label">Планировка</span>
+              <span class="floor-plan-spec-value">${escapeHtml(layout.label)}</span>
             </li>
             <li>
               <span class="floor-plan-spec-label">Площадь</span>
@@ -877,13 +964,35 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType) {
             </li>
             <li>
               <span class="floor-plan-spec-label">Доступно квартир</span>
-              <span class="floor-plan-spec-value">${variant.totalApartments}</span>
+              <span class="floor-plan-spec-value">${apartmentsValue}</span>
             </li>
             <li>
               <span class="floor-plan-spec-label">Цена</span>
               <span class="floor-plan-spec-value">от ${formatPrice(priceValue)}</span>
             </li>
           </ul>
+        </div>
+      `;
+    }).join('');
+
+    const layoutPickerHtml = hasMultipleLayouts
+      ? `<div class="floor-plan-layout-picker">
+          ${layouts.map((layout, layoutIndex) => `
+            <button
+              type="button"
+              class="floor-plan-layout-btn ${layoutIndex === 0 ? 'active' : ''}"
+              data-layout-key="${escapeAttr(layout.key)}"
+            >${escapeHtml(layout.label)}</button>
+          `).join('')}
+        </div>`
+      : '';
+
+    return `
+      <article class="floor-plan-card${activeClass}"${activeId} data-flat-type="${escapeAttr(variant.flatType)}">
+        <div class="floor-plan-info">
+          <h3>${escapeHtml(variant.flatTypeLabel)}</h3>
+          ${layoutPickerHtml}
+          <div class="floor-plan-layout-panels">${layoutPanelsHtml}</div>
         </div>
       </article>
     `;

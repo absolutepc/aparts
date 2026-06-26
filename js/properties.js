@@ -51,6 +51,28 @@ function getBackLabel(property) {
   return 'ЖК и МФК';
 }
 
+function bindFloorPlanLayoutPickers(root) {
+  root?.querySelectorAll('.floor-plan-card').forEach((card) => {
+    const buttons = card.querySelectorAll('.floor-plan-layout-btn');
+    const panels = card.querySelectorAll('.floor-plan-layout-panel');
+    if (buttons.length < 2 || !panels.length) return;
+
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const layoutKey = button.dataset.layoutKey;
+        buttons.forEach(item => item.classList.remove('active'));
+        button.classList.add('active');
+        panels.forEach((panel) => {
+          panel.classList.toggle(
+            'floor-plan-layout-panel--hidden',
+            panel.dataset.layoutKey !== layoutKey
+          );
+        });
+      });
+    });
+  });
+}
+
 function initPropertyPage() {
   const container = document.getElementById('propertyDetail');
   if (!container) return;
@@ -149,6 +171,7 @@ function initPropertyPage() {
   `;
 
   bindPropertyGallery(container, property);
+  bindFloorPlanLayoutPickers(container);
 
   if (selectedVariant?.flatType) {
     requestAnimationFrame(() => {

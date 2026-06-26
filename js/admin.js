@@ -103,6 +103,49 @@ function renderDashboard() {
   `;
 }
 
+function renderAdminLayoutRow(flatType, index, layout = {}) {
+  const label = layout.label || getLayoutLabel(index);
+  return `
+    <div class="admin-layout-row" data-flat-type="${escapeHtml(flatType)}" data-layout-index="${index}">
+      <div class="admin-layout-row-head">
+        <strong>${escapeHtml(label)}</strong>
+        <button type="button" class="btn btn-danger btn-sm admin-remove-layout-btn">Удалить</button>
+      </div>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label>Площадь от, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_areaMin" min="0" step="0.001" value="${layout.areaMin ?? ''}" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Площадь до, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_areaMax" min="0" step="0.001" value="${layout.areaMax ?? ''}" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Цена от, ₽</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_price" min="0" value="${layout.price ?? ''}" placeholder="—">
+        </div>
+        <div class="form-group admin-form-full">
+          <label>Планировка (путь к файлу)</label>
+          <input type="text" name="variant_${escapeHtml(flatType)}_layout_${index}_planImg" value="${escapeHtml(layout.planImg || '')}" placeholder="img/properties/plan.jpg">
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAdminFlatVariantLayouts(flatType, layouts = [{}]) {
+  const rows = layouts.length ? layouts : [{}];
+  return `
+    <div class="admin-layout-editor">
+      <p class="form-hint">Добавьте несколько планировок (А, Б, В…), если у типа есть варианты. Одна планировка — переключатель на сайте не показывается.</p>
+      <div class="admin-layout-rows" data-flat-type="${escapeHtml(flatType)}">
+        ${rows.map((layout, index) => renderAdminLayoutRow(flatType, index, layout)).join('')}
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm admin-add-layout-btn" data-flat-type="${escapeHtml(flatType)}">+ Добавить планировку</button>
+    </div>
+  `;
+}
+
 function renderAdminFlatVariantRow(flatType) {
   const label = getFlatTypeLabel(flatType);
   return `
@@ -126,12 +169,115 @@ function renderAdminFlatVariantRow(flatType) {
           <input type="number" name="variant_${escapeHtml(flatType)}_price" min="0" placeholder="—">
         </div>
         <div class="form-group admin-form-full">
-          <label>Планировка (путь к файлу)</label>
-          <input type="text" name="variant_${escapeHtml(flatType)}_planImg" placeholder="img/properties/plan.jpg">
+          ${renderAdminFlatVariantLayouts(flatType)}
         </div>
       </div>
     </fieldset>
   `;
+}
+
+function collectLayoutsForFlatType(form, flatType) {
+  const container = form.querySelector(`.admin-layout-rows[data-flat-type="${flatType}"]`);
+  if (!container) return [];
+
+  const layouts = [];
+  container.querySelectorAll('.admin-layout-row').forEach((row, index) => {
+    const areaMin = parseArea(row.querySelector(`[name="variant_${flatType}_layout_${index}_areaMin"]`)?.value) ?? 0;
+    const areaMax = parseArea(row.querySelector(`[name="variant_${flatType}_layout_${index}_areaMax"]`)?.value) ?? 0;
+    const planImg = row.querySelector(`[name="variant_${flatType}_layout_${index}_planImg"]`)?.value?.trim() || '';
+    const priceRaw = row.querySelector(`[name="variant_${flatType}_layout_${index}_price"]`)?.value;
+    const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
+
+    if (!planImg && !areaMin && !areaMax) return;
+
+    const layout = {
+      key: getLayoutKey(index),
+      label: getLayoutLabel(index),
+      areaMin,
+      areaMax: areaMax || areaMin,
+    };
+    if (planImg) layout.planImg = planImg;
+    if (Number.isFinite(price)) layout.price = price;
+    layouts.push(layout);
+  });
+
+  return layouts;
+}
+
+function reindexAdminLayoutRows(container, flatType) {
+  container.querySelectorAll('.admin-layout-row').forEach((row, index) => {
+    row.dataset.layoutIndex = String(index);
+    row.querySelector('.admin-layout-row-head strong').textContent = getLayoutLabel(index);
+
+    const fields = [
+      ['areaMin', row.querySelector('[name*="_areaMin"]')?.value ?? ''],
+      ['areaMax', row.querySelector('[name*="_areaMax"]')?.value ?? ''],
+      ['price', row.querySelector('[name*="_price"]')?.value ?? ''],
+      ['planImg', row.querySelector('[name*="_planImg"]')?.value ?? ''],
+    ];
+
+    row.innerHTML = `
+      <div class="admin-layout-row-head">
+        <strong>${escapeHtml(getLayoutLabel(index))}</strong>
+        <button type="button" class="btn btn-danger btn-sm admin-remove-layout-btn">Удалить</button>
+      </div>
+      <div class="admin-form-grid">
+        <div class="form-group">
+          <label>Площадь от, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_areaMin" min="0" step="0.001" value="${fields[0][1]}" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Площадь до, м²</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_areaMax" min="0" step="0.001" value="${fields[1][1]}" placeholder="—">
+        </div>
+        <div class="form-group">
+          <label>Цена от, ₽</label>
+          <input type="number" name="variant_${escapeHtml(flatType)}_layout_${index}_price" min="0" value="${fields[2][1]}" placeholder="—">
+        </div>
+        <div class="form-group admin-form-full">
+          <label>Планировка (путь к файлу)</label>
+          <input type="text" name="variant_${escapeHtml(flatType)}_layout_${index}_planImg" value="${escapeHtml(fields[3][1])}" placeholder="img/properties/plan.jpg">
+        </div>
+      </div>
+    `;
+  });
+}
+
+function bindAdminLayoutRows(form) {
+  if (!form || form.dataset.layoutRowsBound === '1') return;
+  form.dataset.layoutRowsBound = '1';
+
+  form.addEventListener('click', (event) => {
+    const addBtn = event.target.closest('.admin-add-layout-btn');
+    if (addBtn && form.contains(addBtn)) {
+      const flatType = addBtn.dataset.flatType;
+      const container = form.querySelector(`.admin-layout-rows[data-flat-type="${flatType}"]`);
+      if (!container) return;
+      const index = container.querySelectorAll('.admin-layout-row').length;
+      container.insertAdjacentHTML('beforeend', renderAdminLayoutRow(flatType, index));
+      return;
+    }
+
+    const removeBtn = event.target.closest('.admin-remove-layout-btn');
+    if (removeBtn && form.contains(removeBtn)) {
+      const row = removeBtn.closest('.admin-layout-row');
+      const container = row?.closest('.admin-layout-rows');
+      if (!row || !container) return;
+      if (container.querySelectorAll('.admin-layout-row').length <= 1) {
+        showToast('Нужна хотя бы одна планировка', 'error');
+        return;
+      }
+      row.remove();
+      reindexAdminLayoutRows(container, container.dataset.flatType);
+    }
+  });
+}
+
+function setAdminFlatVariantLayouts(form, flatType, layouts = []) {
+  const container = form.querySelector(`.admin-layout-rows[data-flat-type="${flatType}"]`);
+  if (!container) return;
+  const rows = layouts.length ? layouts : [{}];
+  container.innerHTML = rows.map((layout, index) => renderAdminLayoutRow(flatType, index, layout)).join('');
 }
 
 function collectFlatVariantsFromForm(form) {
@@ -147,9 +293,9 @@ function collectFlatVariantsFromForm(form) {
       return { error: `Площадь «${getFlatTypeLabel(flatType)}»: минимум больше максимума` };
     }
 
-    const planImg = form.querySelector(`[name="variant_${flatType}_planImg"]`)?.value?.trim() || '';
     const priceRaw = form.querySelector(`[name="variant_${flatType}_price"]`)?.value;
     const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
+    const layouts = collectLayoutsForFlatType(form, flatType);
 
     const variant = {
       flatType,
@@ -157,8 +303,18 @@ function collectFlatVariantsFromForm(form) {
       areaMin,
       areaMax: areaMax || areaMin,
     };
-    if (planImg) variant.planImg = planImg;
     if (Number.isFinite(price)) variant.price = price;
+
+    if (layouts.length > 1) {
+      variant.layouts = layouts;
+      variant.planImg = layouts[0]?.planImg || '';
+    } else if (layouts.length === 1) {
+      if (layouts[0].planImg) variant.planImg = layouts[0].planImg;
+      if (layouts[0].areaMin) variant.areaMin = layouts[0].areaMin;
+      if (layouts[0].areaMax) variant.areaMax = layouts[0].areaMax;
+      if (layouts[0].price != null) variant.price = layouts[0].price;
+    }
+
     variants.push(variant);
   }
 
@@ -176,14 +332,24 @@ function fillFlatVariantsForm(form, property) {
     const totalInput = form.querySelector(`[name="variant_${flatType}_totalApartments"]`);
     const areaMinInput = form.querySelector(`[name="variant_${flatType}_areaMin"]`);
     const areaMaxInput = form.querySelector(`[name="variant_${flatType}_areaMax"]`);
-    const planImgInput = form.querySelector(`[name="variant_${flatType}_planImg"]`);
     const priceInput = form.querySelector(`[name="variant_${flatType}_price"]`);
 
     if (totalInput) totalInput.value = variant?.totalApartments || '';
     if (areaMinInput) areaMinInput.value = variant?.areaMin || '';
     if (areaMaxInput) areaMaxInput.value = variant?.areaMax || '';
-    if (planImgInput) planImgInput.value = variant?.planImg || '';
     if (priceInput) priceInput.value = variant?.price ?? '';
+
+    const layouts = variant?.layouts?.length
+      ? variant.layouts
+      : (variant?.planImg || variant?.areaMin || variant?.areaMax
+        ? [{
+          planImg: variant.planImg,
+          areaMin: variant.areaMin,
+          areaMax: variant.areaMax,
+          price: variant.price,
+        }]
+        : [{}]);
+    setAdminFlatVariantLayouts(form, flatType, layouts);
   }
 
   if (form.flatType) {
@@ -198,14 +364,13 @@ function clearFlatVariantsForm(form) {
     const totalInput = form.querySelector(`[name="variant_${flatType}_totalApartments"]`);
     const areaMinInput = form.querySelector(`[name="variant_${flatType}_areaMin"]`);
     const areaMaxInput = form.querySelector(`[name="variant_${flatType}_areaMax"]`);
-    const planImgInput = form.querySelector(`[name="variant_${flatType}_planImg"]`);
     const priceInput = form.querySelector(`[name="variant_${flatType}_price"]`);
 
     if (totalInput) totalInput.value = '';
     if (areaMinInput) areaMinInput.value = '';
     if (areaMaxInput) areaMaxInput.value = '';
-    if (planImgInput) planImgInput.value = '';
     if (priceInput) priceInput.value = '';
+    setAdminFlatVariantLayouts(form, flatType, [{}]);
   }
 
   if (form.flatType) form.flatType.value = '1room';
@@ -563,6 +728,7 @@ function bindPropertiesAdmin() {
   typeSelect?.addEventListener('change', () => toggleTypeFields(true));
   toggleTypeFields();
   bindImageFields();
+  bindAdminLayoutRows(form);
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
