@@ -1,22 +1,5 @@
-const SPLASH_SESSION_KEY = 'dune_splash_seen';
-const SPLASH_MIN_MS = 2000;
-const SPLASH_REDUCE_MS = 450;
-
-function shouldShowSiteLoader() {
-  try {
-    return !sessionStorage.getItem(SPLASH_SESSION_KEY);
-  } catch {
-    return true;
-  }
-}
-
-function markSplashSeen() {
-  try {
-    sessionStorage.setItem(SPLASH_SESSION_KEY, '1');
-  } catch {
-    // sessionStorage недоступен
-  }
-}
+const SPLASH_MIN_MS = 2400;
+const SPLASH_REDUCE_MS = 600;
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -31,11 +14,16 @@ function waitForLogo(logo) {
   });
 }
 
-async function waitForSplashReady(loader) {
+function startLoaderAnimations(loader) {
+  loader.classList.remove('site-loader--pending');
+  loader.classList.add('site-loader--play');
+}
+
+function waitForSplashReady(loader) {
   const minMs = prefersReducedMotion() ? SPLASH_REDUCE_MS : SPLASH_MIN_MS;
   const logo = loader.querySelector('.site-loader__logo img');
 
-  await Promise.all([
+  return Promise.all([
     new Promise((resolve) => setTimeout(resolve, minMs)),
     document.fonts?.ready ?? Promise.resolve(),
     waitForLogo(logo),
@@ -58,17 +46,17 @@ function initSiteLoader() {
   const loader = document.getElementById('site-loader');
   if (!loader) return;
 
-  if (!shouldShowSiteLoader()) {
-    loader.remove();
-    return;
-  }
-
   document.body.classList.add('site-loader-active');
-  markSplashSeen();
+  loader.classList.add('site-loader--pending');
 
   loader.querySelector('.site-loader__skip')?.addEventListener('click', () => {
     hideSiteLoader(loader);
   });
 
-  waitForSplashReady(loader).then(() => hideSiteLoader(loader));
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      startLoaderAnimations(loader);
+      waitForSplashReady(loader).then(() => hideSiteLoader(loader));
+    });
+  });
 }

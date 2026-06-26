@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dune Base — Недвижимость</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    #site-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: #12080b;
+    }
+  </style>
 </head>
 <body>
-  <div id="site-loader" class="site-loader" role="status" aria-live="polite" aria-label="Загрузка Dune Base">
+  <div id="site-loader" class="site-loader site-loader--pending" role="status" aria-live="polite" aria-label="Загрузка Dune Base">
     <div class="site-loader__inner">
       <div class="site-loader__logo">
         <img src="img/logo.svg" alt="">
@@ -69,9 +77,9 @@
   <script src="js/loader.js"></script>
   <script src="js/properties.js"></script>
   <script>
+    initSiteLoader();
     initLayout('home');
     initHomePage();
-    initSiteLoader();
   </script>
 </body>
 </html>
