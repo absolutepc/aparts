@@ -424,21 +424,7 @@ main { flex: 1; }
 
 .property-detail-desc {
   color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.7;
-}
-
-.property-detail-desc-block {
-  margin-top: 40px;
-  padding: 28px 32px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.property-detail-desc-block h2 {
-  font-size: 1.35rem;
-  margin: 0 0 16px;
+  margin: 20px 0;
 }
 
 .property-specs-table {
