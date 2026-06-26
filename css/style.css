@@ -442,6 +442,88 @@ main { flex: 1; }
 .property-spec-label { color: var(--text-muted); }
 .property-spec-value { font-weight: 600; }
 
+.property-floor-plans {
+  margin-top: 48px;
+}
+
+.property-floor-plans-header {
+  margin-bottom: 24px;
+}
+
+.floor-plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.floor-plan-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 420px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.floor-plan-image {
+  background: var(--bg-secondary);
+  min-height: 280px;
+}
+
+.floor-plan-image img {
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  object-fit: cover;
+}
+
+.floor-plan-info {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.floor-plan-info h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.floor-plan-specs {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.floor-plan-specs li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.floor-plan-specs li:last-child {
+  border-bottom: none;
+}
+
+.floor-plan-spec-label {
+  color: var(--text-muted);
+}
+
+.floor-plan-spec-value {
+  font-weight: 600;
+  text-align: right;
+}
+
 .empty-state {
   text-align: center;
   padding: 64px 24px;
@@ -1031,6 +1113,7 @@ main { flex: 1; }
 @media (max-width: 960px) {
   .hero-content,
   .property-detail-hero,
+  .floor-plan-card,
   .stats-grid,
   .admin-layout {
     grid-template-columns: 1fr;

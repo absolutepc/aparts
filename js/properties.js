@@ -125,6 +125,8 @@ function initPropertyPage() {
           <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
         </div>
       </div>
+
+      ${isComplex(property) ? renderPropertyFloorPlansBlock(property) : ''}
     </div>
   `;
 

@@ -41,10 +41,10 @@ const DEFAULT_PROPERTIES = [
     flatType: '1room',
     totalApartments: 120,
     flatVariants: [
-      { flatType: '1room', totalApartments: 120, areaMin: 28, areaMax: 42 },
-      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65 },
-      { flatType: '3room', totalApartments: 90, areaMin: 70, areaMax: 95 },
-      { flatType: 'euro2', totalApartments: 60, areaMin: 38, areaMax: 52 },
+      { flatType: '1room', totalApartments: 120, areaMin: 28, areaMax: 42, planImg: 'aparts/img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg' },
+      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65, planImg: 'aparts/img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg' },
+      { flatType: '3room', totalApartments: 90, areaMin: 70, areaMax: 95, planImg: 'aparts/img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg' },
+      { flatType: 'euro2', totalApartments: 60, areaMin: 38, areaMax: 52, planImg: 'aparts/img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg' },
     ],
     areaMin: 28,
     areaMax: 95,
@@ -237,6 +237,7 @@ function normalizeFlatVariant(variant) {
 
   const areaMin = Number(variant.areaMin) || 0;
   const areaMax = Number(variant.areaMax) || areaMin;
+  const price = variant?.price != null && variant.price !== '' ? Number(variant.price) : null;
 
   return {
     flatType,
@@ -245,7 +246,34 @@ function normalizeFlatVariant(variant) {
     totalApartments: Number(variant.totalApartments) || 0,
     areaMin,
     areaMax,
+    planImg: String(variant?.planImg || variant?.planImage || '').trim(),
+    price: Number.isFinite(price) ? price : null,
   };
+}
+
+function getVariantPlanImg(property, variant, index = 0) {
+  if (variant?.planImg && !isBrokenImageSrc(variant.planImg)) {
+    return variant.planImg;
+  }
+
+  const images = getPropertyImages(property).filter(src => !isBrokenImageSrc(src));
+  if (images[index]) return images[index];
+  if (images[0]) return images[0];
+  return DEFAULT_IMG;
+}
+
+function mergeFlatVariants(defaultVariants, savedVariants) {
+  if (!Array.isArray(savedVariants) || !savedVariants.length) return defaultVariants;
+  if (!Array.isArray(defaultVariants) || !defaultVariants.length) return savedVariants;
+
+  const defaultsByType = Object.fromEntries(
+    defaultVariants.map(variant => [variant.flatType, variant])
+  );
+
+  return savedVariants.map(variant => ({
+    ...defaultsByType[variant.flatType],
+    ...variant,
+  }));
 }
 
 function formatVariantAreaRange(variant) {
@@ -567,6 +595,58 @@ function renderComplexStatsTable(property) {
   `;
 }
 
+function renderPropertyFloorPlansBlock(property) {
+  if (!isComplex(property)) return '';
+
+  const variants = getComplexFlatVariants(property);
+  if (!variants.length) return '';
+
+  const cardsHtml = variants.map((variant, index) => {
+    const planImg = getVariantPlanImg(property, variant, index);
+    const areaLabel = formatVariantAreaRange(variant) || '—';
+    const priceValue = variant.price ?? property.price;
+
+    return `
+      <article class="floor-plan-card">
+        <div class="floor-plan-image">
+          ${renderPropertyImg(planImg, `Планировка ${variant.flatTypeLabel}`)}
+        </div>
+        <div class="floor-plan-info">
+          <h3>${escapeHtml(variant.flatTypeLabel)}</h3>
+          <ul class="floor-plan-specs">
+            <li>
+              <span class="floor-plan-spec-label">Тип квартир</span>
+              <span class="floor-plan-spec-value">${escapeHtml(variant.flatTypeLabel)}</span>
+            </li>
+            <li>
+              <span class="floor-plan-spec-label">Площадь</span>
+              <span class="floor-plan-spec-value">${areaLabel}</span>
+            </li>
+            <li>
+              <span class="floor-plan-spec-label">Доступно квартир</span>
+              <span class="floor-plan-spec-value">${variant.totalApartments}</span>
+            </li>
+            <li>
+              <span class="floor-plan-spec-label">Цена</span>
+              <span class="floor-plan-spec-value">от ${formatPrice(priceValue)}</span>
+            </li>
+          </ul>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  return `
+    <section class="property-floor-plans">
+      <div class="section-header property-floor-plans-header">
+        <h2>Планировки квартир</h2>
+        <p>Доступные типы квартир в этом комплексе</p>
+      </div>
+      <div class="floor-plans-list">${cardsHtml}</div>
+    </section>
+  `;
+}
+
 function mergeStoredPropertiesWithDefaults(stored) {
   if (!Array.isArray(stored) || !stored.length) {
     return DEFAULT_PROPERTIES.map(item => ({ ...item }));
@@ -582,9 +662,7 @@ function mergeStoredPropertiesWithDefaults(stored) {
       ...defaults,
       ...saved,
       type: defaults.type,
-      flatVariants: Array.isArray(saved.flatVariants) && saved.flatVariants.length
-        ? saved.flatVariants
-        : defaults.flatVariants,
+      flatVariants: mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
 
