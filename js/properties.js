@@ -137,10 +137,16 @@ function initPropertyPage() {
             ${districtRow}
             ${addressRow}
           </div>
-          ${property.description ? `<p class="property-detail-desc">${escapeHtml(property.description)}</p>` : ''}
           <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
         </div>
       </div>
+
+      ${property.description ? `
+        <section class="property-detail-desc-block">
+          <h2>Описание</h2>
+          <p class="property-detail-desc">${escapeHtml(property.description)}</p>
+        </section>
+      ` : ''}
 
       ${isComplex(property) ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType) : ''}
     </div>
