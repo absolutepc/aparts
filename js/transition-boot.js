@@ -16,11 +16,17 @@
     // sessionStorage недоступен
   }
 
-  const prepStyle = document.getElementById('page-transition-nav-prep');
-  if (prepStyle) prepStyle.remove();
-
   if (isNavEnter) {
     overlay.dataset.transitionMode = 'nav';
+    const labelEl = overlay.querySelector('.page-transition__label');
+    if (labelEl && navLabel) {
+      labelEl.textContent = navLabel;
+    }
+    document.body.classList.remove('page-transition-active');
+    overlay.classList.add('page-transition--hide');
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
+    return;
   }
 
   document.body.classList.add('page-transition-active');
