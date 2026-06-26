@@ -2,7 +2,6 @@ const PAGE_TRANSITION_KEY = 'pageTransitionLabel';
 const PAGE_TRANSITION_NAV_KEY = 'pageTransitionNav';
 const PAGE_TRANSITION_MIN_MS = 2600;
 const PAGE_TRANSITION_REDUCE_MS = 650;
-
 const PAGE_LABELS_BY_HREF = {
   'index.html': 'Главная',
   'complexes.html': 'ЖК и МФК',
