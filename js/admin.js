@@ -172,7 +172,7 @@ function renderPropertiesAdmin() {
             </div>
             <div class="form-group admin-form-full">
               <label>Изображение (путь к файлу)</label>
-              <input type="text" name="img" value="img/default.svg" placeholder="img/default.svg">
+              <input type="text" name="img" value="" placeholder="img/properties/photo.jpg">
             </div>
             <div class="form-group admin-form-full">
               <label>Загрузить с компьютера</label>
@@ -321,13 +321,16 @@ function bindPropertiesAdmin() {
 
   function syncFormMainImage(mainSrc) {
     const main = mainSrc?.trim() || '';
-    if (!main || !imagesField) return;
+    if (!main || !imagesField || isPlaceholderImage(main)) return;
 
-    const gallery = getFormGalleryImages();
-    const images = uniqueImages([main, ...gallery.filter(src => src !== main)]);
-    imagesField.value = formatPropertyImages(images);
-    if (imgInput) imgInput.value = images[0];
-    updatePropertyImagePreview(images[0]);
+    const gallery = getFormGalleryImages().filter(src => !isBrokenImageSrc(src));
+    const normalized = normalizePropertyImages({
+      img: main,
+      images: uniqueImages([main, ...gallery.filter(src => src !== main)]),
+    });
+    imagesField.value = formatPropertyImages(normalized.images);
+    if (imgInput) imgInput.value = normalized.img;
+    updatePropertyImagePreview(normalized.img);
   }
 
   function syncFormImgFromGallery() {
@@ -425,7 +428,7 @@ function bindPropertiesAdmin() {
     form.reset();
     form.editId.value = '';
     form.type.value = 'jk';
-    form.img.value = DEFAULT_IMG;
+    form.img.value = '';
     if (imagesField) imagesField.value = '';
     form.published.checked = true;
     if (imageFileInput) imageFileInput.value = '';
@@ -433,7 +436,7 @@ function bindPropertiesAdmin() {
     document.getElementById('propertyFormTitle').textContent = 'Добавить объект';
     formWrap.style.display = 'block';
     toggleTypeFields();
-    updatePropertyImagePreview(DEFAULT_IMG);
+    updatePropertyImagePreview('');
   });
 
   cancelBtn?.addEventListener('click', () => {
