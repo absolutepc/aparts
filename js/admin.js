@@ -306,11 +306,11 @@ function bindPropertiesAdmin() {
   function renderGalleryPreview() {
     if (!galleryPreview || !galleryPreviewWrap) return;
 
-    const images = uniqueImages([
-      imgInput?.value.trim() || '',
-      ...getFormGalleryImages(),
-    ].filter(Boolean));
-    const normalized = normalizePropertyImages({ img: images[0], images });
+    const images = getFormGalleryImages();
+    const normalized = normalizePropertyImages({
+      img: images[0] || imgInput?.value.trim() || '',
+      images,
+    });
 
     if (normalized.images.length < 2) {
       galleryPreviewWrap.style.display = 'none';
@@ -327,6 +327,28 @@ function bindPropertiesAdmin() {
     `).join('');
   }
 
+  function syncFormMainImage(mainSrc) {
+    const main = mainSrc?.trim() || '';
+    if (!main || !imagesField) return;
+
+    const gallery = getFormGalleryImages();
+    const images = uniqueImages([main, ...gallery.filter(src => src !== main)]);
+    imagesField.value = formatPropertyImages(images);
+    if (imgInput) imgInput.value = images[0];
+    updatePropertyImagePreview(images[0]);
+  }
+
+  function syncFormImgFromGallery() {
+    const images = getFormGalleryImages();
+    const normalized = normalizePropertyImages({
+      img: images[0] || '',
+      images,
+    });
+    if (imgInput) imgInput.value = normalized.img;
+    if (imagesField) imagesField.value = formatPropertyImages(normalized.images);
+    updatePropertyImagePreview(normalized.img);
+  }
+
   function updatePropertyImagePreview(src) {
     if (!imagePreview) return;
     imagePreview.src = resolveImageSrc(src || DEFAULT_IMG);
@@ -338,11 +360,11 @@ function bindPropertiesAdmin() {
 
   function bindImageFields() {
     imgInput?.addEventListener('input', () => {
-      updatePropertyImagePreview(imgInput.value.trim());
+      syncFormMainImage(imgInput.value.trim());
     });
 
     imagesField?.addEventListener('input', () => {
-      renderGalleryPreview();
+      syncFormImgFromGallery();
     });
 
     imageFileInput?.addEventListener('change', async () => {
@@ -365,10 +387,11 @@ function bindPropertiesAdmin() {
       }
 
       if (uploaded.length) {
-        const normalized = normalizePropertyImages({
-          img: isPlaceholderImage(imgInput?.value.trim()) ? uploaded[0] : imgInput.value.trim(),
-          images: [...getFormGalleryImages(), ...uploaded],
-        });
+        const existing = getFormGalleryImages().filter(src => !isBrokenImageSrc(src));
+        const imgVal = imgInput?.value.trim() || '';
+        const normalized = isPlaceholderImage(imgVal)
+          ? normalizePropertyImages({ img: uploaded[0], images: [...uploaded, ...existing] })
+          : normalizePropertyImages({ img: imgVal, images: [...existing, ...uploaded] });
         if (imgInput) imgInput.value = normalized.img;
         setFormGalleryImages(normalized.images);
         updatePropertyImagePreview(normalized.img);
@@ -439,7 +462,10 @@ function bindPropertiesAdmin() {
 
     const galleryImages = parsePropertyImages(formData.get('images')?.toString()) || [];
     const imgField = formData.get('img')?.toString().trim() || '';
-    const normalizedImages = normalizePropertyImages({ img: imgField, images: galleryImages });
+    const normalizedImages = normalizePropertyImages({
+      img: galleryImages[0] || imgField,
+      images: galleryImages.length ? galleryImages : (imgField ? [imgField] : []),
+    });
 
     const property = {
       id: formData.get('editId') || generatePropertyId(),
