@@ -422,28 +422,9 @@ main { flex: 1; }
   margin-bottom: 20px;
 }
 
-.property-detail-media {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .property-detail-desc {
   color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.7;
-}
-
-.property-detail-desc-block {
-  padding: 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-}
-
-.property-detail-desc-block h2 {
-  font-size: 1.2rem;
-  margin: 0 0 12px;
+  margin: 20px 0;
 }
 
 .property-specs-table {
