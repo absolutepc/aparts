@@ -10,6 +10,8 @@ function initPropertyCatalog(options) {
   const areaMaxInput = document.getElementById('areaMax');
   const flatTypeFiltersEl = document.getElementById('flatTypeFilters');
   const flatTypeFilterGroup = document.getElementById('flatTypeFilterGroup');
+  const noMarkupFiltersEl = document.getElementById('noMarkupFilters');
+  const mandatoryPaymentFiltersEl = document.getElementById('mandatoryPaymentFilters');
   const districtFiltersEl = document.getElementById('districtFilters');
   const resultsCountEl = document.getElementById('resultsCount');
   const sortSelect = document.getElementById('sortSelect');
@@ -51,6 +53,24 @@ function initPropertyCatalog(options) {
   }
 
   renderCheckboxGroup(
+    noMarkupFiltersEl,
+    Object.entries(NO_MARKUP_YEARS).map(([value, label]) => ({
+      value,
+      label: getNoMarkupYearsFilterLabel(value),
+    })),
+    'no-markup-filter'
+  );
+
+  renderCheckboxGroup(
+    mandatoryPaymentFiltersEl,
+    Object.entries(MANDATORY_PAYMENT_OPTIONS).map(([value, label]) => ({
+      value,
+      label: getMandatoryPaymentLabel(value),
+    })),
+    'mandatory-payment-filter'
+  );
+
+  renderCheckboxGroup(
     districtFiltersEl,
     getUniqueDistricts(allProperties).map(value => ({ value, label: value })),
     'district-filter'
@@ -70,6 +90,8 @@ function initPropertyCatalog(options) {
       minValue: minRaw ? parseArea(minRaw) : null,
       maxValue: maxRaw ? parseArea(maxRaw) : null,
       flatTypes: isComplexCatalog ? getCheckedValues('.flat-type-filter') : [],
+      noMarkupYears: getCheckedValues('.no-markup-filter'),
+      mandatoryPayments: getCheckedValues('.mandatory-payment-filter'),
       districts: getCheckedValues('.district-filter'),
       sort: sortSelect?.value || 'default',
     };
@@ -82,6 +104,8 @@ function initPropertyCatalog(options) {
           flatTypes: state.flatTypes,
           minValue: state.minValue,
           maxValue: state.maxValue,
+          noMarkupYears: state.noMarkupYears,
+          mandatoryPayments: state.mandatoryPayments,
           districts: state.districts,
         });
       }
@@ -97,7 +121,11 @@ function initPropertyCatalog(options) {
       if (state.districts.length && !state.districts.includes(property.district)) {
         return false;
       }
-      return true;
+
+      return propertyMatchesOfferingFilters(property, {
+        noMarkupYears: state.noMarkupYears,
+        mandatoryPayments: state.mandatoryPayments,
+      });
     });
   }
 

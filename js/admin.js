@@ -170,6 +170,22 @@ function renderPropertiesAdmin() {
               <label>Район</label>
               <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
             </div>
+            <div class="form-group">
+              <label>Без наценки</label>
+              <select name="noMarkupYears" required>
+                ${Object.entries(NO_MARKUP_YEARS).map(([value]) => `
+                  <option value="${value}">${escapeHtml(getNoMarkupYearsFilterLabel(value))}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Обязательный платёж, ₽/м²</label>
+              <select name="mandatoryPayment" required>
+                ${Object.entries(MANDATORY_PAYMENT_OPTIONS).map(([value]) => `
+                  <option value="${value}">${escapeHtml(getMandatoryPaymentLabel(value))}</option>
+                `).join('')}
+              </select>
+            </div>
             <div class="form-group admin-form-full">
               <label>Изображение (путь к файлу)</label>
               <input type="text" name="img" value="" placeholder="img/properties/photo.jpg">
@@ -458,6 +474,17 @@ function bindPropertiesAdmin() {
       return;
     }
 
+    const noMarkupYears = Number(formData.get('noMarkupYears'));
+    const mandatoryPayment = Number(formData.get('mandatoryPayment'));
+    if (!NO_MARKUP_YEARS[noMarkupYears]) {
+      showToast('Выберите срок без наценки', 'error');
+      return;
+    }
+    if (!MANDATORY_PAYMENT_OPTIONS[mandatoryPayment]) {
+      showToast('Выберите обязательный платёж', 'error');
+      return;
+    }
+
     const galleryImages = parsePropertyImages(formData.get('images')?.toString()) || [];
     const imgField = formData.get('img')?.toString().trim() || '';
     const normalizedImages = normalizePropertyImages({
@@ -473,6 +500,8 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
+      noMarkupYears,
+      mandatoryPayment,
       img: normalizedImages.img,
       images: normalizedImages.images,
       published: formData.get('published') === 'on',
@@ -570,6 +599,8 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
+      form.noMarkupYears.value = property.noMarkupYears ?? 1;
+      form.mandatoryPayment.value = property.mandatoryPayment ?? 3000;
       const normalizedImages = normalizePropertyImages(property);
       form.img.value = normalizedImages.img;
       if (imagesField) {

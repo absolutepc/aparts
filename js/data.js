@@ -16,6 +16,17 @@ const FLAT_TYPE_LABELS = {
 
 const FLAT_TYPE_KEYS = Object.keys(FLAT_TYPE_LABELS);
 
+const NO_MARKUP_YEARS = {
+  1: '1 год',
+  2: '2 года',
+};
+
+const MANDATORY_PAYMENT_OPTIONS = {
+  3000: '3 000',
+  4000: '4 000',
+  5000: '5 000',
+};
+
 function assetPath(relativePath) {
   const base = window.location.pathname.replace(/[^/]*$/, '');
   return `${base}${relativePath}`;
@@ -51,6 +62,8 @@ const DEFAULT_PROPERTIES = [
     price: 8500000,
     address: 'В.В.Путина 001',
     district: 'САО',
+    noMarkupYears: 1,
+    mandatoryPayment: 3000,
     img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
     images: [
       'iimg/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
@@ -78,6 +91,8 @@ const DEFAULT_PROPERTIES = [
     price: 12400000,
     address: 'В.В.Путина 001',
     district: 'СЗАО',
+    noMarkupYears: 2,
+    mandatoryPayment: 4000,
     img: 'img/1111111.jpeg',
     images: [
       'img/properties/jk2.jpg',
@@ -103,6 +118,8 @@ const DEFAULT_PROPERTIES = [
     price: 9800000,
     address: 'В.В.Путина 001',
     district: 'САО',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
     img: 'img/eAqRhD17Bf2ScTaaYF0mk8uGCSr7mKfeaiU0prAym2EAScR2bw8PJ9c2bg08c4REWbijEhXdYlrNYWjM8IKaXTSd.jpg',
     images: [
       'img/eAqRhD17Bf2ScTaaYF0mk8uGCSr7mKfeaiU0prAym2EAScR2bw8PJ9c2bg08c4REWbijEhXdYlrNYWjM8IKaXTSd.jpg',
@@ -119,6 +136,8 @@ const DEFAULT_PROPERTIES = [
     price: 25000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
+    noMarkupYears: 1,
+    mandatoryPayment: 3000,
     img: 'img/properties/comm1.jpg',
     images: [
       'img/properties/comm1.jpg',
@@ -134,6 +153,8 @@ const DEFAULT_PROPERTIES = [
     price: 18500000,
     address: 'ул. Тверская, 12',
     district: 'ЦАО',
+    noMarkupYears: 2,
+    mandatoryPayment: 4000,
     img: 'img/default.svg',
     images: ['img/default.svg'],
     published: true,
@@ -147,6 +168,8 @@ const DEFAULT_PROPERTIES = [
     price: 32000000,
     address: 'Ленинградский пр., 39',
     district: 'САО',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
     img: 'img/default.svg',
     images: ['img/default.svg'],
     published: true,
@@ -229,6 +252,88 @@ function getFlatTypeShortLabel(flatType) {
     case 'euro2': return 'Евро-2';
     default: return getFlatTypeLabel(flatType);
   }
+}
+
+function getNoMarkupYearsLabel(years) {
+  return NO_MARKUP_YEARS[Number(years)] || '';
+}
+
+function getNoMarkupYearsFilterLabel(years) {
+  const label = getNoMarkupYearsLabel(years);
+  return label ? `Без наценки: ${label}` : '';
+}
+
+function getMandatoryPaymentLabel(amount) {
+  const value = Number(amount);
+  const formatted = MANDATORY_PAYMENT_OPTIONS[value];
+  return formatted ? `${formatted} ₽/м²` : '';
+}
+
+function normalizePropertyOffering(property) {
+  const item = { ...property };
+  const years = Number(item.noMarkupYears);
+  const payment = Number(item.mandatoryPayment);
+
+  if (NO_MARKUP_YEARS[years]) item.noMarkupYears = years;
+  else delete item.noMarkupYears;
+
+  if (MANDATORY_PAYMENT_OPTIONS[payment]) item.mandatoryPayment = payment;
+  else delete item.mandatoryPayment;
+
+  return item;
+}
+
+function propertyMatchesOfferingFilters(property, filters = {}) {
+  const noMarkupYears = Array.isArray(filters.noMarkupYears) ? filters.noMarkupYears : [];
+  const mandatoryPayments = Array.isArray(filters.mandatoryPayments) ? filters.mandatoryPayments : [];
+
+  if (noMarkupYears.length && !noMarkupYears.includes(String(property.noMarkupYears))) {
+    return false;
+  }
+  if (mandatoryPayments.length && !mandatoryPayments.includes(String(property.mandatoryPayment))) {
+    return false;
+  }
+  return true;
+}
+
+function renderPropertyOfferingTags(property) {
+  const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
+  const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
+  const tags = [];
+
+  if (noMarkupLabel) {
+    tags.push(`<span class="property-attr-tag">${escapeHtml(noMarkupLabel)}</span>`);
+  }
+  if (paymentLabel) {
+    tags.push(`<span class="property-attr-tag">Обяз. платёж: ${escapeHtml(paymentLabel)}</span>`);
+  }
+
+  return tags.join('');
+}
+
+function renderPropertyOfferingSpecs(property) {
+  const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
+  const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
+  const rows = [];
+
+  if (noMarkupLabel) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Без наценки</span>
+        <span class="property-spec-value">${escapeHtml(getNoMarkupYearsLabel(property.noMarkupYears))}</span>
+      </div>
+    `);
+  }
+  if (paymentLabel) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Обязательный платёж</span>
+        <span class="property-spec-value">${escapeHtml(paymentLabel)}</span>
+      </div>
+    `);
+  }
+
+  return rows.join('');
 }
 
 function normalizeFlatVariant(variant) {
@@ -469,7 +574,7 @@ function catalogListingMatchesFilters(listing, filters = {}) {
   }
 
   if (districts.length && !districts.includes(listing.district)) return false;
-  return true;
+  return propertyMatchesOfferingFilters(listing, filters);
 }
 
 function getPropertyCardTitle(property) {
@@ -555,7 +660,7 @@ function enrichProperty(property) {
   merged.images = repaired.images;
   delete merged.imageUrl;
 
-  return merged;
+  return normalizePropertyOffering(merged);
 }
 
 function uniqueImages(list) {
@@ -898,7 +1003,7 @@ function getProperties() {
 function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
-    const item = normalizeComplexProperty({ ...property });
+    const item = normalizePropertyOffering(normalizeComplexProperty({ ...property }));
     const images = repairPropertyImages(item);
     item.img = images.img;
     item.images = images.images;

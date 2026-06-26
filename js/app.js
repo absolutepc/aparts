@@ -48,7 +48,7 @@ function renderFeaturedJkCard(property) {
         <div class="property-category">${escapeHtml(TYPE_LABELS[property.type] || TYPE_LABELS.jk)}</div>
         <h3><a href="property.html?id=${encodeURIComponent(property.id)}">${escapeHtml(property.title)}</a></h3>
         <div class="property-variant-picker">${variantButtons}</div>
-        <div class="property-attrs" data-variant-attrs>${attrsHtml}</div>
+        <div class="property-attrs" data-variant-attrs>${attrsHtml}${renderPropertyOfferingTags(property)}</div>
         <p>${escapeHtml(property.description || '')}</p>
         <div class="property-footer">
           <div class="property-price">от ${formatPrice(property.price)}</div>
@@ -118,13 +118,15 @@ function renderPropertyCard(property) {
     : '';
 
   let attrsHtml = '';
+  const offeringTagsHtml = renderPropertyOfferingTags(property);
   if (isComplex(property)) {
-    attrsHtml = renderComplexStatsTags(property);
+    attrsHtml = `${renderComplexStatsTags(property)}${offeringTagsHtml}`;
   } else {
     attrsHtml = `
       <span class="property-attr-tag">${formatArea(property.area)} м²</span>
       ${districtHtml}
       ${addressHtml}
+      ${offeringTagsHtml}
     `;
   }
 
