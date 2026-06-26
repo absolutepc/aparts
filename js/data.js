@@ -1,5 +1,6 @@
 const STORE_KEY = 'aparts_data_v5';
 const USER_KEY = 'aparts_user';
+const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
@@ -25,7 +26,7 @@ const TYPE_LABELS = {
 };
 
 const ADMIN_CREDENTIALS = {
-  email: 'admin@aparts.ru',
+  email: 'admin@dunebase.ru',
   password: 'admin123',
 };
 
@@ -353,7 +354,7 @@ function renderPropertyImg(src, alt = '') {
   return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" onerror="this.src='${fallback}'">`;
 }
 
-function renderLogo(alt = 'Aparts') {
+function renderLogo(alt = SITE_NAME) {
   const safeAlt = escapeHtml(alt);
   const safeSrc = escapeHtml(assetPath(LOGO_IMG));
   return `<img src="${safeSrc}" alt="${safeAlt}">`;
@@ -460,7 +461,7 @@ function getProperties() {
 
     return enriched;
   } catch (error) {
-    console.warn('Aparts: повреждённые данные, восстанавливаем по умолчанию', error);
+    console.warn(`${SITE_NAME}: повреждённые данные, восстанавливаем по умолчанию`, error);
     localStorage.removeItem(STORE_KEY);
     initStore();
     return DEFAULT_PROPERTIES.map(enrichProperty);

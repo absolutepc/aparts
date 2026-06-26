@@ -69,7 +69,7 @@ function initPropertyPage() {
     return;
   }
 
-  document.title = `${property.title} — Aparts`;
+  document.title = `${property.title} — ${SITE_NAME}`;
 
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const backLink = getBackLink(property);
