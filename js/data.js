@@ -53,22 +53,66 @@ const DEFAULT_PROPERTIES = [
     flatType: '1room',
     totalApartments: 120,
     flatVariants: [
-      { flatType: '1room', totalApartments: 120, areaMin: 28, areaMax: 42, planImg: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg' },
-      { flatType: '2room', totalApartments: 150, areaMin: 45, areaMax: 65, layouts: [
-        { key: 'A', label: 'Вариант A', areaMin: 45, areaMax: 55, planImg: 'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg' },
-        { key: 'B', label: 'Вариант B', areaMin: 56, areaMax: 65, planImg: 'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg' },
+      { flatType: '1room', totalApartments: 58, areaMin: 52, areaMax: 67,layouts: [
+        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
+        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
+        { key: 'В', label: 'Сектор В|Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
+        { key: 'Г', label: 'Сектор В|Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+
+        { key: 'Д', label: 'Сектор Ж Тип-Б', areaMin: 52, areaMax: 52, planImg: 'img/luch/1G.jpg' },
+        { key: 'Е', label: 'Сектор Ж Тип-В', areaMin: 53, areaMax: 53, planImg: 'img/luch/1D.jpg' },
+        { key: 'Ё', label: 'Сектор Ж Тип-Г', areaMin: 67, areaMax: 67, planImg: 'img/luch/1E.jpg' },
+
+        { key: 'Ж', label: 'Сектор Б Тип-И', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
+
+        { key: 'З', label: 'Сектор Г Тип-Г', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
+
+        { key: 'И', label: 'Сектор Е Тип-Д', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
+        { key: 'Й', label: 'Сектор Е Тип-Е', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
+        { key: 'К', label: 'Сектор Е Тип-Ж', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
+        { key: 'Л', label: 'Сектор Е Тип-И', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
+
+      ]  },
+      { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
+        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+
+        { key: 'B', label: 'Сектор Ж Тип-А', areaMin: 57, areaMax: 57, planImg: 'img/luch/2V.jpg' },
+        { key: 'Г', label: 'Сектор Ж Тип-Б', areaMin: 58, areaMax: 58, planImg: 'img/luch/2G.jpg' },
+
+        { key: 'Д', label: 'Сектор Б Тип-В', areaMin: 82, areaMax: 82, planImg: 'img/luch/1G.jpg' },
+        { key: 'Е', label: 'Сектор Б Тип-Б', areaMin: 84, areaMax: 84, planImg: 'img/luch/1D.jpg' },
+        { key: 'Ё', label: 'Сектор Б Тип-Г', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
+        { key: 'Ж', label: 'Сектор Б Тип-Д', areaMin: 84, areaMax: 84, planImg: 'img/luch/1G.jpg' },
+        { key: 'З', label: 'Сектор Б Тип-Ж', areaMin: 78, areaMax: 78, planImg: 'img/luch/1D.jpg' },
+        { key: 'И', label: 'Сектор Б Тип-К', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
+        { key: 'Й', label: 'Сектор Б Тип-Л', areaMin: 81, areaMax: 81, planImg: 'img/luch/1D.jpg' },
+        { key: 'К', label: 'Сектор Б Тип-Н', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
+
+        { key: 'Л', label: 'Сектор Е Тип-Б', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
+        { key: 'М', label: 'Сектор Е Тип-В', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
+        { key: 'Н', label: 'Сектор Е Тип-Г', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
+        { key: 'О', label: 'Сектор Е Тип-Д', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
+        { key: 'П', label: 'Сектор Е Тип-Ж', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
+        { key: 'Р', label: 'Сектор Е Тип-И', areaMin: 74, areaMax: 74, planImg: 'img/luch/1E.jpg' },
+        { key: 'С', label: 'Сектор Е Тип-К', areaMin: 81, areaMax: 81, planImg: 'img/luch/1E.jpg' },
+        { key: 'Т', label: 'Сектор Е Тип-Л', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
+        { key: 'У', label: 'Сектор Е Тип-Н', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
       ] },
-      { flatType: '3room', totalApartments: 90, areaMin: 70, areaMax: 95, planImg: 'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg' },
-      { flatType: '4room', totalApartments: 36, areaMin: 95, areaMax: 120, planImg: 'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg' },
-      { flatType: 'euro2', totalApartments: 60, areaMin: 38, areaMax: 52, planImg: 'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg' },
+      { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
+        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+
+        { key: 'B', label: 'Сектор Г Тип-Б', areaMin: 95, areaMax: 95, planImg: 'img/luch/2V.jpg' },
+      ] },
     ],
-    areaMin: 28,
+    areaMin: 52,
     areaMax: 95,
-    price: 85000,
+    price: 90000,
     address: 'В.В.Путина 001',
     district: 'САО',
     noMarkupYears: 1,
-    mandatoryPayment: 3000,
+    mandatoryPayment: 5000,
     img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
     images: [
       'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
@@ -78,6 +122,7 @@ const DEFAULT_PROPERTIES = [
     ],
     published: true,
   },
+
   {
     id: 'jk2',
     title: '«Бомонд»',
@@ -105,6 +150,7 @@ const DEFAULT_PROPERTIES = [
     ],
     published: true,
   },
+
   {
     id: 'jk3',
     title: '«Дубайский»',
@@ -132,6 +178,7 @@ const DEFAULT_PROPERTIES = [
     ],
     published: true,
   },
+  
   {
     id: 'jk4',
     title: '«Луч»',
