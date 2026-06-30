@@ -73,6 +73,7 @@ const DEFAULT_PROPERTIES = [
         { key: 'Л', label: 'Сектор Е Тип-И', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
 
       ]  },
+
       { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
         { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
         { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
@@ -99,6 +100,7 @@ const DEFAULT_PROPERTIES = [
         { key: 'Т', label: 'Сектор Е Тип-Л', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
         { key: 'У', label: 'Сектор Е Тип-Н', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
       ] },
+
       { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
         { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
         { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
@@ -110,7 +112,7 @@ const DEFAULT_PROPERTIES = [
     areaMax: 95,
     price: 90000,
     address: 'В.В.Путина 001',
-    district: 'САО',
+    district: 'Новый Район',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
     img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
@@ -131,18 +133,77 @@ const DEFAULT_PROPERTIES = [
     flatType: '2room',
     totalApartments: 110,
     flatVariants: [
-      { flatType: '1room', totalApartments: 70, areaMin: 35, areaMax: 48 },
-      { flatType: '2room', totalApartments: 110, areaMin: 52, areaMax: 78 },
-      { flatType: '3room', totalApartments: 60, areaMin: 80, areaMax: 120 },
-      { flatType: 'euro2', totalApartments: 40, areaMin: 42, areaMax: 58 },
+      { flatType: '1room', totalApartments: 55, areaMin: 43.16, areaMax: 60.65, layouts: [
+        { key: 'A', label: 'Сектор А-Г Тип-A', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Б', label: 'Сектор А-Г Тип-Б', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1Б.jpg' },
+        { key: 'В', label: 'Сектор А-Г Тип-В', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1В.jpg' },
+        { key: 'Г', label: 'Сектор А-Г Тип-Г', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1Г.jpg' },
+        { key: 'Д', label: 'Сектор А-Г Тип-Д', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1Д.jpg' },
+        { key: 'Е', label: 'Сектор А-Г Тип-Е', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1Е.jpg' },
+        { key: 'Ж', label: 'Сектор А-Г Тип-Ж', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Ж.jpg' },
+
+        { key: 'И', label: 'Сектор Б-Д Тип-И', areaMin: 51.79, areaMax: 51.79, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'К', label: 'Сектор Б-Д Тип-К', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Л', label: 'Сектор Б-Д Тип-Л', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'М', label: 'Сектор Б-Д Тип-М', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Н', label: 'Сектор Б-Д Тип-Н', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'П', label: 'Сектор Б-Д Тип-П', areaMin: 59.79, areaMax: 59.79, planImg: 'img/Бомонд/1А.jpg' },
+
+        { key: 'Р', label: 'Сектор В-Е Тип-Р', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'С', label: 'Сектор В-Е Тип-С', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Т', label: 'Сектор В-Е Тип-Т', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'У', label: 'Сектор В-Е Тип-У', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Ф', label: 'Сектор В-Е Тип-Ф', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Х', label: 'Сектор В-Е Тип-Х', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Ш', label: 'Сектор В-Е Тип-Ш', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1А.jpg' },
+
+        { key: 'Ж-А', label: 'Сектор Ж-К Тип-А', areaMin: 43.16, areaMax: 43.16, planImg: 'img/luch/1A.jpg' },
+        { key: 'Ж-Б', label: 'Сектор Ж-К Тип-Б', areaMin: 46.18, areaMax: 46.18, planImg: 'img/luch/1B.jpg' },
+        { key: 'Ж-В', label: 'Сектор Ж-К Тип-В', areaMin: 45.75, areaMax: 45.75, planImg: 'img/luch/1V.jpg' },
+        { key: 'Ж-Г', label: 'Сектор Ж-К Тип-Г', areaMin: 43.16, areaMax: 43.16, planImg: 'img/luch/1G.jpg' },
+        { key: 'Ж-Д', label: 'Сектор Ж-К Тип-Д', areaMin: 53.50, areaMax: 53.50, planImg: 'img/luch/1G.jpg' },
+        { key: 'Ж-Е', label: 'Сектор Ж-К Тип-Е', areaMin: 53.50, areaMax: 53.50, planImg: 'img/luch/1D.jpg' },
+        { key: 'Ж-Ж', label: 'Сектор Ж-К Тип-Ж', areaMin: 47.79, areaMax: 47.79, planImg: 'img/luch/1E.jpg' },
+        { key: 'Ж-И', label: 'Сектор Ж-К Тип-И', areaMin: 50.33, areaMax: 50.33, planImg: 'img/luch/1D.jpg' },
+        { key: 'Ж-К', label: 'Сектор Ж-К Тип-К', areaMin: 47.75, areaMax: 47.75, planImg: 'img/luch/1E.jpg' },
+
+        { key: 'З-А', label: 'Сектор З-И Тип-А', areaMin: 43.16, areaMax: 43.16, planImg: 'img/luch/1A.jpg' },
+        { key: 'З-Б', label: 'Сектор З-И Тип-Б', areaMin: 46.18, areaMax: 46.18, planImg: 'img/luch/1B.jpg' },
+        { key: 'З-В', label: 'Сектор З-И Тип-В', areaMin: 45.75, areaMax: 45.75, planImg: 'img/luch/1V.jpg' },
+        { key: 'З-Г', label: 'Сектор З-И Тип-Г', areaMin: 43.16, areaMax: 43.16, planImg: 'img/luch/1G.jpg' },
+        { key: 'З-Д', label: 'Сектор З-И Тип-Д', areaMin: 53.50, areaMax: 53.50, planImg: 'img/luch/1G.jpg' },
+        { key: 'З-Е', label: 'Сектор З-И Тип-Е', areaMin: 53.50, areaMax: 53.50, planImg: 'img/luch/1D.jpg' },
+        { key: 'З-Ж', label: 'Сектор З-И Тип-Ж', areaMin: 47.79, areaMax: 47.79, planImg: 'img/luch/1E.jpg' },
+        { key: 'З-И', label: 'Сектор З-И Тип-И', areaMin: 50.33, areaMax: 50.33, planImg: 'img/luch/1D.jpg' },
+        { key: 'З-К', label: 'Сектор З-И Тип-К', areaMin: 47.75, areaMax: 47.75, planImg: 'img/luch/1E.jpg' },
+
+      ]  },
+      
+      { flatType: '2room', totalApartments: 55, areaMin: 62.34, areaMax: 85.25, layouts: [
+        { key: 'A', label: 'Сектор А-Г Тип-A', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2А.jpg' },
+        { key: 'Б', label: 'Сектор А-Г Тип-Б', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Б.jpg' },
+
+        { key: 'B', label: 'Сектор Б-Д Тип-В', areaMin: 85.25, areaMax: 85.25, planImg: 'img/luch/2V.jpg' },
+        { key: 'Г', label: 'Сектор Б-Д Тип-Г', areaMin: 85.25, areaMax: 85.25, planImg: 'img/luch/2G.jpg' },
+
+        { key: 'Д', label: 'Сектор В-Е Тип-Д', areaMin: 64.43, areaMax: 64.43, planImg: 'img/luch/1G.jpg' },
+        { key: 'Е', label: 'Сектор В-Е Тип-Е', areaMin: 64.43, areaMax: 64.43, planImg: 'img/luch/1D.jpg' },
+
+        { key: 'Е', label: 'Сектор Ж-К Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
+        { key: 'Ж', label: 'Сектор Ж-К Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
+
+        { key: 'З', label: 'Сектор З-И Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
+        { key: 'И', label: 'Сектор З-И Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
+
+      ] },
     ],
     areaMin: 35,
     areaMax: 120,
-    price: 124000,
+    price: 71000,
     address: 'В.В.Путина 001',
-    district: 'СЗАО',
+    district: 'Новый Проспект',
     noMarkupYears: 2,
-    mandatoryPayment: 4000,
+    mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
     images: [
       '',
