@@ -189,11 +189,11 @@ const DEFAULT_PROPERTIES = [
         { key: 'Д', label: 'Сектор В-Е Тип-Д', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Д.jpg' },
         { key: 'Е', label: 'Сектор В-Е Тип-Е', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Е.jpg' },
 
-        { key: 'Е', label: 'Сектор Ж-К Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
-        { key: 'Ж', label: 'Сектор Ж-К Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
+        { key: 'Ж', label: 'Сектор Ж-К Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
+        { key: 'И', label: 'Сектор Ж-К Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
 
-        { key: 'З', label: 'Сектор З-И Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
-        { key: 'И', label: 'Сектор З-И Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
+        { key: 'К', label: 'Сектор З-И Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
+        { key: 'Л', label: 'Сектор З-И Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
 
       ] },
     ],
