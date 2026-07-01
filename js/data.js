@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v15';
-const DATA_JS_VERSION = '15';
+const STORE_KEY = 'aparts_data_v16';
+const DATA_JS_VERSION = '16';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -601,9 +601,16 @@ function getLayoutLabel(index) {
   return `Вариант ${getLayoutKey(index)}`;
 }
 
+function resolveLayoutSectorTitle(layout) {
+  const fromField = stripSectorTitle(layout?.sectorTitle || '');
+  if (fromField) return fromField;
+  return extractSectorTitleFromLayoutLabel(layout?.label) || '';
+}
+
 function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const key = layout?.key?.trim() || getLayoutKey(index);
-  const label = preserveLayoutLabel(layout?.label) || getLayoutLabel(index);
+  const label = String(layout?.label || '').trim() || getLayoutLabel(index);
+  const sectorTitle = resolveLayoutSectorTitle(layout) || undefined;
   const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
   const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
@@ -611,7 +618,7 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const planImg = String(layout?.planImg || layout?.planImage || parentVariant?.planImg || '').trim();
   const availableFloors = normalizeFloorRanges(layout?.availableFloors);
 
-  return {
+  const normalized = {
     key,
     label,
     areaMin,
@@ -621,6 +628,8 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
     planImg,
     price: Number.isFinite(price) ? price : null,
   };
+  if (sectorTitle) normalized.sectorTitle = sectorTitle;
+  return normalized;
 }
 
 function getVariantLayouts(variant) {
@@ -944,12 +953,14 @@ function sanitizeComplexPropertyForStorage(property) {
             if (!normalized) return null;
             return {
               ...normalized,
-              layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
-                normalizeLayoutVariant({
+              layouts: getVariantLayouts(normalized).map((layout, layoutIndex) => {
+                const sectorTitle = resolveLayoutSectorTitle(layout) || undefined;
+                return normalizeLayoutVariant({
                   ...layout,
-                  label: sanitizeLayoutLabel(layout.label),
-                }, layoutIndex, normalized)
-              ),
+                  sectorTitle,
+                  label: sanitizeLayoutLabel(layout.label) || layout.label,
+                }, layoutIndex, normalized);
+              }),
             };
           })
           .filter(Boolean);
@@ -973,12 +984,14 @@ function sanitizeComplexPropertyForStorage(property) {
       if (!normalized) return null;
       return {
         ...normalized,
-        layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
-          normalizeLayoutVariant({
+        layouts: getVariantLayouts(normalized).map((layout, layoutIndex) => {
+          const sectorTitle = resolveLayoutSectorTitle(layout) || undefined;
+          return normalizeLayoutVariant({
             ...layout,
-            label: sanitizeLayoutLabel(layout.label),
-          }, layoutIndex, normalized)
-        ),
+            sectorTitle,
+            label: sanitizeLayoutLabel(layout.label) || layout.label,
+          }, layoutIndex, normalized);
+        }),
       };
     }).filter(Boolean);
   }
@@ -1076,7 +1089,7 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
     price: sourceVariant.price,
     layouts: layouts.map((layout, index) => normalizeLayoutVariant({
       ...layout,
-      label: preserveLayoutLabel(layout.label) || layout.label,
+      sectorTitle: resolveLayoutSectorTitle(layout) || undefined,
     }, index, sourceVariant)),
   });
 }
@@ -1129,10 +1142,13 @@ function buildSectorsFromFlatVariants(flatVariants) {
     const layoutsBySector = new Map();
 
     for (const layout of rawLayouts) {
-      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label);
+      const sectorTitle = resolveLayoutSectorTitle(layout);
       if (!sectorTitle || isGeneralSectorTitle(sectorTitle)) continue;
       if (!layoutsBySector.has(sectorTitle)) layoutsBySector.set(sectorTitle, []);
-      layoutsBySector.get(sectorTitle).push(layout);
+      layoutsBySector.get(sectorTitle).push({
+        ...layout,
+        sectorTitle,
+      });
     }
 
     for (const [sectorTitle, sectorLayouts] of layoutsBySector) {
@@ -1894,6 +1910,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v15',
     'aparts_data_v14',
     'aparts_data_v13',
     'aparts_data_v12',
@@ -2074,7 +2091,8 @@ function logoutUser() {
 // После изменений: git pull (если нужно) + Ctrl+Shift+R в браузере
 //
 // floorPriceRanges — цены по диапазонам этажей для всего объекта
-// layouts — количество квартир и этажи для каждой планировки в секторе
+// layouts — количество квартир, этажи и подпись для каждой планировки в секторе
+//   label — своё название планировки (необязательно)
 //   availableFloors: строка "3-8, 12" или массив [{ floorMin: 3, floorMax: 8 }]
 //
 // Если указать sectors целиком — используется он вместо автосборки из flatVariants
@@ -2203,6 +2221,63 @@ function distributeApartmentsAcrossLayouts(total, layoutCount) {
   return result;
 }
 
+function buildJk2SectorsFromLayoutConfig(sourceVariants) {
+  const layoutLookup = new Map();
+
+  for (const variant of sourceVariants || []) {
+    const flatType = FLAT_TYPE_LABELS[variant?.flatType] ? variant.flatType : null;
+    if (!flatType) continue;
+    if (!layoutLookup.has(flatType)) layoutLookup.set(flatType, new Map());
+
+    for (const layout of variant.layouts || []) {
+      if (!layout?.key) continue;
+      layoutLookup.get(flatType).set(String(layout.key), layout);
+    }
+  }
+
+  const sectors = [];
+  const layoutsConfig = JK2_BOMOND_DATA.layouts || {};
+
+  for (const [sectorTitle, flatTypesConfig] of Object.entries(layoutsConfig)) {
+    const flatVariantsByType = new Map();
+
+    for (const [flatType, layoutsForType] of Object.entries(flatTypesConfig || {})) {
+      if (!FLAT_TYPE_LABELS[flatType]) continue;
+
+      const sourceMap = layoutLookup.get(flatType);
+      const sourceVariant = (sourceVariants || []).find(variant => variant.flatType === flatType);
+      if (!sourceMap || !sourceVariant) continue;
+
+      const sectorLayouts = [];
+      for (const [layoutKey, detail] of Object.entries(layoutsForType || {})) {
+        const sourceLayout = sourceMap.get(String(layoutKey));
+        if (!sourceLayout) continue;
+
+        sectorLayouts.push({
+          ...sourceLayout,
+          sectorTitle,
+          label: detail?.label ? String(detail.label).trim() : sourceLayout.label,
+        });
+      }
+
+      if (!sectorLayouts.length) continue;
+
+      const sectorVariant = buildSectorVariantFromLayouts(flatType, sourceVariant, sectorLayouts);
+      if (sectorVariant) flatVariantsByType.set(flatType, sectorVariant);
+    }
+
+    if (!flatVariantsByType.size) continue;
+
+    sectors.push({
+      id: slugifySectorId(formatSectorTitle(sectorTitle)) || `sector-${sectors.length + 1}`,
+      title: formatSectorTitle(sectorTitle),
+      flatVariants: [...flatVariantsByType.values()],
+    });
+  }
+
+  return sortSectorsAlphabetically(sectors);
+}
+
 function buildJk2SectorsFromExplicitData(sectorsData) {
   return sectorsData
     .map((sector, index) => {
@@ -2242,10 +2317,13 @@ function applyJk2LayoutDetailsToSectors(sectors) {
       const layouts = rawLayouts.map((layout, index) => {
         const detail = getJk2LayoutDetailConfig(sectorTitle, variant.flatType, layout.key);
         const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
+        const customLabel = detail?.label ? String(detail.label).trim() : '';
         return normalizeLayoutVariant({
           ...layout,
+          label: customLabel || layout.label,
           totalApartments,
           availableFloors: resolveLayoutAvailableFloors(detail, layout),
+          sectorTitle: sectorTitle || resolveLayoutSectorTitle(layout) || undefined,
         }, index, variant);
       });
 
@@ -2279,7 +2357,9 @@ function applyJk2BomondDataFromConfig(property) {
 
   let sectors = Array.isArray(JK2_BOMOND_DATA.sectors) && JK2_BOMOND_DATA.sectors.length
     ? buildJk2SectorsFromExplicitData(JK2_BOMOND_DATA.sectors)
-    : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source));
+    : (JK2_BOMOND_DATA.layouts && Object.keys(JK2_BOMOND_DATA.layouts).length
+      ? buildJk2SectorsFromLayoutConfig(source.flatVariants)
+      : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source)));
 
   sectors = applyJk2LayoutDetailsToSectors(sectors);
 

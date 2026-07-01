@@ -295,6 +295,9 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
   if (!container) return [];
 
   const variantPrefix = `sector_${sectorIndex}_variant_${flatType}`;
+  const sectorTitle = stripSectorTitle(
+    form.querySelector(`[name="sector_${sectorIndex}_title"]`)?.value?.trim() || ''
+  );
   const fallbackAreaMin = parseArea(form.querySelector(`[name="${variantPrefix}_areaMin"]`)?.value) ?? 0;
   const fallbackAreaMax = parseArea(form.querySelector(`[name="${variantPrefix}_areaMax"]`)?.value) ?? 0;
 
@@ -326,6 +329,7 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
       areaMin,
       areaMax: areaMax || areaMin,
     };
+    if (sectorTitle) layout.sectorTitle = sectorTitle;
     if (planImg) layout.planImg = planImg;
     if (Number.isFinite(price)) layout.price = price;
     if (totalApartments > 0) layout.totalApartments = totalApartments;
