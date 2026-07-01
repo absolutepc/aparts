@@ -424,7 +424,7 @@ function getLayoutLabel(index) {
 
 function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const key = layout?.key?.trim() || getLayoutKey(index);
-  const label = extractLayoutTypeFromLabel(layout?.label) || layout?.label?.trim() || getLayoutLabel(index);
+  const label = getLayoutDisplayLabel(layout?.label) || getLayoutLabel(index);
   const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
   const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
@@ -649,10 +649,11 @@ function slugifySectorId(title) {
 }
 
 function stripSectorTitle(title) {
-  return String(title || '')
-    .trim()
-    .replace(/^(?:сектор\s+)+/gi, '')
-    .trim();
+  let value = String(title || '').trim();
+  while (/^сектор\b/i.test(value)) {
+    value = value.replace(/^сектор\s*/i, '').trim();
+  }
+  return value;
 }
 
 function formatSectorTitle(title) {
@@ -667,8 +668,19 @@ function isGeneralSectorTitle(title) {
     || normalized === 'основной сектор';
 }
 
+function sortSectorsAlphabetically(sectors) {
+  return [...sectors].sort((a, b) =>
+    stripSectorTitle(a.title).localeCompare(stripSectorTitle(b.title), 'ru', { sensitivity: 'base' })
+  );
+}
+
 function getLayoutDisplayLabel(label) {
-  return extractLayoutTypeFromLabel(label) || String(label || '').trim();
+  const raw = String(label || '').trim();
+  const typeLabel = extractLayoutTypeFromLabel(raw);
+  if (typeLabel) return typeLabel;
+
+  const withoutSectorPrefix = raw.replace(/^Сектор\s+.+?(?=\s+Тип-|$)/i, '').trim();
+  return stripSectorTitle(withoutSectorPrefix) || stripSectorTitle(raw) || raw;
 }
 
 function getSectorDisplayTitle(title) {
@@ -719,7 +731,7 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
     price: sourceVariant.price,
     layouts: layouts.map((layout, index) => normalizeLayoutVariant({
       ...layout,
-      label: extractLayoutTypeFromLabel(layout.label) || layout.label,
+      label: getLayoutDisplayLabel(layout.label) || layout.label,
     }, index, sourceVariant)),
   });
 }
@@ -1358,14 +1370,21 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
   if (!variants.length) return '';
 
   const sectorPickerHtml = sectors.length > 1
-    ? `<div class="property-sector-picker">
-        ${sectors.map(sector => `
+    ? `<div class="property-sector-block">
+        <h3 class="property-sector-heading">Сектор</h3>
+        <div class="property-sector-picker">
+          ${sectors.map(sector => {
+            const sectorLabel = getSectorDisplayTitle(sector.title);
+            return `
           <button
             type="button"
             class="property-sector-btn ${selectedSector?.id === sector.id ? 'active' : ''}"
             data-sector-id="${escapeAttr(sector.id)}"
-          >${escapeHtml(getSectorDisplayTitle(sector.title))}</button>
-        `).join('')}
+            title="${escapeAttr(sectorLabel)}"
+          >${escapeHtml(sectorLabel)}</button>
+        `;
+          }).join('')}
+        </div>
       </div>`
     : '';
 
@@ -1438,7 +1457,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>${sectors.length > 1 ? 'Выберите тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
+        <p>${sectors.length > 1 ? 'Выберите обозначение и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
       </div>
       ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>

@@ -455,11 +455,23 @@ main { flex: 1; }
   margin-bottom: 24px;
 }
 
+.property-sector-block {
+  margin-bottom: 28px;
+}
+
+.property-sector-heading {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .property-sector-picker {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 28px;
 }
 
 .property-sector-btn {
