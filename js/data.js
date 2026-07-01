@@ -132,34 +132,34 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk2',
     title: '«Бомонд»',
-    description: 'Комплекс бизнес-класса с видом на набережную, собственной инфраструктурой и охраняемой территорией.',
+    description: 'ООО «Кормат Строй» Застройщик ЖК «Бомонд» Высота потолков 310 см 2 лифта на подъезд -20 этажей -Коммерция 2 этажа-Шикарный вид на весь новый центр-Рядом будет находиться новый экзотический парк-Рядом будет расположен Детский сад , Школа.Жилищный комплекс ЖК «Бомонд» - это представительские 20 этажные жилые дома , строящиеся строительной компанией ООО « Кормат-Строй»На нижних 2 этажах здания расположены коммерческие помещения, предназначенных для размещения магазинов и офисов. Рядом есть парк, что создает дополнительные возможности для прогулок и отдыха на свежем воздухе. Имеющие садик и школа обеспечивают легкую доступность образовательных учреждений для семей с детьми. Родители могут быть спокойны, зная, что их дети находятся в шаговой доступности от них. В конечном итоге жильцы ЖК «Бомонд» могут насладиться высоким уровнем комфорта и удобств,предоставляющих этим жилым комплексом.',
     type: 'jk',
     flatType: '2room',
     totalApartments: 110,
     flatVariants: [
       { flatType: '1room', totalApartments: 55, areaMin: 43.16, areaMax: 60.65, layouts: [
-        { key: 'A', label: 'Сектор А-Г Тип-A', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1А.jpg' },
-        { key: 'Б', label: 'Сектор А-Г Тип-Б', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1Б.jpg' },
-        { key: 'В', label: 'Сектор А-Г Тип-В', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1В.jpg' },
-        { key: 'Г', label: 'Сектор А-Г Тип-Г', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1Г.jpg' },
-        { key: 'Д', label: 'Сектор А-Г Тип-Д', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1Д.jpg' },
-        { key: 'Е', label: 'Сектор А-Г Тип-Е', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1Е.jpg' },
-        { key: 'Ж', label: 'Сектор А-Г Тип-Ж', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Ж.jpg' },
+        { key: 'A', label: '1A - 51.74м²', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1А.jpg' },
+        { key: 'Б', label: '1Б - 51.35м²', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1Б.jpg' },
+        { key: 'В', label: '1В - 60.65м²', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1В.jpg' },
+        { key: 'Г', label: '1Г - 60.65м²', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1Г.jpg' },
+        { key: 'Д', label: '1Д - 56.03м²', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1Д.jpg' },
+        { key: 'Е', label: '1Е - 56.06м²', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1Е.jpg' },
+        { key: 'Ж', label: '1Ж - 51.74м²', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Ж.jpg' },
 
-        { key: 'И', label: 'Сектор Б-Д Тип-И', areaMin: 51.79, areaMax: 51.79, planImg: 'img/Бомонд/1И.jpg' },
-        { key: 'К', label: 'Сектор Б-Д Тип-К', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1К.jpg' },
-        { key: 'Л', label: 'Сектор Б-Д Тип-Л', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1Л.jpg' },
-        { key: 'М', label: 'Сектор Б-Д Тип-М', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1М.jpg' },
-        { key: 'Н', label: 'Сектор Б-Д Тип-Н', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1Н.jpg' },
-        { key: 'П', label: 'Сектор Б-Д Тип-П', areaMin: 59.79, areaMax: 59.79, planImg: 'img/Бомонд/1П.jpg' },
+        { key: 'И', label: '1И - 51.79м²', areaMin: 51.79, areaMax: 51.79, planImg: 'img/Бомонд/1И.jpg' },
+        { key: 'К', label: '1К - 59.16м²', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1К.jpg' },
+        { key: 'Л', label: '1Л - 59.16м²', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1Л.jpg' },
+        { key: 'М', label: '1М - 59.16м²', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1М.jpg' },
+        { key: 'Н', label: '1Н - 59.16м²', areaMin: 59.16, areaMax: 59.16, planImg: 'img/Бомонд/1Н.jpg' },
+        { key: 'П', label: '1П - 59.79м²', areaMin: 59.79, areaMax: 59.79, planImg: 'img/Бомонд/1П.jpg' },
 
-        { key: 'Р', label: 'Сектор В-Е Тип-Р', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Р.jpg' },
-        { key: 'С', label: 'Сектор В-Е Тип-С', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1С.jpg' },
-        { key: 'Т', label: 'Сектор В-Е Тип-Т', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1Т.jpg' },
-        { key: 'У', label: 'Сектор В-Е Тип-У', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1У.jpg' },
-        { key: 'Ф', label: 'Сектор В-Е Тип-Ф', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1Ф.jpg' },
-        { key: 'Х', label: 'Сектор В-Е Тип-Х', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1Х.jpg' },
-        { key: 'Ш', label: 'Сектор В-Е Тип-Ш', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Ш.jpg' },
+        { key: 'Р', label: '1Р - 51.74м²', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Р.jpg' },
+        { key: 'С', label: '1С - 56.06м²', areaMin: 56.06, areaMax: 56.06, planImg: 'img/Бомонд/1С.jpg' },
+        { key: 'Т', label: '1Т - 56.03м²', areaMin: 56.03, areaMax: 56.03, planImg: 'img/Бомонд/1Т.jpg' },
+        { key: 'У', label: '1У - 60.65м²', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1У.jpg' },
+        { key: 'Ф', label: '1Ф - 60.65м²', areaMin: 60.65, areaMax: 60.65, planImg: 'img/Бомонд/1Ф.jpg' },
+        { key: 'Х', label: '1Х - 51.35м²', areaMin: 51.35, areaMax: 51.35, planImg: 'img/Бомонд/1Х.jpg' },
+        { key: 'Ш', label: '1Ш - 51.74м²', areaMin: 51.74, areaMax: 51.74, planImg: 'img/Бомонд/1Ш.jpg' },
 
         { key: 'Ж-А', label: 'Сектор Ж-К Тип-А', areaMin: 43.16, areaMax: 43.16, planImg: 'img/luch/1A.jpg' },
         { key: 'Ж-Б', label: 'Сектор Ж-К Тип-Б', areaMin: 46.18, areaMax: 46.18, planImg: 'img/luch/1B.jpg' },
@@ -184,14 +184,14 @@ const DEFAULT_PROPERTIES = [
       ]  },
       
       { flatType: '2room', totalApartments: 55, areaMin: 62.34, areaMax: 85.25, layouts: [
-        { key: 'A', label: 'Сектор А-Г Тип-A', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2А.jpg' },
-        { key: 'Б', label: 'Сектор А-Г Тип-Б', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Б.jpg' },
+        { key: 'A', label: '2A - 64.43м²', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2А.jpg' },
+        { key: 'Б', label: '2Б - 64.43м²', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Б.jpg' },
 
-        { key: 'B', label: 'Сектор Б-Д Тип-В', areaMin: 85.25, areaMax: 85.25, planImg: 'img/Бомонд/2В.jpg' },
-        { key: 'Г', label: 'Сектор Б-Д Тип-Г', areaMin: 85.25, areaMax: 85.25, planImg: 'img/Бомонд/2Г.jpg' },
+        { key: 'B', label: '2В - 85.25м²', areaMin: 85.25, areaMax: 85.25, planImg: 'img/Бомонд/2В.jpg' },
+        { key: 'Г', label: '2Г - 85.25м²', areaMin: 85.25, areaMax: 85.25, planImg: 'img/Бомонд/2Г.jpg' },
 
-        { key: 'Д', label: 'Сектор В-Е Тип-Д', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Д.jpg' },
-        { key: 'Е', label: 'Сектор В-Е Тип-Е', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Е.jpg' },
+        { key: 'Д', label: '2Д - 64.43м²', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Д.jpg' },
+        { key: 'Е', label: '2Е - 64.43м²', areaMin: 64.43, areaMax: 64.43, planImg: 'img/Бомонд/2Е.jpg' },
 
         { key: 'Ж', label: 'Сектор Ж-К Тип-A', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2A.jpg' },
         { key: 'И', label: 'Сектор Ж-К Тип-Б', areaMin: 62.34, areaMax: 62.34, planImg: 'img/luch/2B.jpg' },
@@ -206,7 +206,7 @@ const DEFAULT_PROPERTIES = [
     price: 71000,
     address: 'В.В.Путина 001',
     district: 'Новый Проспект',
-    noMarkupYears: 2,
+    noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
     images: [
@@ -2103,57 +2103,111 @@ JK2_SOURCE_FLAT_VARIANTS = JSON.parse(JSON.stringify(
 
 const JK2_BOMOND_DATA = {
   floorPriceRanges: [
-    { floorMin: 3, floorMax: 8, price: 71000 },
-    { floorMin: 9, floorMax: 15, price: 75000 },
-    { floorMin: 16, floorMax: 20, price: 79000 },
+    { floorMin: 3, floorMax: 5, price: 85000 },
+    { floorMin: 6, floorMax: 8, price: 80000 },
+    { floorMin: 9, floorMax: 11, price: 77000 },
+    { floorMin: 12, floorMax: 14, price: 74000 },
+    { floorMin: 15, floorMax: 19, price: 71000 },
   ],
 
   // Сектор → тип квартир → ключ планировки → данные
   layouts: {
-    'А-Г': {
+    'А': {
       '1room': {
-        A: { totalApartments: 2, availableFloors: '3-5' },
-        '\u0411': { totalApartments: 2, availableFloors: '3-5' },
-        '\u0412': { totalApartments: 1, availableFloors: '6-8' },
-        '\u0413': { totalApartments: 1, availableFloors: '6-8' },
-        '\u0414': { totalApartments: 2, availableFloors: '9-11' },
-        '\u0415': { totalApartments: 1, availableFloors: '9-11' },
-        '\u0416': { totalApartments: 1, availableFloors: '12-15' },
+        A: { totalApartments: 11, availableFloors: '4, 6-8, 10-14 , 17, 19' }, /* 3\5 */
+        '\u0411': { totalApartments: 10, availableFloors: '4-12, 19' },  /* 3\5 */
+        '\u0412': { totalApartments: 11, availableFloors: '3-8, 10-11, 13-14, 18' }, 
+        '\u0413': { totalApartments: 12, availableFloors: '3-8, 10-11, 13-14, 17-18' },
+        '\u0414': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
+        '\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
+        '\u0416': { totalApartments: 11, availableFloors: '3-8, 10-14' },
       },
+      
       '2room': {
-        A: { totalApartments: 6, availableFloors: '3-8' },
-        '\u0411': { totalApartments: 5, availableFloors: '9-15' },
+        A: { totalApartments: 1, availableFloors: '5' },  /* 3\4 */
+        /*'\u0411': { totalApartments: 5, availableFloors: '5, 6-15' }, /* 3\4 */
       },
     },
-    'Б-Д': {
+
+    'Б': {
       '1room': {
-        '\u0418': { totalApartments: 2, availableFloors: '3-6' },
-        '\u041a': { totalApartments: 2, availableFloors: '3-6' },
-        '\u041b': { totalApartments: 1, availableFloors: '7-9' },
-        '\u041c': { totalApartments: 1, availableFloors: '7-9' },
-        '\u041d': { totalApartments: 2, availableFloors: '10-12' },
-        '\u041f': { totalApartments: 1, availableFloors: '13-15' },
+        '\u0418': { totalApartments: 7, availableFloors: '4-5, 7-10, 18' },  /* */
+        '\u041a': { totalApartments: 3, availableFloors: '5, 7, 15' },  /* */
+        '\u041b': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
+        '\u041c': { totalApartments: 14, availableFloors: '3-14, 17-18' }, 
+        '\u041d': { totalApartments: 1, availableFloors: '5' },  /* */
+        '\u041f': { totalApartments: 1, availableFloors: '8' },  /* */
       },
       '2room': {
-        B: { totalApartments: 6, availableFloors: '3-8' },
-        '\u0413': { totalApartments: 5, availableFloors: '9-15' },
+        B: { totalApartments: 2, availableFloors: '11, 17' },  /* */
+        '\u0413': { totalApartments: 1, availableFloors: '8' },  /* */
       },
     },
-    'В-Е': {
+
+    'В': {
       '1room': {
-        '\u0420': { totalApartments: 2, availableFloors: '3-5' },
-        '\u0421': { totalApartments: 2, availableFloors: '3-5' },
-        '\u0422': { totalApartments: 1, availableFloors: '6-8' },
-        '\u0423': { totalApartments: 1, availableFloors: '6-8' },
-        '\u0424': { totalApartments: 2, availableFloors: '9-11' },
-        '\u0425': { totalApartments: 1, availableFloors: '12-14' },
-        '\u0428': { totalApartments: 1, availableFloors: '15-17' },
+        '\u0420': { totalApartments: 5, availableFloors: '4-5, 7-8, 10' },  /* */
+        '\u0421': { totalApartments: 3, availableFloors: '4-5, 8' },  /* */
+        '\u0422': { totalApartments: 13, availableFloors: '3-11, 13-14, 17, 19' },
+        '\u0423': { totalApartments: 12, availableFloors: '3-14' },
+        '\u0424': { totalApartments: 12, availableFloors: '3-11, 13-15, 17' },
+        '\u0425': { totalApartments: 9, availableFloors: '3-8, 11, 13, 19,' },  
+        '\u0428': { totalApartments: 6, availableFloors: '4-5, 7-8, 11, 19' },  /* */
+      },
+      '2room': { 
+        '\u0414': { totalApartments: 1, availableFloors: '19' },  /* */
+        '\u0415': { totalApartments: 1, availableFloors: '19' },  /* */
+      },
+    },
+
+    'Г': {
+      '1room': {
+        A: { totalApartments: 6, availableFloors: '4-8, 11' },
+        '\u0411': { totalApartments: 10, availableFloors: '3-5, 7-8, 10-11, 14, 18-19' },  /* 3 */
+        '\u0412': { totalApartments: 13, availableFloors: '3-5, 7-14, 17, 19' },
+        '\u0413': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
+        '\u0414': { totalApartments: 14, availableFloors: '3-11, 13-14, 16-17, 19' },
+        '\u0415': { totalApartments: 3, availableFloors: '3-5' },
+        '\u0416': { totalApartments: 2, availableFloors: '5, 7' },
+      },
+
+      '2room': {
+        A: { totalApartments: 1, availableFloors: '3' },  /* 3 */
+        '\u0411': { totalApartments: 3, availableFloors: '8, 10, 19' }, /* 3 */
+      },
+    },
+
+    'Д': {
+      '1room': {
+        '\u0418': { totalApartments: 7, availableFloors: '3-8, 19' },  /* */
+        '\u041a': { totalApartments: 5, availableFloors: '3, 5, 14, 18-19' },  /* */
+        '\u041b': { totalApartments: 14, availableFloors: '3-5, 7-14, 17-19' },
+        '\u041c': { totalApartments: 13, availableFloors: '4-12, 14-15, 18-19' }, 
+        '\u041d': { totalApartments: 14, availableFloors: '3-5, 7-8, 10-11, 13, 19' },  /* */
+        '\u041f': { totalApartments: 7, availableFloors: '4-9, 19' },  /* */
       },
       '2room': {
-        '\u0414': { totalApartments: 6, availableFloors: '3-8' },
-        '\u0415': { totalApartments: 5, availableFloors: '9-15' },
+        B: { totalApartments: 2, availableFloors: '10, 13' },  /* */
+        '\u0413': { totalApartments: 4, availableFloors: '4-5, 10-11' },  /* */
       },
     },
+
+    'Е': {
+      '1room': {
+        '\u0420': { totalApartments: 2, availableFloors: '3-5' },  /* */
+        '\u0421': { totalApartments: 2, availableFloors: '3-5' },  /* */
+        '\u0422': { totalApartments: 1, availableFloors: '3-8' },
+        '\u0423': { totalApartments: 1, availableFloors: '3-8' },
+        '\u0424': { totalApartments: 2, availableFloors: '3-11' },
+        '\u0425': { totalApartments: 1, availableFloors: '4-14' },  
+        '\u0428': { totalApartments: 1, availableFloors: '3-17' },  /* */
+      },
+      '2room': { 
+        '\u0414': { totalApartments: 6, availableFloors: '3-8' },  /* */
+        '\u0415': { totalApartments: 5, availableFloors: '9-15' },  /* */
+      },
+    },
+
     'Ж-К': {
       '1room': {
         '\u0416-\u0410': { totalApartments: 2, availableFloors: '3-5' },
