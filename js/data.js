@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v10';
+const STORE_KEY = 'aparts_data_v11';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -424,7 +424,7 @@ function getLayoutLabel(index) {
 
 function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const key = layout?.key?.trim() || getLayoutKey(index);
-  const label = layout?.label?.trim() || getLayoutLabel(index);
+  const label = extractLayoutTypeFromLabel(layout?.label) || layout?.label?.trim() || getLayoutLabel(index);
   const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
   const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
@@ -648,10 +648,29 @@ function slugifySectorId(title) {
   return slug ? `sector-${slug}` : 'sector-default';
 }
 
+function stripSectorTitle(title) {
+  return String(title || '')
+    .trim()
+    .replace(/^(?:сектор\s+)+/gi, '')
+    .trim();
+}
+
 function formatSectorTitle(title) {
-  const value = String(title || '').trim();
-  if (!value) return 'Сектор';
-  return /^сектор\b/i.test(value) ? value : `Сектор ${value}`;
+  const value = stripSectorTitle(title);
+  return value || 'A';
+}
+
+function isGeneralSectorTitle(title) {
+  const normalized = stripSectorTitle(title).toLowerCase();
+  return normalized === 'общий'
+    || normalized === 'основной'
+    || normalized === 'основной сектор';
+}
+
+function sortSectorsAlphabetically(sectors) {
+  return [...sectors].sort((a, b) =>
+    stripSectorTitle(a.title).localeCompare(stripSectorTitle(b.title), 'ru', { sensitivity: 'base' })
+  );
 }
 
 function generateSectorId(title) {
@@ -713,13 +732,10 @@ function buildSectorsFromFlatVariants(flatVariants) {
     const layoutsBySector = new Map();
 
     for (const layout of layouts) {
-      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label) || 'Общий';
+      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label);
+      if (!sectorTitle || isGeneralSectorTitle(sectorTitle)) continue;
       if (!layoutsBySector.has(sectorTitle)) layoutsBySector.set(sectorTitle, []);
       layoutsBySector.get(sectorTitle).push(layout);
-    }
-
-    if (!layoutsBySector.size) {
-      layoutsBySector.set('Общий', layouts);
     }
 
     for (const [sectorTitle, sectorLayouts] of layoutsBySector) {
@@ -741,11 +757,13 @@ function buildSectorsFromFlatVariants(flatVariants) {
     }
   }
 
-  const sectors = [...sectorMap.values()].map((sector, index) => ({
-    id: slugifySectorId(sector.title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`,
-    title: sector.title,
-    flatVariants: [...sector.flatVariantsByType.values()],
-  }));
+  const sectors = [...sectorMap.values()]
+    .map((sector, index) => ({
+      id: slugifySectorId(sector.title) || `sector-${index + 1}`,
+      title: sector.title,
+      flatVariants: [...sector.flatVariantsByType.values()],
+    }))
+    .filter(sector => sector.flatVariants.length && !isGeneralSectorTitle(sector.title));
 
   for (const [flatType, targetTotal] of sourceTotals) {
     const sectorVariants = sectors
@@ -769,12 +787,14 @@ function buildSectorsFromFlatVariants(flatVariants) {
     });
   }
 
-  return sectors;
+  return sortSectorsAlphabetically(sectors);
 }
 
 function normalizeSector(sector, index = 0) {
-  const title = formatSectorTitle(sector?.title || `Сектор ${index + 1}`);
-  const id = String(sector?.id || slugifySectorId(title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`).trim();
+  const title = formatSectorTitle(sector?.title || String.fromCharCode(65 + index));
+  if (isGeneralSectorTitle(title)) return null;
+
+  const id = String(sector?.id || slugifySectorId(title) || `sector-${index + 1}`).trim();
   const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
     .map(normalizeFlatVariant)
     .filter(Boolean);
@@ -786,24 +806,20 @@ function normalizeSector(sector, index = 0) {
 function getComplexSectors(property) {
   if (!isComplex(property)) return [];
 
+  let sectors = [];
+
   if (Array.isArray(property.sectors) && property.sectors.length) {
-    return property.sectors
+    sectors = property.sectors
       .map((sector, index) => normalizeSector(sector, index))
       .filter(Boolean);
+  } else {
+    const legacyVariants = getLegacyRootFlatVariants(property);
+    if (legacyVariants.length) {
+      sectors = buildSectorsFromFlatVariants(legacyVariants);
+    }
   }
 
-  const legacyVariants = getLegacyRootFlatVariants(property);
-  if (!legacyVariants.length) return [];
-
-  const autoSectors = buildSectorsFromFlatVariants(legacyVariants);
-  if (autoSectors.length <= 1 && autoSectors[0]?.title === 'Сектор Общий') {
-    return [{
-      ...autoSectors[0],
-      title: 'Основной сектор',
-    }];
-  }
-
-  return autoSectors;
+  return sortSectorsAlphabetically(sectors);
 }
 
 function getComplexSectorById(property, sectorId) {
@@ -1468,6 +1484,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v10',
     'aparts_data_v9',
     'aparts_data_v8',
     'aparts_data_v7',
