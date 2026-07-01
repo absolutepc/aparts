@@ -112,13 +112,15 @@ function renderDashboard() {
 
 function renderAdminLayoutRow(flatType, index, layout = {}, sectorIndex = 0) {
   const label = layout.label || getLayoutLabel(index);
+  const layoutKey = layout.key || getLayoutKey(index);
   const prefix = `sector_${sectorIndex}_variant_${flatType}_layout_${index}`;
   return `
-    <div class="admin-layout-row" data-flat-type="${escapeHtml(flatType)}" data-layout-index="${index}">
+    <div class="admin-layout-row" data-flat-type="${escapeHtml(flatType)}" data-layout-index="${index}" data-layout-key="${escapeAttr(layoutKey)}">
       <div class="admin-layout-row-head">
         <strong>${escapeHtml(label)}</strong>
         <button type="button" class="btn btn-danger btn-sm admin-remove-layout-btn">Удалить</button>
       </div>
+      <input type="hidden" name="${prefix}_key" value="${escapeHtml(layoutKey)}">
       <div class="admin-form-grid">
         <div class="form-group">
           <label>Подпись</label>
@@ -238,20 +240,30 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
   const container = form.querySelector(`.admin-layout-rows[data-flat-type="${flatType}"][data-sector-index="${sectorIndex}"]`);
   if (!container) return [];
 
+  const variantPrefix = `sector_${sectorIndex}_variant_${flatType}`;
+  const fallbackAreaMin = parseArea(form.querySelector(`[name="${variantPrefix}_areaMin"]`)?.value) ?? 0;
+  const fallbackAreaMax = parseArea(form.querySelector(`[name="${variantPrefix}_areaMax"]`)?.value) ?? 0;
+
   const layouts = [];
   container.querySelectorAll('.admin-layout-row').forEach((row, index) => {
     const prefix = `sector_${sectorIndex}_variant_${flatType}_layout_${index}`;
-    const areaMin = parseArea(row.querySelector(`[name="${prefix}_areaMin"]`)?.value) ?? 0;
-    const areaMax = parseArea(row.querySelector(`[name="${prefix}_areaMax"]`)?.value) ?? 0;
-    const planImg = row.querySelector(`[name="${prefix}_planImg"]`)?.value?.trim() || '';
+    let areaMin = parseArea(row.querySelector(`[name="${prefix}_areaMin"]`)?.value) ?? 0;
+    let areaMax = parseArea(row.querySelector(`[name="${prefix}_areaMax"]`)?.value) ?? 0;
+    let planImg = row.querySelector(`[name="${prefix}_planImg"]`)?.value?.trim() || '';
     const label = row.querySelector(`[name="${prefix}_label"]`)?.value?.trim() || getLayoutLabel(index);
+    const key = row.querySelector(`[name="${prefix}_key"]`)?.value?.trim()
+      || row.dataset.layoutKey
+      || getLayoutKey(index);
     const priceRaw = row.querySelector(`[name="${prefix}_price"]`)?.value;
     const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
 
-    if (!planImg && !areaMin && !areaMax) return;
+    if (!areaMin) areaMin = fallbackAreaMin;
+    if (!areaMax) areaMax = fallbackAreaMax || areaMin;
+
+    if (!label && !planImg && !areaMin && !areaMax) return;
 
     const layout = {
-      key: getLayoutKey(index),
+      key,
       label,
       areaMin,
       areaMax: areaMax || areaMin,
@@ -269,7 +281,11 @@ function reindexAdminLayoutRows(container, flatType, sectorIndex = 0) {
     row.dataset.layoutIndex = String(index);
     const prefix = `sector_${sectorIndex}_variant_${flatType}_layout_${index}`;
     const labelValue = row.querySelector('[name*="_label"]')?.value?.trim() || getLayoutLabel(index);
+    const keyValue = row.querySelector('[name*="_key"]')?.value?.trim()
+      || row.dataset.layoutKey
+      || getLayoutKey(index);
     const fields = {
+      key: keyValue,
       label: labelValue,
       areaMin: row.querySelector('[name*="_areaMin"]')?.value ?? '',
       areaMax: row.querySelector('[name*="_areaMax"]')?.value ?? '',
@@ -277,11 +293,13 @@ function reindexAdminLayoutRows(container, flatType, sectorIndex = 0) {
       planImg: row.querySelector('[name*="_planImg"]')?.value ?? '',
     };
 
+    row.dataset.layoutKey = keyValue;
     row.innerHTML = `
       <div class="admin-layout-row-head">
         <strong>${escapeHtml(fields.label)}</strong>
         <button type="button" class="btn btn-danger btn-sm admin-remove-layout-btn">Удалить</button>
       </div>
+      <input type="hidden" name="${prefix}_key" value="${escapeHtml(fields.key)}">
       <div class="admin-form-grid">
         <div class="form-group">
           <label>Подпись</label>
@@ -352,18 +370,30 @@ function collectFlatVariantsFromSectorForm(form, sectorIndex) {
 
   for (const flatType of FLAT_TYPE_KEYS) {
     const prefix = `sector_${sectorIndex}_variant_${flatType}`;
-    const totalApartments = Number(form.querySelector(`[name="${prefix}_totalApartments"]`)?.value);
-    if (!totalApartments || totalApartments < 1) continue;
-
+    const totalRaw = form.querySelector(`[name="${prefix}_totalApartments"]`)?.value;
+    const totalApartments = Number(totalRaw);
     const areaMin = parseArea(form.querySelector(`[name="${prefix}_areaMin"]`)?.value) ?? 0;
     const areaMax = parseArea(form.querySelector(`[name="${prefix}_areaMax"]`)?.value) ?? 0;
+    const layouts = collectLayoutsForFlatType(form, flatType, sectorIndex);
+    const hasVariantData = (totalApartments >= 1)
+      || layouts.length > 0
+      || areaMin > 0
+      || areaMax > 0;
+
+    if (!hasVariantData) continue;
+
     if (areaMin && areaMax && areaMin > areaMax) {
       return { error: `Сектор ${sectorIndex + 1}, «${getFlatTypeLabel(flatType)}»: минимум больше максимума` };
     }
 
+    if (!totalApartments || totalApartments < 1) {
+      return {
+        error: `Сектор ${sectorIndex + 1}, «${getFlatTypeLabel(flatType)}»: укажите количество квартир (поле «Количество квартир»)`,
+      };
+    }
+
     const priceRaw = form.querySelector(`[name="${prefix}_price"]`)?.value;
     const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
-    const layouts = collectLayoutsForFlatType(form, flatType, sectorIndex);
 
     const variant = {
       flatType,
@@ -381,7 +411,7 @@ function collectFlatVariantsFromSectorForm(form, sectorIndex) {
       if (layouts[0].areaMin) variant.areaMin = layouts[0].areaMin;
       if (layouts[0].areaMax) variant.areaMax = layouts[0].areaMax;
       if (layouts[0].price != null) variant.price = layouts[0].price;
-      if (layouts[0].label) variant.layouts = layouts;
+      variant.layouts = layouts;
     }
 
     variants.push(variant);

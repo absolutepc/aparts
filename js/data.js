@@ -425,7 +425,7 @@ function getLayoutLabel(index) {
 
 function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const key = layout?.key?.trim() || getLayoutKey(index);
-  const label = getLayoutDisplayLabel(layout?.label) || getLayoutLabel(index);
+  const label = preserveLayoutLabel(layout?.label) || getLayoutLabel(index);
   const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
   const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
@@ -678,6 +678,8 @@ function sortSectorsAlphabetically(sectors) {
 
 function getLayoutDisplayLabel(label) {
   const raw = String(label || '').trim();
+  if (!raw) return '';
+
   const typeLabel = extractLayoutTypeFromLabel(raw);
   if (typeLabel) return typeLabel;
 
@@ -688,12 +690,53 @@ function getLayoutDisplayLabel(label) {
   return stripSectorTitle(withoutSectorPrefix) || stripSectorTitle(raw) || raw;
 }
 
+function preserveLayoutLabel(label) {
+  const raw = String(label || '').trim();
+  if (!raw) return '';
+
+  if (/^Сектор\s+.+\s+Тип-/i.test(raw)) {
+    return getLayoutDisplayLabel(raw);
+  }
+
+  return raw;
+}
+
 function getSectorDisplayTitle(title) {
   return stripSectorTitle(title);
 }
 
 function sanitizeLayoutLabel(label) {
-  return getLayoutDisplayLabel(label);
+  return preserveLayoutLabel(label);
+}
+
+function restoreMissingSectorVariantsFromDefaults(property) {
+  if (!isComplex(property)) return property;
+
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  if (!defaults || !Array.isArray(property.sectors) || !property.sectors.length) return property;
+
+  const defaultSectors = buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(defaults));
+  if (!defaultSectors.length) return property;
+
+  let changed = false;
+
+  property.sectors = property.sectors.map((sector) => {
+    const sectorTitle = stripSectorTitle(sector?.title);
+    const defaultSector = defaultSectors.find(item => stripSectorTitle(item.title) === sectorTitle);
+    if (!defaultSector) return sector;
+
+    const existingTypes = new Set((sector.flatVariants || []).map(variant => variant.flatType));
+    const missingVariants = defaultSector.flatVariants.filter(variant => !existingTypes.has(variant.flatType));
+    if (!missingVariants.length) return sector;
+
+    changed = true;
+    return {
+      ...sector,
+      flatVariants: [...(sector.flatVariants || []), ...missingVariants.map(variant => ({ ...variant }))],
+    };
+  });
+
+  return changed ? repairComplexSectorData(property) : property;
 }
 
 function sanitizeComplexPropertyForStorage(property) {
@@ -753,7 +796,7 @@ function sanitizeComplexPropertyForStorage(property) {
     }).filter(Boolean);
   }
 
-  return repairComplexSectorData(item);
+  return repairComplexSectorData(restoreMissingSectorVariantsFromDefaults(item));
 }
 
 function repairComplexSectorData(property) {
@@ -846,7 +889,7 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
     price: sourceVariant.price,
     layouts: layouts.map((layout, index) => normalizeLayoutVariant({
       ...layout,
-      label: getLayoutDisplayLabel(layout.label) || layout.label,
+      label: preserveLayoutLabel(layout.label) || layout.label,
     }, index, sourceVariant)),
   });
 }
@@ -1306,6 +1349,7 @@ function enrichProperty(property) {
 
   if (isComplex(merged)) {
     Object.assign(merged, normalizeComplexProperty(merged));
+    restoreMissingSectorVariantsFromDefaults(merged);
   }
 
   const repaired = repairPropertyImages({
