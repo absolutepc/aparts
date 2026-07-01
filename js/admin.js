@@ -195,7 +195,7 @@ function renderAdminSectorPanel(sector = {}, sectorIndex = 0) {
       <div class="admin-sector-panel-head">
         <div class="form-group">
           <label>Название сектора</label>
-          <input type="text" name="sector_${sectorIndex}_title" value="${escapeHtml(sector.title || '')}" placeholder="Сектор A" required>
+          <input type="text" name="sector_${sectorIndex}_title" value="${escapeHtml(stripSectorTitle(sector.title || ''))}" placeholder="А-Г" required>
           <input type="hidden" name="sector_${sectorIndex}_id" value="${escapeHtml(sector.id || '')}">
         </div>
         <button type="button" class="btn btn-danger btn-sm admin-remove-sector-btn">Удалить сектор</button>
@@ -211,7 +211,7 @@ function renderAdminSectorPanel(sector = {}, sectorIndex = 0) {
 }
 
 function renderAdminSectorsEditor(sectors = []) {
-  const panels = sectors.length ? sectors : [{ title: 'Основной сектор' }];
+  const panels = sectors.length ? sectors : [{ title: 'A' }];
   return `
     <div class="admin-sectors-editor">
       <div class="admin-sectors-editor-head">
@@ -426,7 +426,7 @@ function collectSectorsFromForm(form) {
 }
 
 function fillSectorFormPanel(form, sector, sectorIndex) {
-  form.querySelector(`[name="sector_${sectorIndex}_title"]`).value = sector.title || '';
+  form.querySelector(`[name="sector_${sectorIndex}_title"]`).value = stripSectorTitle(sector.title || '');
   form.querySelector(`[name="sector_${sectorIndex}_id"]`).value = sector.id || '';
 
   const byType = Object.fromEntries((sector.flatVariants || []).map(variant => [variant.flatType, variant]));
@@ -462,7 +462,7 @@ function fillSectorFormPanel(form, sector, sectorIndex) {
 function fillSectorsForm(form, property) {
   if (!form) return;
 
-  const sectors = isComplex(property) ? getComplexSectors(property) : [{ title: 'Основной сектор' }];
+  const sectors = isComplex(property) ? getComplexSectors(property) : [{ title: 'A' }];
   const sectorRows = form.querySelector('#sectorRows');
   if (sectorRows) {
     sectorRows.innerHTML = sectors.map((sector, index) => renderAdminSectorPanel(sector, index)).join('');
@@ -479,7 +479,7 @@ function clearSectorsForm(form) {
 
   const sectorRows = form.querySelector('#sectorRows');
   if (sectorRows) {
-    sectorRows.innerHTML = renderAdminSectorPanel({ title: 'Основной сектор' }, 0);
+    sectorRows.innerHTML = renderAdminSectorPanel({ title: 'A' }, 0);
   }
 
   if (form.flatType) form.flatType.value = '1room';
@@ -515,7 +515,7 @@ function bindAdminSectorRows(form) {
       const nextIndex = sectorRows.querySelectorAll('.admin-sector-panel').length;
       sectorRows.insertAdjacentHTML(
         'beforeend',
-        renderAdminSectorPanel({ title: `Сектор ${String.fromCharCode(65 + nextIndex)}` }, nextIndex)
+        renderAdminSectorPanel({ title: String.fromCharCode(65 + nextIndex) }, nextIndex)
       );
       return;
     }

@@ -1,4 +1,5 @@
-const STORE_KEY = 'aparts_data_v10';
+const STORE_KEY = 'aparts_data_v13';
+const DATA_JS_VERSION = '13';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -424,7 +425,7 @@ function getLayoutLabel(index) {
 
 function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const key = layout?.key?.trim() || getLayoutKey(index);
-  const label = layout?.label?.trim() || getLayoutLabel(index);
+  const label = getLayoutDisplayLabel(layout?.label) || getLayoutLabel(index);
   const areaMin = Number(layout?.areaMin) || Number(parentVariant.areaMin) || 0;
   const areaMax = Number(layout?.areaMax) || Number(parentVariant.areaMax) || areaMin;
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
@@ -612,10 +613,12 @@ function mergeFlatVariants(defaultVariants, savedVariants) {
     defaultVariants.map(variant => [variant.flatType, variant])
   );
 
-  return savedVariants.map(variant => ({
-    ...defaultsByType[variant.flatType],
-    ...variant,
-  }));
+  return savedVariants
+    .map(variant => normalizeFlatVariant({
+      ...defaultsByType[variant.flatType],
+      ...variant,
+    }))
+    .filter(Boolean);
 }
 
 function formatVariantAreaRange(variant) {
@@ -648,10 +651,155 @@ function slugifySectorId(title) {
   return slug ? `sector-${slug}` : 'sector-default';
 }
 
+function stripSectorTitle(title) {
+  return String(title || '')
+    .trim()
+    .replace(/^(?:сектор\s*)+/gi, '')
+    .trim();
+}
+
 function formatSectorTitle(title) {
-  const value = String(title || '').trim();
-  if (!value) return 'Сектор';
-  return /^сектор\b/i.test(value) ? value : `Сектор ${value}`;
+  const value = stripSectorTitle(title);
+  return value || 'A';
+}
+
+function isGeneralSectorTitle(title) {
+  const normalized = stripSectorTitle(title).toLowerCase();
+  return normalized === 'общий'
+    || normalized === 'основной'
+    || normalized === 'основной сектор';
+}
+
+function sortSectorsAlphabetically(sectors) {
+  return [...sectors].sort((a, b) =>
+    stripSectorTitle(a.title).localeCompare(stripSectorTitle(b.title), 'ru', { sensitivity: 'base' })
+  );
+}
+
+function getLayoutDisplayLabel(label) {
+  const raw = String(label || '').trim();
+  const typeLabel = extractLayoutTypeFromLabel(raw);
+  if (typeLabel) return typeLabel;
+
+  const withoutSectorPrefix = raw
+    .replace(/^Сектор\s+/i, '')
+    .replace(/\s+Тип-.+$/i, '')
+    .trim();
+  return stripSectorTitle(withoutSectorPrefix) || stripSectorTitle(raw) || raw;
+}
+
+function getSectorDisplayTitle(title) {
+  return stripSectorTitle(title);
+}
+
+function sanitizeLayoutLabel(label) {
+  return getLayoutDisplayLabel(label);
+}
+
+function sanitizeComplexPropertyForStorage(property) {
+  if (!isComplex(property)) return property;
+
+  const item = { ...property };
+  repairComplexSectorData(item);
+
+  if (Array.isArray(item.sectors) && item.sectors.length) {
+    item.sectors = item.sectors
+      .map((sector, index) => {
+        const title = stripSectorTitle(sector?.title) || String.fromCharCode(65 + index);
+        if (isGeneralSectorTitle(title)) return null;
+
+        const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
+          .map((variant) => {
+            const normalized = normalizeFlatVariant(variant);
+            if (!normalized) return null;
+            return {
+              ...normalized,
+              layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
+                normalizeLayoutVariant({
+                  ...layout,
+                  label: sanitizeLayoutLabel(layout.label),
+                }, layoutIndex, normalized)
+              ),
+            };
+          })
+          .filter(Boolean);
+
+        if (!flatVariants.length) return null;
+        return {
+          id: String(sector?.id || slugifySectorId(title) || `sector-${index + 1}`).trim(),
+          title,
+          flatVariants,
+        };
+      })
+      .filter(Boolean);
+
+    item.sectors = sortSectorsAlphabetically(item.sectors);
+    item.flatVariants = mergeAggregatedFlatVariants(
+      item.sectors.flatMap(sector => sector.flatVariants)
+    );
+  } else if (Array.isArray(item.flatVariants)) {
+    item.flatVariants = item.flatVariants.map((variant) => {
+      const normalized = normalizeFlatVariant(variant);
+      if (!normalized) return null;
+      return {
+        ...normalized,
+        layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
+          normalizeLayoutVariant({
+            ...layout,
+            label: sanitizeLayoutLabel(layout.label),
+          }, layoutIndex, normalized)
+        ),
+      };
+    }).filter(Boolean);
+  }
+
+  return repairComplexSectorData(item);
+}
+
+function repairComplexSectorData(property) {
+  if (!isComplex(property)) return property;
+
+  const hasStoredSectors = Array.isArray(property.sectors) && property.sectors.length;
+
+  if (hasStoredSectors) {
+    property.sectors = property.sectors
+      .map((sector, index) => normalizeSector(sector, index))
+      .filter(Boolean);
+  } else if (Array.isArray(property.flatVariants) && property.flatVariants.length) {
+    property.sectors = buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(property));
+  } else {
+    property.sectors = [];
+  }
+
+  property.sectors = sortSectorsAlphabetically(property.sectors);
+
+  if (property.sectors.length) {
+    property.flatVariants = mergeAggregatedFlatVariants(
+      property.sectors.flatMap(sector => sector.flatVariants)
+    );
+  } else if (Array.isArray(property.flatVariants)) {
+    property.flatVariants = property.flatVariants.map(normalizeFlatVariant).filter(Boolean);
+  }
+
+  if (property.flatVariants?.length) {
+    const primary = property.flatVariants.find(variant => variant.flatType === property.flatType)
+      || property.flatVariants[0];
+    property.flatType = primary.flatType;
+    property.totalApartments = property.flatVariants.reduce(
+      (sum, variant) => sum + (Number(variant.totalApartments) || 0),
+      0
+    );
+    const areaMins = property.flatVariants
+      .map(variant => Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+    const areaMaxs = property.flatVariants
+      .map(variant => Number(variant.areaMax) || Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+    property.areaMin = areaMins.length ? Math.min(...areaMins) : primary.areaMin;
+    property.areaMax = areaMaxs.length ? Math.max(...areaMaxs) : primary.areaMax;
+  }
+
+  return property;
 }
 
 function generateSectorId(title) {
@@ -698,8 +846,26 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
     price: sourceVariant.price,
     layouts: layouts.map((layout, index) => normalizeLayoutVariant({
       ...layout,
-      label: extractLayoutTypeFromLabel(layout.label) || layout.label,
+      label: getLayoutDisplayLabel(layout.label) || layout.label,
     }, index, sourceVariant)),
+  });
+}
+
+function getFlatVariantsForSectorBuild(property) {
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const savedVariants = getLegacyRootFlatVariants(property);
+
+  if (!defaults?.flatVariants?.length) return savedVariants;
+
+  return defaults.flatVariants.map((defaultVariant) => {
+    const saved = savedVariants.find(variant => variant.flatType === defaultVariant.flatType);
+    if (!saved) return { ...defaultVariant };
+
+    return {
+      ...defaultVariant,
+      ...saved,
+      layouts: defaultVariant.layouts,
+    };
   });
 }
 
@@ -707,19 +873,33 @@ function buildSectorsFromFlatVariants(flatVariants) {
   const sectorMap = new Map();
   const sourceTotals = new Map();
 
-  for (const sourceVariant of flatVariants.map(normalizeFlatVariant).filter(Boolean)) {
-    sourceTotals.set(sourceVariant.flatType, Number(sourceVariant.totalApartments) || 0);
-    const layouts = getVariantLayouts(sourceVariant);
+  for (const sourceVariant of flatVariants) {
+    const flatType = FLAT_TYPE_LABELS[sourceVariant?.flatType] ? sourceVariant.flatType : null;
+    if (!flatType) continue;
+
+    const normalizedVariant = normalizeFlatVariant(sourceVariant);
+    if (!normalizedVariant) continue;
+
+    sourceTotals.set(flatType, Number(sourceVariant.totalApartments ?? normalizedVariant.totalApartments) || 0);
+
+    const rawLayouts = Array.isArray(sourceVariant.layouts) && sourceVariant.layouts.length
+      ? sourceVariant.layouts
+      : [{
+        label: sourceVariant.planImg || sourceVariant.planImage ? '' : '',
+        planImg: sourceVariant.planImg || sourceVariant.planImage,
+        areaMin: sourceVariant.areaMin,
+        areaMax: sourceVariant.areaMax,
+        price: sourceVariant.price,
+        totalApartments: sourceVariant.totalApartments,
+      }];
+
     const layoutsBySector = new Map();
 
-    for (const layout of layouts) {
-      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label) || 'Общий';
+    for (const layout of rawLayouts) {
+      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label);
+      if (!sectorTitle || isGeneralSectorTitle(sectorTitle)) continue;
       if (!layoutsBySector.has(sectorTitle)) layoutsBySector.set(sectorTitle, []);
       layoutsBySector.get(sectorTitle).push(layout);
-    }
-
-    if (!layoutsBySector.size) {
-      layoutsBySector.set('Общий', layouts);
     }
 
     for (const [sectorTitle, sectorLayouts] of layoutsBySector) {
@@ -731,21 +911,23 @@ function buildSectorsFromFlatVariants(flatVariants) {
       }
 
       const sectorVariant = buildSectorVariantFromLayouts(
-        sourceVariant.flatType,
-        sourceVariant,
+        flatType,
+        normalizedVariant,
         sectorLayouts
       );
       if (sectorVariant) {
-        sectorMap.get(sectorTitle).flatVariantsByType.set(sourceVariant.flatType, sectorVariant);
+        sectorMap.get(sectorTitle).flatVariantsByType.set(flatType, sectorVariant);
       }
     }
   }
 
-  const sectors = [...sectorMap.values()].map((sector, index) => ({
-    id: slugifySectorId(sector.title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`,
-    title: sector.title,
-    flatVariants: [...sector.flatVariantsByType.values()],
-  }));
+  const sectors = [...sectorMap.values()]
+    .map((sector, index) => ({
+      id: slugifySectorId(sector.title) || `sector-${index + 1}`,
+      title: sector.title,
+      flatVariants: [...sector.flatVariantsByType.values()],
+    }))
+    .filter(sector => sector.flatVariants.length && !isGeneralSectorTitle(sector.title));
 
   for (const [flatType, targetTotal] of sourceTotals) {
     const sectorVariants = sectors
@@ -769,12 +951,14 @@ function buildSectorsFromFlatVariants(flatVariants) {
     });
   }
 
-  return sectors;
+  return sortSectorsAlphabetically(sectors);
 }
 
 function normalizeSector(sector, index = 0) {
-  const title = formatSectorTitle(sector?.title || `Сектор ${index + 1}`);
-  const id = String(sector?.id || slugifySectorId(title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`).trim();
+  const title = formatSectorTitle(sector?.title || String.fromCharCode(65 + index));
+  if (isGeneralSectorTitle(title)) return null;
+
+  const id = String(sector?.id || slugifySectorId(title) || `sector-${index + 1}`).trim();
   const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
     .map(normalizeFlatVariant)
     .filter(Boolean);
@@ -787,23 +971,17 @@ function getComplexSectors(property) {
   if (!isComplex(property)) return [];
 
   if (Array.isArray(property.sectors) && property.sectors.length) {
-    return property.sectors
-      .map((sector, index) => normalizeSector(sector, index))
-      .filter(Boolean);
+    return sortSectorsAlphabetically(
+      property.sectors
+        .map((sector, index) => normalizeSector(sector, index))
+        .filter(Boolean)
+    );
   }
 
-  const legacyVariants = getLegacyRootFlatVariants(property);
+  const legacyVariants = getFlatVariantsForSectorBuild(property);
   if (!legacyVariants.length) return [];
 
-  const autoSectors = buildSectorsFromFlatVariants(legacyVariants);
-  if (autoSectors.length <= 1 && autoSectors[0]?.title === 'Сектор Общий') {
-    return [{
-      ...autoSectors[0],
-      title: 'Основной сектор',
-    }];
-  }
-
-  return autoSectors;
+  return buildSectorsFromFlatVariants(legacyVariants);
 }
 
 function getComplexSectorById(property, sectorId) {
@@ -865,22 +1043,7 @@ function mergeAggregatedFlatVariants(variantsList) {
 }
 
 function syncAggregatedFlatVariantsFromSectors(property) {
-  const sectors = getComplexSectors(property);
-  if (!sectors.length) return property;
-
-  property.sectors = sectors;
-  property.flatVariants = mergeAggregatedFlatVariants(sectors.flatMap(sector => sector.flatVariants));
-
-  const primary = property.flatVariants.find(variant => variant.flatType === property.flatType)
-    || property.flatVariants[0];
-  if (primary) {
-    property.flatType = primary.flatType;
-    property.totalApartments = primary.totalApartments;
-    property.areaMin = primary.areaMin;
-    property.areaMax = primary.areaMax;
-  }
-
-  return property;
+  return repairComplexSectorData(property);
 }
 
 function getComplexFlatVariants(property, sectorId = null) {
@@ -1125,11 +1288,21 @@ function complexHasFlatType(property, flatType) {
 
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const hasSavedSectors = Array.isArray(property.sectors) && property.sectors.length;
   const merged = {
     ...defaults,
     ...property,
     district: property.district || defaults?.district || '',
   };
+
+  if (hasSavedSectors) {
+    merged.sectors = property.sectors;
+    if (Array.isArray(property.flatVariants)) {
+      merged.flatVariants = property.flatVariants;
+    } else {
+      delete merged.flatVariants;
+    }
+  }
 
   if (isComplex(merged)) {
     Object.assign(merged, normalizeComplexProperty(merged));
@@ -1340,14 +1513,21 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
   if (!variants.length) return '';
 
   const sectorPickerHtml = sectors.length > 1
-    ? `<div class="property-sector-picker">
-        ${sectors.map(sector => `
+    ? `<div class="property-sector-block">
+        <h3 class="property-sector-heading">Сектор</h3>
+        <div class="property-sector-picker">
+          ${sectors.map(sector => {
+            const sectorLabel = getSectorDisplayTitle(sector.title);
+            return `
           <button
             type="button"
             class="property-sector-btn ${selectedSector?.id === sector.id ? 'active' : ''}"
             data-sector-id="${escapeAttr(sector.id)}"
-          >${escapeHtml(sector.title)}</button>
-        `).join('')}
+            title="${escapeAttr(sectorLabel)}"
+          >${escapeHtml(sectorLabel)}</button>
+        `;
+          }).join('')}
+        </div>
       </div>`
     : '';
 
@@ -1360,6 +1540,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
 
     const layoutPanelsHtml = layouts.map((layout, layoutIndex) => {
       const planImg = getVariantPlanImg(property, variant, layoutIndex, index);
+      const layoutLabel = getLayoutDisplayLabel(layout.label);
       const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '—';
       const priceValue = layout.price ?? variant.price ?? property.price;
       const apartmentsValue = layout.totalApartments || variant.totalApartments;
@@ -1368,12 +1549,12 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       return `
         <div class="floor-plan-layout-panel${hiddenClass}" data-layout-key="${escapeAttr(layout.key)}">
           <div class="floor-plan-image">
-            ${renderPropertyImg(planImg, `Планировка ${layout.label}`)}
+            ${renderPropertyImg(planImg, `Планировка ${layoutLabel}`)}
           </div>
           <ul class="floor-plan-specs">
             <li>
               <span class="floor-plan-spec-label">Планировка</span>
-              <span class="floor-plan-spec-value">${escapeHtml(layout.label)}</span>
+              <span class="floor-plan-spec-value">${escapeHtml(layoutLabel)}</span>
             </li>
             <li>
               <span class="floor-plan-spec-label">Площадь</span>
@@ -1399,7 +1580,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               type="button"
               class="floor-plan-layout-btn ${layoutIndex === 0 ? 'active' : ''}"
               data-layout-key="${escapeAttr(layout.key)}"
-            >${escapeHtml(layout.label)}</button>
+            >${escapeHtml(getLayoutDisplayLabel(layout.label))}</button>
           `).join('')}
         </div>`
       : '';
@@ -1419,7 +1600,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>${sectors.length > 1 ? 'Выберите сектор и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
+        <p>${sectors.length > 1 ? 'Выберите обозначение и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
       </div>
       ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>
@@ -1446,7 +1627,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       sectors: Array.isArray(saved.sectors) && saved.sectors.length
         ? saved.sectors
         : defaults.sectors,
-      flatVariants: mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
+      flatVariants: Array.isArray(saved.sectors) && saved.sectors.length
+        ? (Array.isArray(saved.flatVariants) ? saved.flatVariants : [])
+        : mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
 
@@ -1468,6 +1651,9 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v12',
+    'aparts_data_v11',
+    'aparts_data_v10',
     'aparts_data_v9',
     'aparts_data_v8',
     'aparts_data_v7',
@@ -1485,13 +1671,15 @@ function migrateStore() {
     try {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
-        const repaired = mergeStoredPropertiesWithDefaults(data.properties).map(property => {
-          const item = normalizeComplexProperty({ ...property });
+        const repaired = mergeStoredPropertiesWithDefaults(data.properties).map((property) => {
+          const item = sanitizeComplexPropertyForStorage(
+            normalizeComplexProperty({ ...property })
+          );
           const images = repairPropertyImages(item);
           item.img = images.img;
           item.images = images.images;
           delete item.imageUrl;
-          return item;
+          return normalizePropertyOffering(item);
         });
         localStorage.setItem(STORE_KEY, JSON.stringify({ properties: repaired }));
         return;
@@ -1544,7 +1732,9 @@ function getProperties() {
 function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
-    const item = normalizePropertyOffering(normalizeComplexProperty({ ...property }));
+    const item = sanitizeComplexPropertyForStorage(
+      normalizePropertyOffering(normalizeComplexProperty({ ...property }))
+    );
     const images = repairPropertyImages(item);
     item.img = images.img;
     item.images = images.images;
