@@ -667,10 +667,12 @@ function isGeneralSectorTitle(title) {
     || normalized === 'основной сектор';
 }
 
-function sortSectorsAlphabetically(sectors) {
-  return [...sectors].sort((a, b) =>
-    stripSectorTitle(a.title).localeCompare(stripSectorTitle(b.title), 'ru', { sensitivity: 'base' })
-  );
+function getLayoutDisplayLabel(label) {
+  return extractLayoutTypeFromLabel(label) || String(label || '').trim();
+}
+
+function getSectorDisplayTitle(title) {
+  return stripSectorTitle(title);
 }
 
 function generateSectorId(title) {
@@ -1362,7 +1364,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
             type="button"
             class="property-sector-btn ${selectedSector?.id === sector.id ? 'active' : ''}"
             data-sector-id="${escapeAttr(sector.id)}"
-          >${escapeHtml(sector.title)}</button>
+          >${escapeHtml(getSectorDisplayTitle(sector.title))}</button>
         `).join('')}
       </div>`
     : '';
@@ -1376,6 +1378,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
 
     const layoutPanelsHtml = layouts.map((layout, layoutIndex) => {
       const planImg = getVariantPlanImg(property, variant, layoutIndex, index);
+      const layoutLabel = getLayoutDisplayLabel(layout.label);
       const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '—';
       const priceValue = layout.price ?? variant.price ?? property.price;
       const apartmentsValue = layout.totalApartments || variant.totalApartments;
@@ -1384,12 +1387,12 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       return `
         <div class="floor-plan-layout-panel${hiddenClass}" data-layout-key="${escapeAttr(layout.key)}">
           <div class="floor-plan-image">
-            ${renderPropertyImg(planImg, `Планировка ${layout.label}`)}
+            ${renderPropertyImg(planImg, `Планировка ${layoutLabel}`)}
           </div>
           <ul class="floor-plan-specs">
             <li>
               <span class="floor-plan-spec-label">Планировка</span>
-              <span class="floor-plan-spec-value">${escapeHtml(layout.label)}</span>
+              <span class="floor-plan-spec-value">${escapeHtml(layoutLabel)}</span>
             </li>
             <li>
               <span class="floor-plan-spec-label">Площадь</span>
@@ -1415,7 +1418,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               type="button"
               class="floor-plan-layout-btn ${layoutIndex === 0 ? 'active' : ''}"
               data-layout-key="${escapeAttr(layout.key)}"
-            >${escapeHtml(layout.label)}</button>
+            >${escapeHtml(getLayoutDisplayLabel(layout.label))}</button>
           `).join('')}
         </div>`
       : '';
@@ -1435,7 +1438,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>${sectors.length > 1 ? 'Выберите сектор и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
+        <p>${sectors.length > 1 ? 'Выберите тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
       </div>
       ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>
