@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v11';
+const STORE_KEY = 'aparts_data_v12';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -612,10 +612,12 @@ function mergeFlatVariants(defaultVariants, savedVariants) {
     defaultVariants.map(variant => [variant.flatType, variant])
   );
 
-  return savedVariants.map(variant => ({
-    ...defaultsByType[variant.flatType],
-    ...variant,
-  }));
+  return savedVariants
+    .map(variant => normalizeFlatVariant({
+      ...defaultsByType[variant.flatType],
+      ...variant,
+    }))
+    .filter(Boolean);
 }
 
 function formatVariantAreaRange(variant) {
@@ -649,11 +651,10 @@ function slugifySectorId(title) {
 }
 
 function stripSectorTitle(title) {
-  let value = String(title || '').trim();
-  while (/^сектор\b/i.test(value)) {
-    value = value.replace(/^сектор\s*/i, '').trim();
-  }
-  return value;
+  return String(title || '')
+    .trim()
+    .replace(/^(?:сектор\s*)+/gi, '')
+    .trim();
 }
 
 function formatSectorTitle(title) {
@@ -679,12 +680,61 @@ function getLayoutDisplayLabel(label) {
   const typeLabel = extractLayoutTypeFromLabel(raw);
   if (typeLabel) return typeLabel;
 
-  const withoutSectorPrefix = raw.replace(/^Сектор\s+.+?(?=\s+Тип-|$)/i, '').trim();
+  const withoutSectorPrefix = raw
+    .replace(/^Сектор\s+/i, '')
+    .replace(/\s+Тип-.+$/i, '')
+    .trim();
   return stripSectorTitle(withoutSectorPrefix) || stripSectorTitle(raw) || raw;
 }
 
 function getSectorDisplayTitle(title) {
   return stripSectorTitle(title);
+}
+
+function repairComplexSectorData(property) {
+  if (!isComplex(property)) return property;
+
+  const hasStoredSectors = Array.isArray(property.sectors) && property.sectors.length;
+
+  if (hasStoredSectors) {
+    property.sectors = property.sectors
+      .map((sector, index) => normalizeSector(sector, index))
+      .filter(Boolean);
+  } else if (Array.isArray(property.flatVariants) && property.flatVariants.length) {
+    property.sectors = buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(property));
+  } else {
+    property.sectors = [];
+  }
+
+  property.sectors = sortSectorsAlphabetically(property.sectors);
+
+  if (property.sectors.length) {
+    property.flatVariants = mergeAggregatedFlatVariants(
+      property.sectors.flatMap(sector => sector.flatVariants)
+    );
+  } else if (Array.isArray(property.flatVariants)) {
+    property.flatVariants = property.flatVariants.map(normalizeFlatVariant).filter(Boolean);
+  }
+
+  if (property.flatVariants?.length) {
+    const primary = property.flatVariants.find(variant => variant.flatType === property.flatType)
+      || property.flatVariants[0];
+    property.flatType = primary.flatType;
+    property.totalApartments = property.flatVariants.reduce(
+      (sum, variant) => sum + (Number(variant.totalApartments) || 0),
+      0
+    );
+    const areaMins = property.flatVariants
+      .map(variant => Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+    const areaMaxs = property.flatVariants
+      .map(variant => Number(variant.areaMax) || Number(variant.areaMin) || 0)
+      .filter(value => value > 0);
+    property.areaMin = areaMins.length ? Math.min(...areaMins) : primary.areaMin;
+    property.areaMax = areaMaxs.length ? Math.max(...areaMaxs) : primary.areaMax;
+  }
+
+  return property;
 }
 
 function generateSectorId(title) {
@@ -736,16 +786,51 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
   });
 }
 
+function getFlatVariantsForSectorBuild(property) {
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const savedVariants = getLegacyRootFlatVariants(property);
+
+  if (!defaults?.flatVariants?.length) return savedVariants;
+
+  return defaults.flatVariants.map((defaultVariant) => {
+    const saved = savedVariants.find(variant => variant.flatType === defaultVariant.flatType);
+    if (!saved) return { ...defaultVariant };
+
+    return {
+      ...defaultVariant,
+      ...saved,
+      layouts: defaultVariant.layouts,
+    };
+  });
+}
+
 function buildSectorsFromFlatVariants(flatVariants) {
   const sectorMap = new Map();
   const sourceTotals = new Map();
 
-  for (const sourceVariant of flatVariants.map(normalizeFlatVariant).filter(Boolean)) {
-    sourceTotals.set(sourceVariant.flatType, Number(sourceVariant.totalApartments) || 0);
-    const layouts = getVariantLayouts(sourceVariant);
+  for (const sourceVariant of flatVariants) {
+    const flatType = FLAT_TYPE_LABELS[sourceVariant?.flatType] ? sourceVariant.flatType : null;
+    if (!flatType) continue;
+
+    const normalizedVariant = normalizeFlatVariant(sourceVariant);
+    if (!normalizedVariant) continue;
+
+    sourceTotals.set(flatType, Number(sourceVariant.totalApartments ?? normalizedVariant.totalApartments) || 0);
+
+    const rawLayouts = Array.isArray(sourceVariant.layouts) && sourceVariant.layouts.length
+      ? sourceVariant.layouts
+      : [{
+        label: sourceVariant.planImg || sourceVariant.planImage ? '' : '',
+        planImg: sourceVariant.planImg || sourceVariant.planImage,
+        areaMin: sourceVariant.areaMin,
+        areaMax: sourceVariant.areaMax,
+        price: sourceVariant.price,
+        totalApartments: sourceVariant.totalApartments,
+      }];
+
     const layoutsBySector = new Map();
 
-    for (const layout of layouts) {
+    for (const layout of rawLayouts) {
       const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label);
       if (!sectorTitle || isGeneralSectorTitle(sectorTitle)) continue;
       if (!layoutsBySector.has(sectorTitle)) layoutsBySector.set(sectorTitle, []);
@@ -761,12 +846,12 @@ function buildSectorsFromFlatVariants(flatVariants) {
       }
 
       const sectorVariant = buildSectorVariantFromLayouts(
-        sourceVariant.flatType,
-        sourceVariant,
+        flatType,
+        normalizedVariant,
         sectorLayouts
       );
       if (sectorVariant) {
-        sectorMap.get(sectorTitle).flatVariantsByType.set(sourceVariant.flatType, sectorVariant);
+        sectorMap.get(sectorTitle).flatVariantsByType.set(flatType, sectorVariant);
       }
     }
   }
@@ -820,20 +905,18 @@ function normalizeSector(sector, index = 0) {
 function getComplexSectors(property) {
   if (!isComplex(property)) return [];
 
-  let sectors = [];
-
   if (Array.isArray(property.sectors) && property.sectors.length) {
-    sectors = property.sectors
-      .map((sector, index) => normalizeSector(sector, index))
-      .filter(Boolean);
-  } else {
-    const legacyVariants = getLegacyRootFlatVariants(property);
-    if (legacyVariants.length) {
-      sectors = buildSectorsFromFlatVariants(legacyVariants);
-    }
+    return sortSectorsAlphabetically(
+      property.sectors
+        .map((sector, index) => normalizeSector(sector, index))
+        .filter(Boolean)
+    );
   }
 
-  return sortSectorsAlphabetically(sectors);
+  const legacyVariants = getFlatVariantsForSectorBuild(property);
+  if (!legacyVariants.length) return [];
+
+  return buildSectorsFromFlatVariants(legacyVariants);
 }
 
 function getComplexSectorById(property, sectorId) {
@@ -895,22 +978,7 @@ function mergeAggregatedFlatVariants(variantsList) {
 }
 
 function syncAggregatedFlatVariantsFromSectors(property) {
-  const sectors = getComplexSectors(property);
-  if (!sectors.length) return property;
-
-  property.sectors = sectors;
-  property.flatVariants = mergeAggregatedFlatVariants(sectors.flatMap(sector => sector.flatVariants));
-
-  const primary = property.flatVariants.find(variant => variant.flatType === property.flatType)
-    || property.flatVariants[0];
-  if (primary) {
-    property.flatType = primary.flatType;
-    property.totalApartments = primary.totalApartments;
-    property.areaMin = primary.areaMin;
-    property.areaMax = primary.areaMax;
-  }
-
-  return property;
+  return repairComplexSectorData(property);
 }
 
 function getComplexFlatVariants(property, sectorId = null) {
@@ -1484,7 +1552,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       sectors: Array.isArray(saved.sectors) && saved.sectors.length
         ? saved.sectors
         : defaults.sectors,
-      flatVariants: mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
+      flatVariants: Array.isArray(saved.sectors) && saved.sectors.length
+        ? (Array.isArray(saved.flatVariants) ? saved.flatVariants : defaults.flatVariants)
+        : mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
 
@@ -1506,6 +1576,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v11',
     'aparts_data_v10',
     'aparts_data_v9',
     'aparts_data_v8',
@@ -1524,7 +1595,7 @@ function migrateStore() {
     try {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
-        const repaired = mergeStoredPropertiesWithDefaults(data.properties).map(property => {
+        const repaired = mergeStoredPropertiesWithDefaults(data.properties).map((property) => {
           const item = normalizeComplexProperty({ ...property });
           const images = repairPropertyImages(item);
           item.img = images.img;
