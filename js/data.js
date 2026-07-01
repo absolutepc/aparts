@@ -1,4 +1,4 @@
-const STORE_KEY = 'aparts_data_v9';
+const STORE_KEY = 'aparts_data_v10';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -629,7 +629,36 @@ function formatVariantAreaRange(variant) {
   return `${formatArea(areaMin || areaMax)} м²`;
 }
 
-function getComplexFlatVariants(property) {
+function extractSectorTitleFromLayoutLabel(label) {
+  const match = String(label || '').match(/^Сектор\s+(.+?)\s+Тип-/i);
+  return match ? match[1].trim() : null;
+}
+
+function extractLayoutTypeFromLabel(label) {
+  const match = String(label || '').match(/Тип-(.+)$/i);
+  return match ? `Тип-${match[1].trim()}` : String(label || '').trim();
+}
+
+function slugifySectorId(title) {
+  const slug = String(title || '')
+    .toLowerCase()
+    .replace(/\|/g, '-')
+    .replace(/[^a-zа-яё0-9]+/gi, '-')
+    .replace(/^-|-$/g, '');
+  return slug ? `sector-${slug}` : 'sector-default';
+}
+
+function formatSectorTitle(title) {
+  const value = String(title || '').trim();
+  if (!value) return 'Сектор';
+  return /^сектор\b/i.test(value) ? value : `Сектор ${value}`;
+}
+
+function generateSectorId(title) {
+  return `${slugifySectorId(title)}-${Date.now().toString(36)}`;
+}
+
+function getLegacyRootFlatVariants(property) {
   if (!isComplex(property)) return [];
 
   if (Array.isArray(property.flatVariants) && property.flatVariants.length) {
@@ -652,6 +681,222 @@ function getComplexFlatVariants(property) {
     areaMin: Number(property.areaMin) || 0,
     areaMax: Number(property.areaMax) || Number(property.areaMin) || 0,
   }];
+}
+
+function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
+  const areaMins = layouts.map(layout => Number(layout.areaMin) || 0).filter(value => value > 0);
+  const areaMaxs = layouts.map(layout => Number(layout.areaMax) || Number(layout.areaMin) || 0).filter(value => value > 0);
+  const totalLayouts = getVariantLayouts(sourceVariant).length || 1;
+  const totalApartments = layouts.reduce((sum, layout) => sum + (Number(layout.totalApartments) || 0), 0)
+    || Math.max(1, Math.round((Number(sourceVariant.totalApartments) || 0) * layouts.length / totalLayouts));
+
+  return normalizeFlatVariant({
+    flatType,
+    totalApartments,
+    areaMin: areaMins.length ? Math.min(...areaMins) : sourceVariant.areaMin,
+    areaMax: areaMaxs.length ? Math.max(...areaMaxs) : sourceVariant.areaMax,
+    price: sourceVariant.price,
+    layouts: layouts.map((layout, index) => normalizeLayoutVariant({
+      ...layout,
+      label: extractLayoutTypeFromLabel(layout.label) || layout.label,
+    }, index, sourceVariant)),
+  });
+}
+
+function buildSectorsFromFlatVariants(flatVariants) {
+  const sectorMap = new Map();
+  const sourceTotals = new Map();
+
+  for (const sourceVariant of flatVariants.map(normalizeFlatVariant).filter(Boolean)) {
+    sourceTotals.set(sourceVariant.flatType, Number(sourceVariant.totalApartments) || 0);
+    const layouts = getVariantLayouts(sourceVariant);
+    const layoutsBySector = new Map();
+
+    for (const layout of layouts) {
+      const sectorTitle = extractSectorTitleFromLayoutLabel(layout.label) || 'Общий';
+      if (!layoutsBySector.has(sectorTitle)) layoutsBySector.set(sectorTitle, []);
+      layoutsBySector.get(sectorTitle).push(layout);
+    }
+
+    if (!layoutsBySector.size) {
+      layoutsBySector.set('Общий', layouts);
+    }
+
+    for (const [sectorTitle, sectorLayouts] of layoutsBySector) {
+      if (!sectorMap.has(sectorTitle)) {
+        sectorMap.set(sectorTitle, {
+          title: formatSectorTitle(sectorTitle),
+          flatVariantsByType: new Map(),
+        });
+      }
+
+      const sectorVariant = buildSectorVariantFromLayouts(
+        sourceVariant.flatType,
+        sourceVariant,
+        sectorLayouts
+      );
+      if (sectorVariant) {
+        sectorMap.get(sectorTitle).flatVariantsByType.set(sourceVariant.flatType, sectorVariant);
+      }
+    }
+  }
+
+  const sectors = [...sectorMap.values()].map((sector, index) => ({
+    id: slugifySectorId(sector.title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`,
+    title: sector.title,
+    flatVariants: [...sector.flatVariantsByType.values()],
+  }));
+
+  for (const [flatType, targetTotal] of sourceTotals) {
+    const sectorVariants = sectors
+      .map(sector => sector.flatVariants.find(variant => variant.flatType === flatType))
+      .filter(Boolean);
+    if (!sectorVariants.length || !targetTotal) continue;
+
+    const weights = sectorVariants.map(variant => getVariantLayouts(variant).length || 1);
+    const weightSum = weights.reduce((sum, value) => sum + value, 0) || sectorVariants.length;
+    let assigned = 0;
+
+    sectorVariants.forEach((variant, index) => {
+      let totalApartments;
+      if (index === sectorVariants.length - 1) {
+        totalApartments = targetTotal - assigned;
+      } else {
+        totalApartments = Math.round(targetTotal * weights[index] / weightSum);
+        assigned += totalApartments;
+      }
+      variant.totalApartments = Math.max(0, totalApartments);
+    });
+  }
+
+  return sectors;
+}
+
+function normalizeSector(sector, index = 0) {
+  const title = formatSectorTitle(sector?.title || `Сектор ${index + 1}`);
+  const id = String(sector?.id || slugifySectorId(title.replace(/^Сектор\s+/i, '')) || `sector-${index + 1}`).trim();
+  const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
+    .map(normalizeFlatVariant)
+    .filter(Boolean);
+
+  if (!flatVariants.length) return null;
+  return { id, title, flatVariants };
+}
+
+function getComplexSectors(property) {
+  if (!isComplex(property)) return [];
+
+  if (Array.isArray(property.sectors) && property.sectors.length) {
+    return property.sectors
+      .map((sector, index) => normalizeSector(sector, index))
+      .filter(Boolean);
+  }
+
+  const legacyVariants = getLegacyRootFlatVariants(property);
+  if (!legacyVariants.length) return [];
+
+  const autoSectors = buildSectorsFromFlatVariants(legacyVariants);
+  if (autoSectors.length <= 1 && autoSectors[0]?.title === 'Сектор Общий') {
+    return [{
+      ...autoSectors[0],
+      title: 'Основной сектор',
+    }];
+  }
+
+  return autoSectors;
+}
+
+function getComplexSectorById(property, sectorId) {
+  if (!sectorId) return null;
+  return getComplexSectors(property).find(sector => sector.id === sectorId) || null;
+}
+
+function sectorHasFlatType(sector, flatType) {
+  return sector?.flatVariants?.some(variant => variant.flatType === flatType);
+}
+
+function resolveComplexSector(property, sectorParam, flatTypeParam) {
+  const sectors = getComplexSectors(property);
+  if (!sectors.length) return null;
+
+  const fromParam = getComplexSectorById(property, sectorParam);
+  if (fromParam) return fromParam;
+
+  if (flatTypeParam) {
+    const withFlatType = sectors.find(sector => sectorHasFlatType(sector, flatTypeParam));
+    if (withFlatType) return withFlatType;
+  }
+
+  return sectors[0];
+}
+
+function mergeAggregatedFlatVariants(variantsList) {
+  const byType = new Map();
+
+  for (const variant of variantsList.map(normalizeFlatVariant).filter(Boolean)) {
+    const existing = byType.get(variant.flatType);
+    if (!existing) {
+      byType.set(variant.flatType, {
+        ...variant,
+        layouts: [...getVariantLayouts(variant)],
+      });
+      continue;
+    }
+
+    existing.totalApartments = (Number(existing.totalApartments) || 0) + (Number(variant.totalApartments) || 0);
+
+    const nextAreaMin = Number(variant.areaMin) || 0;
+    const nextAreaMax = Number(variant.areaMax) || nextAreaMin;
+    if (nextAreaMin) {
+      existing.areaMin = existing.areaMin
+        ? Math.min(Number(existing.areaMin) || nextAreaMin, nextAreaMin)
+        : nextAreaMin;
+    }
+    if (nextAreaMax) {
+      existing.areaMax = Math.max(Number(existing.areaMax) || nextAreaMax, nextAreaMax);
+    }
+
+    existing.layouts.push(...getVariantLayouts(variant));
+  }
+
+  return [...byType.values()]
+    .map(normalizeFlatVariant)
+    .filter(Boolean);
+}
+
+function syncAggregatedFlatVariantsFromSectors(property) {
+  const sectors = getComplexSectors(property);
+  if (!sectors.length) return property;
+
+  property.sectors = sectors;
+  property.flatVariants = mergeAggregatedFlatVariants(sectors.flatMap(sector => sector.flatVariants));
+
+  const primary = property.flatVariants.find(variant => variant.flatType === property.flatType)
+    || property.flatVariants[0];
+  if (primary) {
+    property.flatType = primary.flatType;
+    property.totalApartments = primary.totalApartments;
+    property.areaMin = primary.areaMin;
+    property.areaMax = primary.areaMax;
+  }
+
+  return property;
+}
+
+function getComplexFlatVariants(property, sectorId = null) {
+  if (!isComplex(property)) return [];
+
+  if (sectorId) {
+    const sector = getComplexSectorById(property, sectorId);
+    return sector ? sector.flatVariants : [];
+  }
+
+  const sectors = getComplexSectors(property);
+  if (sectors.length) {
+    return mergeAggregatedFlatVariants(sectors.flatMap(sector => sector.flatVariants));
+  }
+
+  return getLegacyRootFlatVariants(property);
 }
 
 function normalizeComplexProperty(property) {
@@ -688,15 +933,17 @@ function normalizeComplexProperty(property) {
         seen.add(variant.flatType);
         return true;
       });
+  }
 
-    const primary = item.flatVariants.find(variant => variant.flatType === item.flatType)
-      || item.flatVariants[0];
-    if (primary) {
-      item.flatType = primary.flatType;
-      item.totalApartments = primary.totalApartments;
-      item.areaMin = primary.areaMin;
-      item.areaMax = primary.areaMax;
-    }
+  syncAggregatedFlatVariantsFromSectors(item);
+
+  const primary = item.flatVariants?.find(variant => variant.flatType === item.flatType)
+    || item.flatVariants?.[0];
+  if (primary) {
+    item.flatType = primary.flatType;
+    item.totalApartments = primary.totalApartments;
+    item.areaMin = primary.areaMin;
+    item.areaMax = primary.areaMax;
   }
 
   delete item.count1room;
@@ -1082,11 +1329,27 @@ function renderComplexStatsTable(property, selectedVariant) {
   `;
 }
 
-function renderPropertyFloorPlansBlock(property, selectedFlatType) {
+function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSectorId = null) {
   if (!isComplex(property)) return '';
 
-  const variants = getComplexFlatVariants(property);
+  const sectors = getComplexSectors(property);
+  const selectedSector = resolveComplexSector(property, selectedSectorId, selectedFlatType);
+  const variants = selectedSector
+    ? selectedSector.flatVariants
+    : getComplexFlatVariants(property, selectedSectorId);
   if (!variants.length) return '';
+
+  const sectorPickerHtml = sectors.length > 1
+    ? `<div class="property-sector-picker">
+        ${sectors.map(sector => `
+          <button
+            type="button"
+            class="property-sector-btn ${selectedSector?.id === sector.id ? 'active' : ''}"
+            data-sector-id="${escapeAttr(sector.id)}"
+          >${escapeHtml(sector.title)}</button>
+        `).join('')}
+      </div>`
+    : '';
 
   const cardsHtml = variants.map((variant, index) => {
     const layouts = getVariantLayouts(variant);
@@ -1153,11 +1416,12 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType) {
   }).join('');
 
   return `
-    <section class="property-floor-plans">
+    <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>Доступные типы квартир в этом комплексе</p>
+        <p>${sectors.length > 1 ? 'Выберите сектор и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
       </div>
+      ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>
     </section>
   `;
@@ -1179,6 +1443,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       ...saved,
       type: defaults.type,
       published: saved.published ?? defaults.published,
+      sectors: Array.isArray(saved.sectors) && saved.sectors.length
+        ? saved.sectors
+        : defaults.sectors,
       flatVariants: mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
@@ -1200,7 +1467,17 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const legacyKeys = ['aparts_data_v8', 'aparts_data_v7', 'aparts_data_v6', 'aparts_data_v5', 'aparts_data_v4', 'aparts_data_v3', 'aparts_data_v2', 'aparts_data_v1'];
+  const legacyKeys = [
+    'aparts_data_v9',
+    'aparts_data_v8',
+    'aparts_data_v7',
+    'aparts_data_v6',
+    'aparts_data_v5',
+    'aparts_data_v4',
+    'aparts_data_v3',
+    'aparts_data_v2',
+    'aparts_data_v1',
+  ];
   for (const key of legacyKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -1243,6 +1520,7 @@ function getProperties() {
           || JSON.stringify(property.images) !== JSON.stringify(source.images)
           || property.flatType !== source.flatType
           || JSON.stringify(property.flatVariants) !== JSON.stringify(source.flatVariants)
+          || JSON.stringify(property.sectors) !== JSON.stringify(source.sectors)
           || source.count1room != null
           || source.count2room != null
           || source.count3room != null

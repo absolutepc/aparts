@@ -455,6 +455,34 @@ main { flex: 1; }
   margin-bottom: 24px;
 }
 
+.property-sector-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.property-sector-btn {
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.property-sector-btn:hover {
+  border-color: var(--accent);
+}
+
+.property-sector-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 .floor-plans-list {
   display: flex;
   flex-direction: column;
@@ -962,6 +990,35 @@ main { flex: 1; }
 
 .admin-variant-editor .form-hint {
   margin-bottom: 16px;
+}
+
+.admin-sectors-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.admin-sector-panel {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+}
+
+.admin-sector-panel-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin-sector-panel-head .form-group {
+  flex: 1;
+  margin-bottom: 0;
 }
 
 .admin-flat-variant-row {

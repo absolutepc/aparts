@@ -73,6 +73,34 @@ function bindFloorPlanLayoutPickers(root) {
   });
 }
 
+function bindPropertySectorPicker(root, property, selectedFlatType) {
+  const section = root?.querySelector('.property-floor-plans');
+  const picker = section?.querySelector('.property-sector-picker');
+  if (!picker) return;
+
+  picker.querySelectorAll('.property-sector-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const sectorId = button.dataset.sectorId;
+      const params = new URLSearchParams(window.location.search);
+      params.set('sector', sectorId);
+      if (selectedFlatType) params.set('flatType', selectedFlatType);
+      else params.delete('flatType');
+
+      const nextUrl = `${window.location.pathname}?${params.toString()}`;
+      const floorPlansHtml = renderPropertyFloorPlansBlock(property, selectedFlatType, sectorId);
+      section.outerHTML = floorPlansHtml;
+      const newSection = root.querySelector('.property-floor-plans');
+      bindFloorPlanLayoutPickers(root);
+      bindPropertySectorPicker(root, property, selectedFlatType);
+      window.history.replaceState(null, '', nextUrl);
+
+      requestAnimationFrame(() => {
+        newSection?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+  });
+}
+
 function initPropertyPage() {
   const container = document.getElementById('propertyDetail');
   if (!container) return;
@@ -102,8 +130,13 @@ function initPropertyPage() {
   }
 
   const flatTypeParam = getQueryParam('flatType');
+  const sectorParam = getQueryParam('sector');
+  const selectedSector = isComplex(property)
+    ? resolveComplexSector(property, sectorParam, flatTypeParam)
+    : null;
   const selectedVariant = isComplex(property) && flatTypeParam
-    ? resolveComplexCatalogVariant(property, flatTypeParam)
+    ? (selectedSector?.flatVariants.find(variant => variant.flatType === flatTypeParam)
+      || resolveComplexCatalogVariant(property, flatTypeParam))
     : null;
   const pageTitle = selectedVariant
     ? getPropertyCardTitle({ ...property, flatType: selectedVariant.flatType })
@@ -166,12 +199,15 @@ function initPropertyPage() {
         </div>
       </div>
 
-      ${isComplex(property) ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType) : ''}
+      ${isComplex(property)
+        ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType, selectedSector?.id)
+        : ''}
     </div>
   `;
 
   bindPropertyGallery(container, property);
   bindFloorPlanLayoutPickers(container);
+  bindPropertySectorPicker(container, property, selectedVariant?.flatType);
 
   if (selectedVariant?.flatType) {
     requestAnimationFrame(() => {
