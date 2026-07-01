@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v13';
-const DATA_JS_VERSION = '13';
+const STORE_KEY = 'aparts_data_v14';
+const DATA_JS_VERSION = '14';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -375,6 +375,181 @@ function parseArea(value) {
   return Number.isFinite(num) ? num : null;
 }
 
+function parseFloorNumber(value) {
+  const num = Number(String(value ?? '').trim());
+  return Number.isFinite(num) && num > 0 ? Math.round(num) : 0;
+}
+
+function normalizeFloorRange(range) {
+  const floorMin = parseFloorNumber(range?.floorMin ?? range?.from ?? range?.min);
+  const floorMax = parseFloorNumber(range?.floorMax ?? range?.to ?? range?.max) || floorMin;
+  if (!floorMin) return null;
+  return {
+    floorMin,
+    floorMax: Math.max(floorMin, floorMax),
+  };
+}
+
+function normalizeFloorRanges(ranges) {
+  if (!Array.isArray(ranges)) {
+    if (typeof ranges === 'string') return parseFloorRangesInput(ranges);
+    return [];
+  }
+
+  return ranges
+    .map(normalizeFloorRange)
+    .filter(Boolean)
+    .sort((a, b) => a.floorMin - b.floorMin || a.floorMax - b.floorMax);
+}
+
+function parseFloorRangesInput(text) {
+  const ranges = [];
+  for (const part of String(text || '').split(/[,;]+/)) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+
+    const dashMatch = trimmed.match(/^(\d+)\s*[-–—]\s*(\d+)$/);
+    if (dashMatch) {
+      const normalized = normalizeFloorRange({
+        floorMin: dashMatch[1],
+        floorMax: dashMatch[2],
+      });
+      if (normalized) ranges.push(normalized);
+      continue;
+    }
+
+    const singleMatch = trimmed.match(/^(\d+)(?:\s*этаж(?:а|е|ей|ов)?)?\.?$/i);
+    if (singleMatch) {
+      const normalized = normalizeFloorRange({
+        floorMin: singleMatch[1],
+        floorMax: singleMatch[1],
+      });
+      if (normalized) ranges.push(normalized);
+    }
+  }
+
+  return normalizeFloorRanges(ranges);
+}
+
+function formatFloorRangesInput(ranges) {
+  const normalized = normalizeFloorRanges(ranges);
+  if (!normalized.length) return '';
+  return normalized.map((range) => {
+    if (range.floorMin === range.floorMax) return String(range.floorMin);
+    return `${range.floorMin}-${range.floorMax}`;
+  }).join(', ');
+}
+
+function formatFloorRangeLabel(range) {
+  const normalized = normalizeFloorRange(range);
+  if (!normalized) return '';
+  if (normalized.floorMin === normalized.floorMax) {
+    return `${normalized.floorMin} этаж`;
+  }
+  return `${normalized.floorMin}–${normalized.floorMax} этаж`;
+}
+
+function formatFloorRangesLabel(ranges) {
+  const normalized = normalizeFloorRanges(ranges);
+  if (!normalized.length) return '—';
+  return normalized.map(formatFloorRangeLabel).join(', ');
+}
+
+function floorRangesOverlap(a, b) {
+  const left = normalizeFloorRange(a);
+  const right = normalizeFloorRange(b);
+  if (!left || !right) return false;
+  return left.floorMin <= right.floorMax && right.floorMin <= left.floorMax;
+}
+
+function normalizeFloorPriceRange(range) {
+  const floors = normalizeFloorRange(range);
+  const price = Number(range?.price);
+  if (!floors || !Number.isFinite(price) || price <= 0) return null;
+  return { ...floors, price };
+}
+
+function normalizeFloorPriceRanges(ranges) {
+  if (!Array.isArray(ranges)) return [];
+  return ranges
+    .map(normalizeFloorPriceRange)
+    .filter(Boolean)
+    .sort((a, b) => a.floorMin - b.floorMin || a.floorMax - b.floorMax);
+}
+
+function getPropertyFloorPriceRanges(property) {
+  return normalizeFloorPriceRanges(property?.floorPriceRanges);
+}
+
+function getApplicableFloorPrices(property, layout) {
+  const priceRanges = getPropertyFloorPriceRanges(property);
+  if (!priceRanges.length) return [];
+
+  const layoutFloors = normalizeFloorRanges(layout?.availableFloors);
+  if (!layoutFloors.length) return priceRanges;
+
+  return priceRanges.filter((priceRange) =>
+    layoutFloors.some((layoutRange) => floorRangesOverlap(layoutRange, priceRange))
+  );
+}
+
+function formatFloorPriceRangeLabel(range) {
+  const normalized = normalizeFloorPriceRange(range);
+  if (!normalized) return '';
+  return `${formatFloorRangeLabel(normalized)} — от ${formatPrice(normalized.price)}`;
+}
+
+function renderPropertyFloorPricesBlock(property) {
+  const ranges = getPropertyFloorPriceRanges(property);
+  if (!ranges.length) return '';
+
+  return `
+    <section class="property-floor-prices">
+      <div class="section-header property-floor-prices-header">
+        <h2>Цены по этажам</h2>
+        <p>Стоимость зависит от выбранного этажа</p>
+      </div>
+      <div class="property-floor-prices-table-wrap">
+        <table class="property-floor-prices-table">
+          <thead>
+            <tr>
+              <th>Этажи</th>
+              <th>Цена</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ranges.map((range) => `
+              <tr>
+                <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
+                <td>от ${formatPrice(range.price)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderLayoutPriceSpecs(property, layout, variant) {
+  const applicablePrices = getApplicableFloorPrices(property, layout);
+  if (applicablePrices.length) {
+    if (applicablePrices.length === 1) {
+      return `<span class="floor-plan-spec-value">от ${formatPrice(applicablePrices[0].price)}</span>`;
+    }
+    return `
+      <ul class="floor-plan-price-list">
+        ${applicablePrices.map((range) => `
+          <li>${escapeHtml(formatFloorRangeLabel(range))}: от ${formatPrice(range.price)}</li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  const priceValue = layout.price ?? variant.price ?? property.price;
+  return `<span class="floor-plan-spec-value">от ${formatPrice(priceValue)}</span>`;
+}
+
 function isComplex(property) {
   return COMPLEX_TYPES.includes(property.type);
 }
@@ -431,6 +606,7 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const price = layout?.price != null && layout.price !== '' ? Number(layout.price) : null;
   const totalApartments = Number(layout?.totalApartments) || 0;
   const planImg = String(layout?.planImg || layout?.planImage || parentVariant?.planImg || '').trim();
+  const availableFloors = normalizeFloorRanges(layout?.availableFloors);
 
   return {
     key,
@@ -438,6 +614,7 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
     areaMin,
     areaMax,
     totalApartments,
+    availableFloors,
     planImg,
     price: Number.isFinite(price) ? price : null,
   };
@@ -486,6 +663,13 @@ function normalizePropertyOffering(property) {
 
   if (MANDATORY_PAYMENT_OPTIONS[payment]) item.mandatoryPayment = payment;
   else delete item.mandatoryPayment;
+
+  if (isComplex(item)) {
+    item.floorPriceRanges = normalizeFloorPriceRanges(item.floorPriceRanges);
+    if (!item.floorPriceRanges.length) delete item.floorPriceRanges;
+  } else {
+    delete item.floorPriceRanges;
+  }
 
   return item;
 }
@@ -1586,8 +1770,10 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       const planImg = getVariantPlanImg(property, variant, layoutIndex, index);
       const layoutLabel = getLayoutDisplayLabel(layout.label);
       const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '—';
-      const priceValue = layout.price ?? variant.price ?? property.price;
-      const apartmentsValue = layout.totalApartments || variant.totalApartments;
+      const apartmentsValue = layout.totalApartments > 0
+        ? layout.totalApartments
+        : (variant.totalApartments || '—');
+      const floorsLabel = formatFloorRangesLabel(layout.availableFloors);
       const hiddenClass = layoutIndex === 0 ? '' : ' floor-plan-layout-panel--hidden';
 
       return `
@@ -1609,8 +1795,12 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               <span class="floor-plan-spec-value">${apartmentsValue}</span>
             </li>
             <li>
+              <span class="floor-plan-spec-label">Этажи</span>
+              <span class="floor-plan-spec-value">${escapeHtml(floorsLabel)}</span>
+            </li>
+            <li class="floor-plan-spec-prices">
               <span class="floor-plan-spec-label">Цена</span>
-              <span class="floor-plan-spec-value">от ${formatPrice(priceValue)}</span>
+              ${renderLayoutPriceSpecs(property, layout, variant)}
             </li>
           </ul>
         </div>
@@ -1695,6 +1885,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v13',
     'aparts_data_v12',
     'aparts_data_v11',
     'aparts_data_v10',
@@ -1753,6 +1944,7 @@ function getProperties() {
           || property.flatType !== source.flatType
           || JSON.stringify(property.flatVariants) !== JSON.stringify(source.flatVariants)
           || JSON.stringify(property.sectors) !== JSON.stringify(source.sectors)
+          || JSON.stringify(property.floorPriceRanges) !== JSON.stringify(source.floorPriceRanges)
           || source.count1room != null
           || source.count2room != null
           || source.count3room != null

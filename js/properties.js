@@ -201,6 +201,7 @@ function initPropertyPage() {
 
       ${isComplex(property)
         ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType, selectedSector?.id)
+          + renderPropertyFloorPricesBlock(property)
         : ''}
     </div>
   `;
