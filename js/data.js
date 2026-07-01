@@ -1,4 +1,5 @@
-const STORE_KEY = 'aparts_data_v12';
+const STORE_KEY = 'aparts_data_v13';
+const DATA_JS_VERSION = '13';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -691,6 +692,70 @@ function getSectorDisplayTitle(title) {
   return stripSectorTitle(title);
 }
 
+function sanitizeLayoutLabel(label) {
+  return getLayoutDisplayLabel(label);
+}
+
+function sanitizeComplexPropertyForStorage(property) {
+  if (!isComplex(property)) return property;
+
+  const item = { ...property };
+  repairComplexSectorData(item);
+
+  if (Array.isArray(item.sectors) && item.sectors.length) {
+    item.sectors = item.sectors
+      .map((sector, index) => {
+        const title = stripSectorTitle(sector?.title) || String.fromCharCode(65 + index);
+        if (isGeneralSectorTitle(title)) return null;
+
+        const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
+          .map((variant) => {
+            const normalized = normalizeFlatVariant(variant);
+            if (!normalized) return null;
+            return {
+              ...normalized,
+              layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
+                normalizeLayoutVariant({
+                  ...layout,
+                  label: sanitizeLayoutLabel(layout.label),
+                }, layoutIndex, normalized)
+              ),
+            };
+          })
+          .filter(Boolean);
+
+        if (!flatVariants.length) return null;
+        return {
+          id: String(sector?.id || slugifySectorId(title) || `sector-${index + 1}`).trim(),
+          title,
+          flatVariants,
+        };
+      })
+      .filter(Boolean);
+
+    item.sectors = sortSectorsAlphabetically(item.sectors);
+    item.flatVariants = mergeAggregatedFlatVariants(
+      item.sectors.flatMap(sector => sector.flatVariants)
+    );
+  } else if (Array.isArray(item.flatVariants)) {
+    item.flatVariants = item.flatVariants.map((variant) => {
+      const normalized = normalizeFlatVariant(variant);
+      if (!normalized) return null;
+      return {
+        ...normalized,
+        layouts: getVariantLayouts(normalized).map((layout, layoutIndex) =>
+          normalizeLayoutVariant({
+            ...layout,
+            label: sanitizeLayoutLabel(layout.label),
+          }, layoutIndex, normalized)
+        ),
+      };
+    }).filter(Boolean);
+  }
+
+  return repairComplexSectorData(item);
+}
+
 function repairComplexSectorData(property) {
   if (!isComplex(property)) return property;
 
@@ -1223,11 +1288,21 @@ function complexHasFlatType(property, flatType) {
 
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const hasSavedSectors = Array.isArray(property.sectors) && property.sectors.length;
   const merged = {
     ...defaults,
     ...property,
     district: property.district || defaults?.district || '',
   };
+
+  if (hasSavedSectors) {
+    merged.sectors = property.sectors;
+    if (Array.isArray(property.flatVariants)) {
+      merged.flatVariants = property.flatVariants;
+    } else {
+      delete merged.flatVariants;
+    }
+  }
 
   if (isComplex(merged)) {
     Object.assign(merged, normalizeComplexProperty(merged));
@@ -1553,7 +1628,7 @@ function mergeStoredPropertiesWithDefaults(stored) {
         ? saved.sectors
         : defaults.sectors,
       flatVariants: Array.isArray(saved.sectors) && saved.sectors.length
-        ? (Array.isArray(saved.flatVariants) ? saved.flatVariants : defaults.flatVariants)
+        ? (Array.isArray(saved.flatVariants) ? saved.flatVariants : [])
         : mergeFlatVariants(defaults.flatVariants, saved.flatVariants),
     };
   });
@@ -1576,6 +1651,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v12',
     'aparts_data_v11',
     'aparts_data_v10',
     'aparts_data_v9',
@@ -1596,12 +1672,14 @@ function migrateStore() {
       const data = JSON.parse(raw);
       if (Array.isArray(data?.properties)) {
         const repaired = mergeStoredPropertiesWithDefaults(data.properties).map((property) => {
-          const item = normalizeComplexProperty({ ...property });
+          const item = sanitizeComplexPropertyForStorage(
+            normalizeComplexProperty({ ...property })
+          );
           const images = repairPropertyImages(item);
           item.img = images.img;
           item.images = images.images;
           delete item.imageUrl;
-          return item;
+          return normalizePropertyOffering(item);
         });
         localStorage.setItem(STORE_KEY, JSON.stringify({ properties: repaired }));
         return;
@@ -1654,7 +1732,9 @@ function getProperties() {
 function saveProperties(properties) {
   initStore();
   const normalized = properties.map(property => {
-    const item = normalizePropertyOffering(normalizeComplexProperty({ ...property }));
+    const item = sanitizeComplexPropertyForStorage(
+      normalizePropertyOffering(normalizeComplexProperty({ ...property }))
+    );
     const images = repairPropertyImages(item);
     item.img = images.img;
     item.images = images.images;
