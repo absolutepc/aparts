@@ -1,10 +1,13 @@
-const STORE_KEY = 'aparts_data_v14';
-const DATA_JS_VERSION = '14';
+const STORE_KEY = 'aparts_data_v15';
+const DATA_JS_VERSION = '15';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+
+// Исходные flatVariants «Бомонд» с подписями «Сектор …» — заполняется после DEFAULT_PROPERTIES
+let JK2_SOURCE_FLAT_VARIANTS = [];
 
 const COMPLEX_TYPES = ['jk', 'mfk'];
 
@@ -1081,10 +1084,13 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
 function getFlatVariantsForSectorBuild(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const savedVariants = getLegacyRootFlatVariants(property);
+  const baselineVariants = property.id === 'jk2' && Array.isArray(JK2_SOURCE_FLAT_VARIANTS) && JK2_SOURCE_FLAT_VARIANTS.length
+    ? JK2_SOURCE_FLAT_VARIANTS
+    : defaults?.flatVariants;
 
-  if (!defaults?.flatVariants?.length) return savedVariants;
+  if (!baselineVariants?.length) return savedVariants;
 
-  return defaults.flatVariants.map((defaultVariant) => {
+  return baselineVariants.map((defaultVariant) => {
     const saved = savedVariants.find(variant => variant.flatType === defaultVariant.flatType);
     if (!saved) return { ...defaultVariant };
 
@@ -1534,6 +1540,9 @@ function enrichProperty(property) {
   if (isComplex(merged)) {
     Object.assign(merged, normalizeComplexProperty(merged));
     restoreMissingSectorVariantsFromDefaults(merged);
+    if (merged.id === 'jk2') {
+      Object.assign(merged, applyJk2BomondDataFromConfig(merged));
+    }
   }
 
   const repaired = repairPropertyImages({
@@ -1885,6 +1894,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v14',
     'aparts_data_v13',
     'aparts_data_v12',
     'aparts_data_v11',
@@ -2059,4 +2069,234 @@ function logoutUser() {
   localStorage.removeItem(USER_KEY);
 }
 
+// =============================================================================
+// БОМОНД (jk2) — редактируйте данные здесь в data.js
+// После изменений: git pull (если нужно) + Ctrl+Shift+R в браузере
+//
+// floorPriceRanges — цены по диапазонам этажей для всего объекта
+// layouts — количество квартир и этажи для каждой планировки в секторе
+//   availableFloors: строка "3-8, 12" или массив [{ floorMin: 3, floorMax: 8 }]
+//
+// Если указать sectors целиком — используется он вместо автосборки из flatVariants
+// =============================================================================
+JK2_SOURCE_FLAT_VARIANTS = JSON.parse(JSON.stringify(
+  (DEFAULT_PROPERTIES.find(item => item.id === 'jk2') || {}).flatVariants || []
+));
+
+const JK2_BOMOND_DATA = {
+  floorPriceRanges: [
+    { floorMin: 3, floorMax: 8, price: 71000 },
+    { floorMin: 9, floorMax: 15, price: 75000 },
+    { floorMin: 16, floorMax: 20, price: 79000 },
+  ],
+
+  // Сектор → тип квартир → ключ планировки → данные
+  layouts: {
+    'А-Г': {
+      '1room': {
+        A: { totalApartments: 2, availableFloors: '3-5' },
+        '\u0411': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0412': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0413': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0414': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0415': { totalApartments: 1, availableFloors: '9-11' },
+        '\u0416': { totalApartments: 1, availableFloors: '12-15' },
+      },
+      '2room': {
+        A: { totalApartments: 6, availableFloors: '3-8' },
+        '\u0411': { totalApartments: 5, availableFloors: '9-15' },
+      },
+    },
+    'Б-Д': {
+      '1room': {
+        '\u0418': { totalApartments: 2, availableFloors: '3-6' },
+        '\u041a': { totalApartments: 2, availableFloors: '3-6' },
+        '\u041b': { totalApartments: 1, availableFloors: '7-9' },
+        '\u041c': { totalApartments: 1, availableFloors: '7-9' },
+        '\u041d': { totalApartments: 2, availableFloors: '10-12' },
+        '\u041f': { totalApartments: 1, availableFloors: '13-15' },
+      },
+      '2room': {
+        B: { totalApartments: 6, availableFloors: '3-8' },
+        '\u0413': { totalApartments: 5, availableFloors: '9-15' },
+      },
+    },
+    'В-Е': {
+      '1room': {
+        '\u0420': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0421': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0422': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0423': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0424': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0425': { totalApartments: 1, availableFloors: '12-14' },
+        '\u0428': { totalApartments: 1, availableFloors: '15-17' },
+      },
+      '2room': {
+        '\u0414': { totalApartments: 6, availableFloors: '3-8' },
+        '\u0415': { totalApartments: 5, availableFloors: '9-15' },
+      },
+    },
+    'Ж-К': {
+      '1room': {
+        '\u0416-\u0410': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0416-\u0411': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0416-\u0412': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0416-\u0413': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0416-\u0414': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0416-\u0415': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0416-\u0416': { totalApartments: 1, availableFloors: '12-14' },
+        '\u0416-\u0418': { totalApartments: 1, availableFloors: '12-14' },
+        '\u0416-\u041a': { totalApartments: 1, availableFloors: '15-17' },
+      },
+      '2room': {
+        '\u0416': { totalApartments: 6, availableFloors: '3-8' },
+        '\u0418': { totalApartments: 5, availableFloors: '9-15' },
+      },
+    },
+    'З-И': {
+      '1room': {
+        '\u0417-\u0410': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0417-\u0411': { totalApartments: 2, availableFloors: '3-5' },
+        '\u0417-\u0412': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0417-\u0413': { totalApartments: 1, availableFloors: '6-8' },
+        '\u0417-\u0414': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0417-\u0415': { totalApartments: 2, availableFloors: '9-11' },
+        '\u0417-\u0416': { totalApartments: 1, availableFloors: '12-14' },
+        '\u0417-\u0418': { totalApartments: 1, availableFloors: '12-14' },
+        '\u0417-\u041a': { totalApartments: 1, availableFloors: '15-17' },
+      },
+      '2room': {
+        '\u041a': { totalApartments: 6, availableFloors: '3-8' },
+        '\u041b': { totalApartments: 5, availableFloors: '9-15' },
+      },
+    },
+  },
+
+  // Опционально: полная структура sectors (если заполнить — layouts игнорируется)
+  sectors: null,
+};
+
+function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
+  const sectorConfig = JK2_BOMOND_DATA.layouts?.[stripSectorTitle(sectorTitle)];
+  if (!sectorConfig) return null;
+  const flatConfig = sectorConfig[flatType];
+  if (!flatConfig) return null;
+  return flatConfig[layoutKey] ?? flatConfig[String(layoutKey)] ?? null;
+}
+
+function resolveLayoutAvailableFloors(detail, layout) {
+  if (detail?.availableFloors != null) {
+    return typeof detail.availableFloors === 'string'
+      ? parseFloorRangesInput(detail.availableFloors)
+      : normalizeFloorRanges(detail.availableFloors);
+  }
+  return normalizeFloorRanges(layout?.availableFloors);
+}
+
+function distributeApartmentsAcrossLayouts(total, layoutCount) {
+  const count = Math.max(0, Number(total) || 0);
+  const slots = Math.max(1, Number(layoutCount) || 1);
+  const result = new Array(slots).fill(0);
+  for (let index = 0; index < count; index += 1) {
+    result[index % slots] += 1;
+  }
+  return result;
+}
+
+function buildJk2SectorsFromExplicitData(sectorsData) {
+  return sectorsData
+    .map((sector, index) => {
+      const title = formatSectorTitle(sector?.title || String.fromCharCode(65 + index));
+      const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
+        .map((variant) => normalizeFlatVariant({
+          ...variant,
+          layouts: (variant?.layouts || []).map((layout, layoutIndex) => normalizeLayoutVariant({
+            ...layout,
+            availableFloors: typeof layout?.availableFloors === 'string'
+              ? parseFloorRangesInput(layout.availableFloors)
+              : layout?.availableFloors,
+          }, layoutIndex, variant)),
+        }))
+        .filter(Boolean);
+
+      if (!flatVariants.length) return null;
+      return {
+        id: String(sector?.id || slugifySectorId(title) || `sector-${index + 1}`).trim(),
+        title,
+        flatVariants,
+      };
+    })
+    .filter(Boolean);
+}
+
+function applyJk2LayoutDetailsToSectors(sectors) {
+  return sectors.map((sector) => {
+    const sectorTitle = stripSectorTitle(sector.title);
+    const flatVariants = (sector.flatVariants || []).map((variant) => {
+      const rawLayouts = getVariantLayouts(variant);
+      const distributed = distributeApartmentsAcrossLayouts(
+        variant.totalApartments,
+        rawLayouts.length
+      );
+
+      const layouts = rawLayouts.map((layout, index) => {
+        const detail = getJk2LayoutDetailConfig(sectorTitle, variant.flatType, layout.key);
+        const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
+        return normalizeLayoutVariant({
+          ...layout,
+          totalApartments,
+          availableFloors: resolveLayoutAvailableFloors(detail, layout),
+        }, index, variant);
+      });
+
+      const layoutApartmentSum = layouts.reduce(
+        (sum, layout) => sum + (Number(layout.totalApartments) || 0),
+        0
+      );
+
+      return normalizeFlatVariant({
+        ...variant,
+        totalApartments: layoutApartmentSum > 0 ? layoutApartmentSum : variant.totalApartments,
+        layouts,
+      });
+    }).filter(Boolean);
+
+    return { ...sector, flatVariants };
+  });
+}
+
+function applyJk2BomondDataFromConfig(property) {
+  if (property?.id !== 'jk2') return property;
+
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === 'jk2');
+  const source = {
+    ...defaults,
+    ...property,
+    flatVariants: JK2_SOURCE_FLAT_VARIANTS.length
+      ? JK2_SOURCE_FLAT_VARIANTS
+      : (defaults?.flatVariants || property.flatVariants),
+  };
+
+  let sectors = Array.isArray(JK2_BOMOND_DATA.sectors) && JK2_BOMOND_DATA.sectors.length
+    ? buildJk2SectorsFromExplicitData(JK2_BOMOND_DATA.sectors)
+    : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source));
+
+  sectors = applyJk2LayoutDetailsToSectors(sectors);
+
+  const item = {
+    ...source,
+    floorPriceRanges: normalizeFloorPriceRanges(JK2_BOMOND_DATA.floorPriceRanges),
+    sectors,
+  };
+
+  return repairComplexSectorData(item);
+}
+
+function applyJk2BomondDefaultsToCatalog() {
+  const jk2 = DEFAULT_PROPERTIES.find(item => item.id === 'jk2');
+  if (!jk2) return;
+  Object.assign(jk2, applyJk2BomondDataFromConfig(jk2));
+}
+
+applyJk2BomondDefaultsToCatalog();
 initStore();
