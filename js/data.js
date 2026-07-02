@@ -1835,7 +1835,9 @@ function renderLogo(alt = SITE_NAME) {
 
 function renderComplexStatsTags(property) {
   const stats = getComplexStats(property);
-  const areaLabel = formatComplexAreaRange(property);
+  const areaLabel = property.catalogKey
+    ? formatVariantAreaRange(property)
+    : formatComplexAreaRange(property);
   const areaTag = areaLabel
     ? `<span class="property-attr-tag">${areaLabel}</span>`
     : '';
