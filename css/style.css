@@ -437,6 +437,28 @@ main { flex: 1; }
   object-fit: cover;
 }
 
+.property-detail-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.55em;
+  row-gap: 0.15em;
+  font-size: 2rem;
+  margin: 0 0 16px;
+  line-height: 1.2;
+}
+
+.property-detail-title-name {
+  font-weight: 700;
+}
+
+.property-detail-title-type {
+  color: var(--text-secondary);
+  font-size: 0.78em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .property-detail-info h1 {
   font-size: 2rem;
   margin: 0 0 16px;

@@ -1838,16 +1838,8 @@ function renderComplexStatsTable(property, selectedVariant) {
   if (selectedVariant) {
     return `
       <div class="property-spec-row">
-        <span class="property-spec-label">Тип квартир</span>
-        <span class="property-spec-value">${escapeHtml(selectedVariant.flatTypeLabel)}</span>
-      </div>
-      <div class="property-spec-row">
         <span class="property-spec-label">Площадь квартир</span>
         <span class="property-spec-value">${formatVariantAreaRange(selectedVariant) || '—'}</span>
-      </div>
-      <div class="property-spec-row">
-        <span class="property-spec-label">Количество</span>
-        <span class="property-spec-value">${selectedVariant.totalApartments}</span>
       </div>
     `;
   }
@@ -1880,14 +1872,35 @@ function renderComplexStatsTable(property, selectedVariant) {
   `;
 }
 
+function renderPropertyDetailTitle(property, selectedVariant = null) {
+  if (!selectedVariant) {
+    return `<h1 class="property-detail-title">${escapeHtml(property.title)}</h1>`;
+  }
+
+  return `
+    <h1 class="property-detail-title">
+      <span class="property-detail-title-name">${escapeHtml(property.title)}</span>
+      <span class="property-detail-title-type">${escapeHtml(selectedVariant.flatTypeLabel)}</span>
+    </h1>
+  `;
+}
+
 function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSectorId = null) {
   if (!isComplex(property)) return '';
 
-  const sectors = getComplexSectors(property);
+  const allSectors = getComplexSectors(property);
+  const sectors = selectedFlatType
+    ? allSectors.filter(sector => sectorHasFlatType(sector, selectedFlatType))
+    : allSectors;
   const selectedSector = resolveComplexSector(property, selectedSectorId, selectedFlatType);
-  const variants = selectedSector
+  let variants = selectedSector
     ? selectedSector.flatVariants
     : getComplexFlatVariants(property, selectedSectorId);
+
+  if (selectedFlatType) {
+    variants = variants.filter(variant => variant.flatType === selectedFlatType);
+  }
+
   if (!variants.length) return '';
 
   const sectorPickerHtml = sectors.length > 1
@@ -1972,7 +1985,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     return `
       <article class="floor-plan-card${activeClass}"${activeId} data-flat-type="${escapeAttr(variant.flatType)}">
         <div class="floor-plan-info">
-          <h3>${escapeHtml(variant.flatTypeLabel)}</h3>
+          ${selectedFlatType ? '' : `<h3>${escapeHtml(variant.flatTypeLabel)}</h3>`}
           ${layoutPickerHtml}
           <div class="floor-plan-layout-panels">${layoutPanelsHtml}</div>
         </div>
@@ -1984,7 +1997,9 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>${sectors.length > 1 ? 'Выберите обозначение и тип квартиры' : 'Доступные типы квартир в этом комплексе'}</p>
+        <p>${selectedFlatType
+          ? (sectors.length > 1 ? 'Выберите обозначение и планировку' : 'Доступные планировки')
+          : (sectors.length > 1 ? 'Выберите обозначение и тип квартиры' : 'Доступные типы квартир в этом комплексе')}</p>
       </div>
       ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>

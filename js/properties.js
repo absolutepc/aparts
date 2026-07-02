@@ -183,7 +183,7 @@ function initPropertyPage() {
       <div class="property-detail-hero">
         ${renderPropertyGalleryBlock(property)}
         <div class="property-detail-info">
-          <h1>${escapeHtml(pageTitle)}</h1>
+          ${renderPropertyDetailTitle(property, selectedVariant)}
           <div class="property-detail-head">
             <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
             <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
