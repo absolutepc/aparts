@@ -35,7 +35,7 @@ const MANDATORY_PAYMENT_OPTIONS = {
   8000: '8 000',
 };
 
-const DEFAULT_DEVELOPER = 'Кормат строй, Квартал 777, Монолит, Фаворит 13';
+const DEFAULT_DEVELOPER = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13']
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -131,7 +131,7 @@ const DEFAULT_PROPERTIES = [
     areaMax: 95,
     price: 90000,
     address: '​Проспект Владимира Владимировича Путина, 22/4​',
-    district: 'Новый Район',
+    district: 'Новый район',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
     img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
@@ -220,11 +220,11 @@ const DEFAULT_PROPERTIES = [
     areaMax: 82.25,
     price: 71000,
     address: 'Грозный, улица Э.Э. Исмаилова, 35 стр.',
-    district: 'Новый Проспект',
+    district: 'Новый район',
     developer: 'Кормат строй',
-    deliveryDate: '4 кв. 2026',
-    installmentTerm: '24 месяца',
-    maternityCapital: 'yes',
+    deliveryDate: '2027г',
+    installmentTerm: '1-6 лет',
+    maternityCapital: 'no',
     markupBasis: 'after',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
@@ -2230,9 +2230,9 @@ JK2_SOURCE_FLAT_VARIANTS = JSON.parse(JSON.stringify(
 
 const JK2_BOMOND_DATA = {
   developer: 'Кормат строй',
-  deliveryDate: '4 кв. 2026',
-  installmentTerm: '24 месяца',
-  maternityCapital: 'yes',
+  deliveryDate: '2027г',
+  installmentTerm: '1-6 лет',
+  maternityCapital: 'no',
   markupBasis: 'after',
 
   floorPriceRanges: [
