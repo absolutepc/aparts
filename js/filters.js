@@ -2,9 +2,7 @@ function initPropertyCatalog(options) {
   const { types, catalogMode = 'commercial' } = options;
   const isComplexCatalog = catalogMode === 'complex';
   const baseProperties = getCatalogProperties(types);
-  const allProperties = isComplexCatalog
-    ? expandCatalogListings(baseProperties)
-    : baseProperties;
+  const allProperties = baseProperties;
 
   const areaMinInput = document.getElementById('areaMin');
   const areaMaxInput = document.getElementById('areaMax');
@@ -100,14 +98,16 @@ function initPropertyCatalog(options) {
   function filterProperties(properties, state) {
     return properties.filter(property => {
       if (isComplexCatalog) {
-        return catalogListingMatchesFilters(property, {
+        return complexMatchesCatalogFilters(property, {
           flatTypes: state.flatTypes,
           minValue: state.minValue,
           maxValue: state.maxValue,
-          noMarkupYears: state.noMarkupYears,
-          mandatoryPayments: state.mandatoryPayments,
-          districts: state.districts,
-        });
+        })
+          && propertyMatchesOfferingFilters(property, {
+            noMarkupYears: state.noMarkupYears,
+            mandatoryPayments: state.mandatoryPayments,
+          })
+          && (!state.districts.length || state.districts.includes(property.district));
       }
 
       const area = Number(property.area) || 0;
@@ -178,10 +178,19 @@ function initPropertyCatalog(options) {
     }
 
     if (listEl) {
-      listEl.innerHTML = renderPropertiesGrid(
-        filtered,
-        'По выбранным фильтрам ничего не найдено. Попробуйте изменить параметры.'
-      );
+      if (isComplexCatalog) {
+        listEl.innerHTML = renderFeaturedJkGrid(
+          filtered,
+          'По выбранным фильтрам ничего не найдено. Попробуйте изменить параметры.',
+          { showDescription: false }
+        );
+        bindFeaturedJkCards(listEl);
+      } else {
+        listEl.innerHTML = renderPropertiesGrid(
+          filtered,
+          'По выбранным фильтрам ничего не найдено. Попробуйте изменить параметры.'
+        );
+      }
     }
   }
 

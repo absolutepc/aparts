@@ -23,7 +23,7 @@ function renderPropertyCardCompact(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const cardTitle = isComplex(property) ? property.title : getPropertyCardTitle(property);
   const detailHref = getPropertyDetailHref(property, { overview: true });
-  const cardImg = property.listingPlanImg || getPropertyImg(property);
+  const cardImg = getPropertyImg(property);
   const priceLabel = isComplex(property) ? 'от ' : '';
   const districtHtml = property.district
     ? `<p class="property-card-summary">${escapeHtml(property.district)}</p>`
@@ -54,9 +54,17 @@ function renderPropertiesGridCompact(properties, emptyMessage) {
   return `<div class="properties-grid properties-grid--compact">${properties.map(renderPropertyCardCompact).join('')}</div>`;
 }
 
-function renderFeaturedJkCard(property) {
+function renderFeaturedJkCard(property, options = {}) {
   const variants = getComplexFlatVariants(property);
   const activeVariant = variants[0];
+  const showDescription = options.showDescription === true;
+  const detailHref = getPropertyDetailHref(
+    activeVariant ? { ...property, flatType: activeVariant.flatType } : property
+  );
+  const cardTitle = activeVariant
+    ? getPropertyCardTitle({ ...property, flatType: activeVariant.flatType })
+    : property.title;
+  const activePrice = activeVariant?.price ?? property.price;
   const variantButtons = variants.map((variant, index) => `
     <button
       type="button"
@@ -67,6 +75,9 @@ function renderFeaturedJkCard(property) {
   `).join('');
 
   const attrsHtml = renderFeaturedVariantTags(activeVariant);
+  const descriptionHtml = showDescription
+    ? `<p>${escapeHtml(property.description || '')}</p>`
+    : '';
 
   return `
     <article
@@ -74,23 +85,23 @@ function renderFeaturedJkCard(property) {
       data-property-id="${escapeAttr(property.id)}"
       data-variants="${escapeAttr(encodeURIComponent(JSON.stringify(variants)))}"
     >
-      <a href="property.html?id=${encodeURIComponent(property.id)}" class="property-card-media" data-transition-label="${escapeAttr(property.title)}">
+      <a href="${escapeAttr(detailHref)}" class="property-card-media" data-detail-link data-transition-label="${escapeAttr(cardTitle)}">
         <div class="property-image">
           ${renderPropertyImg(getPropertyImg(property), property.title)}
         </div>
       </a>
       <div class="property-info">
         <div class="property-category">${escapeHtml(TYPE_LABELS[property.type] || TYPE_LABELS.jk)}</div>
-        <h3><a href="property.html?id=${encodeURIComponent(property.id)}" data-transition-label="${escapeAttr(property.title)}">${escapeHtml(property.title)}</a></h3>
+        <h3><a href="${escapeAttr(detailHref)}" data-detail-link data-transition-label="${escapeAttr(cardTitle)}">${escapeHtml(property.title)}</a></h3>
         <div class="property-variant-picker">${variantButtons}</div>
         <div class="property-attrs">
           <span data-variant-attrs>${attrsHtml}</span>
           <span data-offering-tags>${renderPropertyOfferingTags(property)}</span>
         </div>
-        <p>${escapeHtml(property.description || '')}</p>
+        ${descriptionHtml}
         <div class="property-footer">
-          <div class="property-price">от ${formatPrice(property.price)}</div>
-          <a href="property.html?id=${encodeURIComponent(property.id)}" class="btn btn-secondary btn-sm" data-transition-label="${escapeAttr(property.title)}">Подробнее</a>
+          <div class="property-price" data-variant-price>от ${formatPrice(activePrice)}</div>
+          <a href="${escapeAttr(detailHref)}" class="btn btn-secondary btn-sm" data-detail-link data-transition-label="${escapeAttr(cardTitle)}">Подробнее</a>
         </div>
       </div>
     </article>
@@ -117,7 +128,27 @@ function bindFeaturedJkCards(container) {
       return;
     }
 
+    const property = getPropertyById(card.dataset.propertyId);
+    if (!property) return;
+
     const attrsEl = card.querySelector('[data-variant-attrs]');
+    const priceEl = card.querySelector('[data-variant-price]');
+    const detailLinks = card.querySelectorAll('[data-detail-link]');
+
+    function applyVariant(variant) {
+      if (!variant) return;
+
+      const detailHref = getPropertyDetailHref({ ...property, flatType: variant.flatType });
+      const cardTitle = getPropertyCardTitle({ ...property, flatType: variant.flatType });
+      const price = variant.price ?? property.price;
+
+      if (attrsEl) attrsEl.innerHTML = renderFeaturedVariantTags(variant);
+      if (priceEl) priceEl.textContent = `от ${formatPrice(price)}`;
+      detailLinks.forEach((link) => {
+        link.href = detailHref;
+        link.dataset.transitionLabel = cardTitle;
+      });
+    }
 
     card.querySelectorAll('.property-variant-btn').forEach(button => {
       button.addEventListener('click', (event) => {
@@ -126,28 +157,28 @@ function bindFeaturedJkCards(container) {
 
         const index = Number(button.dataset.index);
         const variant = variants[index];
-        if (!variant || !attrsEl) return;
+        if (!variant) return;
 
         card.querySelectorAll('.property-variant-btn').forEach(item => item.classList.remove('active'));
         button.classList.add('active');
-        attrsEl.innerHTML = renderFeaturedVariantTags(variant);
+        applyVariant(variant);
       });
     });
   });
 }
 
-function renderFeaturedJkGrid(properties, emptyMessage) {
+function renderFeaturedJkGrid(properties, emptyMessage, options = {}) {
   if (!properties.length) {
     return `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
   }
-  return `<div class="properties-grid">${properties.map(renderFeaturedJkCard).join('')}</div>`;
+  return `<div class="properties-grid">${properties.map((property) => renderFeaturedJkCard(property, options)).join('')}</div>`;
 }
 
 function renderPropertyCard(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const cardTitle = getPropertyCardTitle(property);
   const detailHref = getPropertyDetailHref(property);
-  const cardImg = property.listingPlanImg || getPropertyImg(property);
+  const cardImg = getPropertyImg(property);
   const districtHtml = property.district
     ? `<span class="property-attr-tag">${escapeHtml(property.district)}</span>`
     : '';
