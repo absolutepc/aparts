@@ -418,6 +418,12 @@ main { flex: 1; }
   margin-top: 24px;
 }
 
+.property-detail-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .property-detail-image {
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -443,7 +449,15 @@ main { flex: 1; }
 
 .property-detail-desc {
   color: var(--text-secondary);
-  margin: 20px 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.property-detail-desc p {
+  margin: 0;
+  line-height: 1.6;
 }
 
 .property-specs-table {
