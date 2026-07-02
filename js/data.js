@@ -222,6 +222,10 @@ const DEFAULT_PROPERTIES = [
     address: 'Грозный, улица Э.Э. Исмаилова, 35 стр.',
     district: 'Новый Проспект',
     developer: 'Кормат строй',
+    deliveryDate: '4 кв. 2026',
+    installmentTerm: '24 месяца',
+    maternityCapital: 'yes',
+    markupBasis: 'after',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
@@ -770,71 +774,32 @@ function renderPropertyOfferingTags(property) {
   return tags.join('');
 }
 
+function renderPropertySpecRow(label, value) {
+  const display = value != null && String(value).trim() !== '' ? String(value).trim() : '—';
+  return `
+    <div class="property-spec-row">
+      <span class="property-spec-label">${escapeHtml(label)}</span>
+      <span class="property-spec-value">${escapeHtml(display)}</span>
+    </div>
+  `;
+}
+
 function renderPropertyOfferingSpecs(property) {
   const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
   const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
-  const maternityLabel = getMaternityCapitalLabel(property.maternityCapital);
-  const markupLabel = getMarkupBasisLabel(property.markupBasis);
-  const rows = [];
-
-  rows.push(`
-    <div class="property-spec-row">
-      <span class="property-spec-label">Застройщик</span>
-      <span class="property-spec-value">${escapeHtml(property.developer || DEFAULT_DEVELOPER)}</span>
-    </div>
-  `);
-
-  if (property.deliveryDate) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Срок сдачи объекта</span>
-        <span class="property-spec-value">${escapeHtml(property.deliveryDate)}</span>
-      </div>
-    `);
-  }
-
-  if (property.installmentTerm) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Общий срок рассрочки</span>
-        <span class="property-spec-value">${escapeHtml(property.installmentTerm)}</span>
-      </div>
-    `);
-  }
-
-  if (maternityLabel) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Материнский капитал</span>
-        <span class="property-spec-value">${escapeHtml(maternityLabel)}</span>
-      </div>
-    `);
-  }
-
-  if (markupLabel) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Наценка</span>
-        <span class="property-spec-value">${escapeHtml(markupLabel)}</span>
-      </div>
-    `);
-  }
+  const rows = [
+    renderPropertySpecRow('Застройщик', property.developer || DEFAULT_DEVELOPER),
+    renderPropertySpecRow('Срок сдачи объекта', property.deliveryDate),
+    renderPropertySpecRow('Срок предоставления рассрочки', property.installmentTerm),
+    renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
+    renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
+  ];
 
   if (noMarkupLabel) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Без наценки</span>
-        <span class="property-spec-value">${escapeHtml(getNoMarkupYearsLabel(property.noMarkupYears))}</span>
-      </div>
-    `);
+    rows.push(renderPropertySpecRow('Без наценки', getNoMarkupYearsLabel(property.noMarkupYears)));
   }
   if (paymentLabel) {
-    rows.push(`
-      <div class="property-spec-row">
-        <span class="property-spec-label">Обязательный платёж</span>
-        <span class="property-spec-value">${escapeHtml(paymentLabel)}</span>
-      </div>
-    `);
+    rows.push(renderPropertySpecRow('Обязательный платёж', paymentLabel));
   }
 
   return rows.join('');
@@ -1681,14 +1646,28 @@ function complexHasFlatType(property, flatType) {
   return getComplexFlatVariants(property).some(variant => variant.flatType === flatType);
 }
 
+function mergePropertyDetails(property, defaults) {
+  if (!defaults) return property;
+
+  const item = { ...property };
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis']) {
+    const saved = item[key];
+    const fallback = defaults[key];
+    if ((saved == null || String(saved).trim() === '') && fallback != null && String(fallback).trim() !== '') {
+      item[key] = fallback;
+    }
+  }
+  return item;
+}
+
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const hasSavedSectors = Array.isArray(property.sectors) && property.sectors.length;
-  const merged = {
+  const merged = mergePropertyDetails({
     ...defaults,
     ...property,
     district: property.district || defaults?.district || '',
-  };
+  }, defaults);
 
   if (hasSavedSectors) {
     merged.sectors = property.sectors;
@@ -2238,6 +2217,7 @@ function logoutUser() {
 // После изменений: git pull (если нужно) + Ctrl+Shift+R в браузере
 //
 // floorPriceRanges — цены по диапазонам этажей для всего объекта
+// developer, deliveryDate, installmentTerm, maternityCapital, markupBasis — характеристики объекта
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
 //   label — своё название планировки (необязательно)
 //   availableFloors: строка "3-8, 12" или массив [{ floorMin: 3, floorMax: 8 }]
@@ -2249,6 +2229,12 @@ JK2_SOURCE_FLAT_VARIANTS = JSON.parse(JSON.stringify(
 ));
 
 const JK2_BOMOND_DATA = {
+  developer: 'Кормат строй',
+  deliveryDate: '4 кв. 2026',
+  installmentTerm: '24 месяца',
+  maternityCapital: 'yes',
+  markupBasis: 'after',
+
   floorPriceRanges: [
     { floorMin: 3, floorMax: 5, price: 85000 },
     { floorMin: 6, floorMax: 8, price: 80000 },
@@ -2587,6 +2573,18 @@ function applyJk2LayoutDetailsToSectors(sectors) {
   });
 }
 
+function getJk2PropertyDetailsFromConfig() {
+  const config = JK2_BOMOND_DATA;
+  const details = {};
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis']) {
+    const value = config?.[key];
+    if (value != null && String(value).trim() !== '') {
+      details[key] = value;
+    }
+  }
+  return details;
+}
+
 function applyJk2BomondDataFromConfig(property) {
   if (property?.id !== 'jk2') return property;
 
@@ -2609,6 +2607,7 @@ function applyJk2BomondDataFromConfig(property) {
 
   const item = {
     ...source,
+    ...getJk2PropertyDetailsFromConfig(),
     floorPriceRanges: normalizeFloorPriceRanges(JK2_BOMOND_DATA.floorPriceRanges),
     sectors,
   };

@@ -825,7 +825,7 @@ function renderPropertiesAdmin() {
               <input type="text" name="developer" value="${escapeHtml(DEFAULT_DEVELOPER)}" placeholder="Кормат строй">
             </div>
             <div class="form-group">
-              <label>Общий срок рассрочки</label>
+              <label>Срок предоставления рассрочки</label>
               <input type="text" name="installmentTerm" placeholder="например, 24 месяца">
             </div>
             <div class="form-group">
