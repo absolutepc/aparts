@@ -22,7 +22,7 @@ function showToast(message, type = 'info') {
 function renderPropertyCardCompact(property) {
   const typeLabel = TYPE_LABELS[property.type] || property.type;
   const cardTitle = isComplex(property) ? property.title : getPropertyCardTitle(property);
-  const detailHref = getPropertyDetailHref(property);
+  const detailHref = getPropertyDetailHref(property, { overview: true });
   const cardImg = property.listingPlanImg || getPropertyImg(property);
   const priceLabel = isComplex(property) ? 'от ' : '';
   const districtHtml = property.district
