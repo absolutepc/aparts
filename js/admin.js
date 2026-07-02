@@ -4,7 +4,12 @@ function setDeveloperFormValue(form, value) {
   const select = form?.developer;
   if (!select) return;
 
-  const developer = value || DEFAULT_DEVELOPER;
+  const developer = value || '';
+  if (!developer) {
+    select.value = '';
+    return;
+  }
+
   const exists = Array.from(select.options).some((option) => option.value === developer);
   if (!exists) {
     select.insertAdjacentHTML(
@@ -838,6 +843,7 @@ function renderPropertiesAdmin() {
             <div class="form-group">
               <label>Застройщик</label>
               <select name="developer">
+                <option value="">—</option>
                 ${DEVELOPER_LIST.map((developer) => `
                   <option value="${escapeAttr(developer)}">${escapeHtml(developer)}</option>
                 `).join('')}
@@ -1196,7 +1202,7 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
-      developer: formData.get('developer')?.toString().trim() || DEFAULT_DEVELOPER,
+      developer: formData.get('developer')?.toString().trim() || '',
       installmentTerm: formData.get('installmentTerm')?.toString().trim() || '',
       deliveryDate: formData.get('deliveryDate')?.toString().trim() || '',
       maternityCapital: formData.get('maternityCapital')?.toString() || '',

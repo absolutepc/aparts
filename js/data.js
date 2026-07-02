@@ -36,7 +36,6 @@ const MANDATORY_PAYMENT_OPTIONS = {
 };
 
 const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13'];
-const DEFAULT_DEVELOPER = DEVELOPER_LIST[0];
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -133,6 +132,7 @@ const DEFAULT_PROPERTIES = [
     price: 90000,
     address: '​Проспект Владимира Владимировича Путина, 22/4​',
     district: 'Новый район',
+    developer: 'Монолит',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
     img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
@@ -303,6 +303,7 @@ const DEFAULT_PROPERTIES = [
     price: 65000,
     address: 'Проспект А.А. Кадырова 201',
     district: 'Байсангуровский',
+    developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 4000,
     img: 'img/luch/luch.jpg',
@@ -722,7 +723,8 @@ function normalizePropertyOffering(property) {
   else delete item.mandatoryPayment;
 
   const developer = String(item.developer || '').trim();
-  item.developer = developer || DEFAULT_DEVELOPER;
+  if (developer) item.developer = developer;
+  else delete item.developer;
 
   const installmentTerm = String(item.installmentTerm || '').trim();
   if (installmentTerm) item.installmentTerm = installmentTerm;
@@ -798,7 +800,7 @@ function renderPropertyOfferingSpecs(property) {
   const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
   const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
   const rows = [
-    renderPropertySpecRow('Застройщик', property.developer || DEFAULT_DEVELOPER),
+    renderPropertySpecRow('Застройщик', property.developer),
     renderPropertySpecRow('Срок сдачи объекта', property.deliveryDate),
     renderPropertySpecRow('Срок предоставления рассрочки', property.installmentTerm),
     renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
@@ -2036,6 +2038,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       ...saved,
       type: defaults.type,
       published: saved.published ?? defaults.published,
+      developer: defaults.developer != null && String(defaults.developer).trim() !== ''
+        ? defaults.developer
+        : saved.developer,
       sectors: Array.isArray(saved.sectors) && saved.sectors.length
         ? saved.sectors
         : defaults.sectors,
