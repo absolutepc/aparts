@@ -147,7 +147,6 @@ function initPropertyPage() {
 
   document.title = `${pageTitle} — ${SITE_NAME}`;
 
-  const typeLabel = TYPE_LABELS[property.type] || property.type;
   const backLink = getBackLink(property);
   const backLabel = getBackLabel(property);
   const districtRow = property.district
@@ -184,16 +183,17 @@ function initPropertyPage() {
       <div class="property-detail-hero">
         ${renderPropertyGalleryBlock(property)}
         <div class="property-detail-info">
-          <div class="property-category">${escapeHtml(typeLabel)}</div>
           <h1>${escapeHtml(pageTitle)}</h1>
-          <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
+          <div class="property-detail-head">
+            <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
+            <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
+          </div>
           <div class="property-specs-table">
             ${renderPropertyOfferingSpecs(property)}
             ${specsHtml}
             ${districtRow}
             ${addressRow}
           </div>
-          <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
         </div>
       </div>
 

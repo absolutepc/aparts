@@ -169,6 +169,9 @@ function renderPropertyCard(property) {
   }
 
   const priceLabel = isComplex(property) ? 'от ' : '';
+  const descriptionHtml = isComplex(property)
+    ? ''
+    : `<p>${escapeHtml(property.description || '')}</p>`;
 
   return `
     <a href="${escapeAttr(detailHref)}" class="property-card" data-transition-label="${escapeAttr(cardTitle)}">
@@ -179,7 +182,7 @@ function renderPropertyCard(property) {
         <div class="property-category">${escapeHtml(typeLabel)}</div>
         <h3>${escapeHtml(cardTitle)}</h3>
         <div class="property-attrs">${attrsHtml}</div>
-        <p>${escapeHtml(property.description || '')}</p>
+        ${descriptionHtml}
         <div class="property-footer">
           <div class="property-price">${priceLabel}${formatPrice(property.price)}</div>
           <span class="btn btn-secondary btn-sm">Подробнее</span>

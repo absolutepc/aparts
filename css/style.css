@@ -439,12 +439,21 @@ main { flex: 1; }
 
 .property-detail-info h1 {
   font-size: 2rem;
-  margin: 12px 0;
+  margin: 0 0 16px;
+}
+
+.property-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
 .property-detail-price {
   font-size: 1.6rem;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .property-detail-desc {
