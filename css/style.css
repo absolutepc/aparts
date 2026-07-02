@@ -413,7 +413,7 @@ main { flex: 1; }
 
 .property-detail-hero {
   display: grid;
-  grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+  grid-template-columns: minmax(0, 55fr) minmax(0, 45fr);
   gap: 32px;
   align-items: start;
   margin-top: 24px;
