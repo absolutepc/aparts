@@ -30,9 +30,12 @@ const MANDATORY_PAYMENT_OPTIONS = {
   3000: '3 000',
   4000: '4 000',
   5000: '5 000',
+  6000: '6 000',
+  7000: '7 000',
+  8000: '8 000',
 };
 
-const DEFAULT_DEVELOPER = 'Кормат строй';
+const DEFAULT_DEVELOPER = 'Кормат строй, Квартал 777, Монолит, Фаворит 13';
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -216,15 +219,21 @@ const DEFAULT_PROPERTIES = [
     areaMin: 43.16,
     areaMax: 82.25,
     price: 71000,
-    address: 'Чеченская Республика, Грозный, улица Э.Э. Исмаилова, 35 стр.',
+    address: 'Грозный, улица Э.Э. Исмаилова, 35 стр.',
     district: 'Новый Проспект',
     developer: 'Кормат строй',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
     images: [
-      '',
-      '',
+      'img/Бомонд/бомонд.jpg',
+      'img/Бомонд/бомонд 1.jpg',
+      'img/Бомонд/бомонд 2.jpg',
+      'img/Бомонд/бомонд 3.jpg',
+      'img/Бомонд/бомонд 4.jpg',
+      'img/Бомонд/бомонд 5.jpg',
+      'img/Бомонд/бомонд 6.jpg',
+      'img/Бомонд/бомонд 7.jpg',
     ],
     published: true,
   },
