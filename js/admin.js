@@ -821,6 +821,36 @@ function renderPropertiesAdmin() {
               <input type="text" name="district" placeholder="ЦАО, ВАО, САО...">
             </div>
             <div class="form-group">
+              <label>Застройщик</label>
+              <input type="text" name="developer" value="${escapeHtml(DEFAULT_DEVELOPER)}" placeholder="Кормат строй">
+            </div>
+            <div class="form-group">
+              <label>Общий срок рассрочки</label>
+              <input type="text" name="installmentTerm" placeholder="например, 24 месяца">
+            </div>
+            <div class="form-group">
+              <label>Срок сдачи объекта</label>
+              <input type="text" name="deliveryDate" placeholder="например, 4 кв. 2026">
+            </div>
+            <div class="form-group">
+              <label>Материнский капитал</label>
+              <select name="maternityCapital">
+                <option value="">—</option>
+                ${Object.entries(MATERNITY_CAPITAL_OPTIONS).map(([value, label]) => `
+                  <option value="${value}">${escapeHtml(label)}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Наценка</label>
+              <select name="markupBasis">
+                <option value="">—</option>
+                ${Object.entries(MARKUP_BASIS_OPTIONS).map(([value, label]) => `
+                  <option value="${value}">${escapeHtml(label)}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
               <label>Без наценки</label>
               <select name="noMarkupYears" required>
                 ${Object.entries(NO_MARKUP_YEARS).map(([value]) => `
@@ -1147,6 +1177,11 @@ function bindPropertiesAdmin() {
       price: priceValue ? Number(priceValue) : null,
       address: formData.get('address')?.toString().trim() || '',
       district: formData.get('district')?.toString().trim() || '',
+      developer: formData.get('developer')?.toString().trim() || DEFAULT_DEVELOPER,
+      installmentTerm: formData.get('installmentTerm')?.toString().trim() || '',
+      deliveryDate: formData.get('deliveryDate')?.toString().trim() || '',
+      maternityCapital: formData.get('maternityCapital')?.toString() || '',
+      markupBasis: formData.get('markupBasis')?.toString() || '',
       noMarkupYears,
       mandatoryPayment,
       img: normalizedImages.img,
@@ -1242,6 +1277,11 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
+      form.developer.value = property.developer || DEFAULT_DEVELOPER;
+      form.installmentTerm.value = property.installmentTerm || '';
+      form.deliveryDate.value = property.deliveryDate || '';
+      form.maternityCapital.value = property.maternityCapital || '';
+      form.markupBasis.value = property.markupBasis || '';
       form.noMarkupYears.value = property.noMarkupYears ?? 1;
       form.mandatoryPayment.value = property.mandatoryPayment ?? 3000;
       const normalizedImages = normalizePropertyImages(property);

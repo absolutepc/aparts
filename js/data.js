@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v16';
-const DATA_JS_VERSION = '16';
+const STORE_KEY = 'aparts_data_v17';
+const DATA_JS_VERSION = '17';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -30,6 +30,18 @@ const MANDATORY_PAYMENT_OPTIONS = {
   3000: '3 000',
   4000: '4 000',
   5000: '5 000',
+};
+
+const DEFAULT_DEVELOPER = 'Кормат строй';
+
+const MATERNITY_CAPITAL_OPTIONS = {
+  yes: 'Да',
+  no: 'Нет',
+};
+
+const MARKUP_BASIS_OPTIONS = {
+  after: 'После вычета',
+  before: 'До вычета',
 };
 
 function assetPath(relativePath) {
@@ -206,6 +218,7 @@ const DEFAULT_PROPERTIES = [
     price: 71000,
     address: 'Чеченская Республика, Грозный, улица Э.Э. Исмаилова, 35 стр.',
     district: 'Новый Проспект',
+    developer: 'Кормат строй',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
@@ -666,6 +679,14 @@ function getMandatoryPaymentLabel(amount) {
   return formatted ? `${formatted} ₽/м²` : '';
 }
 
+function getMaternityCapitalLabel(value) {
+  return MATERNITY_CAPITAL_OPTIONS[value] || '';
+}
+
+function getMarkupBasisLabel(value) {
+  return MARKUP_BASIS_OPTIONS[value] || '';
+}
+
 function normalizePropertyOffering(property) {
   const item = { ...property };
   const years = Number(item.noMarkupYears);
@@ -676,6 +697,31 @@ function normalizePropertyOffering(property) {
 
   if (MANDATORY_PAYMENT_OPTIONS[payment]) item.mandatoryPayment = payment;
   else delete item.mandatoryPayment;
+
+  const developer = String(item.developer || '').trim();
+  item.developer = developer || DEFAULT_DEVELOPER;
+
+  const installmentTerm = String(item.installmentTerm || '').trim();
+  if (installmentTerm) item.installmentTerm = installmentTerm;
+  else delete item.installmentTerm;
+
+  const deliveryDate = String(item.deliveryDate || '').trim();
+  if (deliveryDate) item.deliveryDate = deliveryDate;
+  else delete item.deliveryDate;
+
+  if (item.maternityCapital === true) item.maternityCapital = 'yes';
+  if (item.maternityCapital === false) item.maternityCapital = 'no';
+  if (MATERNITY_CAPITAL_OPTIONS[item.maternityCapital]) {
+    item.maternityCapital = item.maternityCapital;
+  } else {
+    delete item.maternityCapital;
+  }
+
+  if (MARKUP_BASIS_OPTIONS[item.markupBasis]) {
+    item.markupBasis = item.markupBasis;
+  } else {
+    delete item.markupBasis;
+  }
 
   if (isComplex(item)) {
     item.floorPriceRanges = normalizeFloorPriceRanges(item.floorPriceRanges);
@@ -718,7 +764,52 @@ function renderPropertyOfferingTags(property) {
 function renderPropertyOfferingSpecs(property) {
   const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
   const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
+  const maternityLabel = getMaternityCapitalLabel(property.maternityCapital);
+  const markupLabel = getMarkupBasisLabel(property.markupBasis);
   const rows = [];
+
+  rows.push(`
+    <div class="property-spec-row">
+      <span class="property-spec-label">Застройщик</span>
+      <span class="property-spec-value">${escapeHtml(property.developer || DEFAULT_DEVELOPER)}</span>
+    </div>
+  `);
+
+  if (property.deliveryDate) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Срок сдачи объекта</span>
+        <span class="property-spec-value">${escapeHtml(property.deliveryDate)}</span>
+      </div>
+    `);
+  }
+
+  if (property.installmentTerm) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Общий срок рассрочки</span>
+        <span class="property-spec-value">${escapeHtml(property.installmentTerm)}</span>
+      </div>
+    `);
+  }
+
+  if (maternityLabel) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Материнский капитал</span>
+        <span class="property-spec-value">${escapeHtml(maternityLabel)}</span>
+      </div>
+    `);
+  }
+
+  if (markupLabel) {
+    rows.push(`
+      <div class="property-spec-row">
+        <span class="property-spec-label">Наценка</span>
+        <span class="property-spec-value">${escapeHtml(markupLabel)}</span>
+      </div>
+    `);
+  }
 
   if (noMarkupLabel) {
     rows.push(`
@@ -1955,6 +2046,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const legacyKeys = [
+    'aparts_data_v16',
     'aparts_data_v15',
     'aparts_data_v14',
     'aparts_data_v13',
