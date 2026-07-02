@@ -188,8 +188,8 @@ function initPropertyPage() {
           <h1>${escapeHtml(pageTitle)}</h1>
           <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
           <div class="property-specs-table">
-            ${specsHtml}
             ${renderPropertyOfferingSpecs(property)}
+            ${specsHtml}
             ${districtRow}
             ${addressRow}
           </div>
