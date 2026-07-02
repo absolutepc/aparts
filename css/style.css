@@ -496,6 +496,7 @@ main { flex: 1; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  margin-top: 37px;
 }
 
 .property-spec-row {
@@ -574,7 +575,7 @@ main { flex: 1; }
 }
 
 .property-floor-prices--compact {
-  margin-top: 20px;
+  margin-top: 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);

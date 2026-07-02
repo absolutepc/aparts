@@ -35,7 +35,7 @@ const MANDATORY_PAYMENT_OPTIONS = {
   8000: '8 000',
 };
 
-const DEFAULT_DEVELOPER = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13']
+const DEFAULT_DEVELOPER = 'Кормат строй'
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
