@@ -19,6 +19,41 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
+function renderPropertyCardCompact(property) {
+  const typeLabel = TYPE_LABELS[property.type] || property.type;
+  const cardTitle = isComplex(property) ? property.title : getPropertyCardTitle(property);
+  const detailHref = getPropertyDetailHref(property);
+  const cardImg = property.listingPlanImg || getPropertyImg(property);
+  const priceLabel = isComplex(property) ? 'от ' : '';
+  const districtHtml = property.district
+    ? `<p class="property-card-summary">${escapeHtml(property.district)}</p>`
+    : '';
+
+  return `
+    <a href="${escapeAttr(detailHref)}" class="property-card property-card--compact" data-transition-label="${escapeAttr(cardTitle)}">
+      <div class="property-image">
+        ${renderPropertyImg(cardImg, cardTitle)}
+      </div>
+      <div class="property-info">
+        <div class="property-category">${escapeHtml(typeLabel)}</div>
+        <h3>${escapeHtml(cardTitle)}</h3>
+        ${districtHtml}
+        <div class="property-footer">
+          <div class="property-price">${priceLabel}${formatPrice(property.price)}</div>
+          <span class="btn btn-secondary btn-sm">Подробнее</span>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+function renderPropertiesGridCompact(properties, emptyMessage) {
+  if (!properties.length) {
+    return `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
+  }
+  return `<div class="properties-grid properties-grid--compact">${properties.map(renderPropertyCardCompact).join('')}</div>`;
+}
+
 function renderFeaturedJkCard(property) {
   const variants = getComplexFlatVariants(property);
   const activeVariant = variants[0];

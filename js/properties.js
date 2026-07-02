@@ -11,16 +11,15 @@ function initHomePage() {
 
   const jkGridEl = document.getElementById('featuredJkProperties');
   if (jkGridEl) {
-    jkGridEl.innerHTML = renderFeaturedJkGrid(
+    jkGridEl.innerHTML = renderPropertiesGridCompact(
       jkProperties,
       'ЖК пока нет. Добавьте объекты через админ-панель.'
     );
-    bindFeaturedJkCards(jkGridEl);
   }
 
   const commercialGridEl = document.getElementById('featuredCommercialProperties');
   if (commercialGridEl) {
-    commercialGridEl.innerHTML = renderPropertiesGrid(
+    commercialGridEl.innerHTML = renderPropertiesGridCompact(
       commercialProperties,
       'Коммерческих объектов пока нет. Добавьте через админ-панель.'
     );
