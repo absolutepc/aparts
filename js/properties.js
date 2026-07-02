@@ -194,12 +194,12 @@ function initPropertyPage() {
             ${districtRow}
             ${addressRow}
           </div>
+          ${isComplex(property) ? renderPropertyFloorPricesBlock(property, { compact: true }) : ''}
         </div>
       </div>
 
       ${isComplex(property)
         ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType, selectedSector?.id)
-          + renderPropertyFloorPricesBlock(property)
         : ''}
     </div>
   `;

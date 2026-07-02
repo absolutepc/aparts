@@ -573,6 +573,26 @@ main { flex: 1; }
   margin-top: 40px;
 }
 
+.property-floor-prices--compact {
+  margin-top: 20px;
+}
+
+.property-floor-prices--compact .property-floor-prices-header {
+  margin-bottom: 12px;
+}
+
+.property-floor-prices--compact .property-floor-prices-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.property-floor-prices--compact .property-floor-prices-table th,
+.property-floor-prices--compact .property-floor-prices-table td {
+  padding: 10px 14px;
+  font-size: 0.92rem;
+}
+
 .property-floor-prices-header {
   margin-bottom: 20px;
 }

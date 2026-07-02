@@ -529,15 +529,24 @@ function formatFloorPriceRangeLabel(range) {
   return `${formatFloorRangeLabel(normalized)} — от ${formatPrice(normalized.price)}`;
 }
 
-function renderPropertyFloorPricesBlock(property) {
+function renderPropertyFloorPricesBlock(property, options = {}) {
   const ranges = getPropertyFloorPriceRanges(property);
   if (!ranges.length) return '';
 
+  const compact = options.compact === true;
+  const sectionClass = compact
+    ? 'property-floor-prices property-floor-prices--compact'
+    : 'property-floor-prices';
+  const headingTag = compact ? 'h3' : 'h2';
+  const subtitleHtml = compact
+    ? ''
+    : '<p>Стоимость зависит от выбранного этажа</p>';
+
   return `
-    <section class="property-floor-prices">
+    <section class="${sectionClass}">
       <div class="section-header property-floor-prices-header">
-        <h2>Цены по этажам</h2>
-        <p>Стоимость зависит от выбранного этажа</p>
+        <${headingTag}>Цены по этажам</${headingTag}>
+        ${subtitleHtml}
       </div>
       <div class="property-floor-prices-table-wrap">
         <table class="property-floor-prices-table">
@@ -1836,12 +1845,7 @@ function renderComplexStatsTags(property) {
 
 function renderComplexStatsTable(property, selectedVariant) {
   if (selectedVariant) {
-    return `
-      <div class="property-spec-row">
-        <span class="property-spec-label">Площадь квартир</span>
-        <span class="property-spec-value">${formatVariantAreaRange(selectedVariant) || '—'}</span>
-      </div>
-    `;
+    return '';
   }
 
   const variants = getComplexFlatVariants(property);
