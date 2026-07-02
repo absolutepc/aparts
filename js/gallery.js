@@ -35,7 +35,9 @@ function renderPropertyGalleryBlock(property) {
   return `
     <div class="property-detail-gallery">
       <div class="property-detail-image" id="propertyGallery">
-        <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
+        <div class="property-detail-image-main">
+          <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
+        </div>
         ${thumbsHtml}
       </div>
       ${descriptionHtml}
