@@ -1269,7 +1269,7 @@ function bindPropertiesAdmin() {
     const editId = formData.get('editId');
 
     if (editId) {
-      properties = properties.map(item => item.id === editId ? property : item);
+      properties = properties.map(item => item.id === editId ? { ...item, ...property } : item);
       showToast('Объект обновлён', 'success');
     } else {
       properties.unshift(property);

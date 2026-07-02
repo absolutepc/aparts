@@ -1672,6 +1672,18 @@ function mergePropertyDetails(property, defaults) {
   return item;
 }
 
+function preservePropertyContentFields(target, source) {
+  if (!target || !source) return target;
+
+  for (const key of ['title', 'description', 'address', 'district', 'img', 'images', 'price', 'published']) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      target[key] = source[key];
+    }
+  }
+
+  return target;
+}
+
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const hasSavedSectors = Array.isArray(property.sectors) && property.sectors.length;
@@ -1695,6 +1707,7 @@ function enrichProperty(property) {
     restoreMissingSectorVariantsFromDefaults(merged);
     if (merged.id === 'jk2') {
       Object.assign(merged, applyJk2BomondDataFromConfig(merged));
+      preservePropertyContentFields(merged, property);
     }
   }
 
@@ -2043,6 +2056,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       developer: defaults.developer != null && String(defaults.developer).trim() !== ''
         ? defaults.developer
         : saved.developer,
+      description: Object.prototype.hasOwnProperty.call(saved, 'description')
+        ? saved.description
+        : defaults.description,
       sectors: Array.isArray(saved.sectors) && saved.sectors.length
         ? saved.sectors
         : defaults.sectors,
@@ -2127,6 +2143,7 @@ function getProperties() {
         const source = stored.find(item => item.id === property.id);
         if (!source) return true;
         return property.type !== source.type
+          || property.description !== (source.description ?? '')
           || property.img !== source.img
           || JSON.stringify(property.images) !== JSON.stringify(source.images)
           || property.flatType !== source.flatType
@@ -2647,7 +2664,7 @@ function applyJk2BomondDataFromConfig(property) {
     sectors,
   };
 
-  return repairComplexSectorData(item);
+  return preservePropertyContentFields(repairComplexSectorData(item), property);
 }
 
 function applyJk2BomondDefaultsToCatalog() {
