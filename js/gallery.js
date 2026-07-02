@@ -26,10 +26,19 @@ function renderPropertyGalleryBlock(property) {
       </div>`
     : '';
 
+  const descriptionHtml = property.description
+    ? `<div class="property-detail-desc">
+        <p>${escapeHtml(property.description)}</p>
+      </div>`
+    : '';
+
   return `
-    <div class="property-detail-image" id="propertyGallery">
-      <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
-      ${thumbsHtml}
+    <div class="property-detail-gallery">
+      <div class="property-detail-image" id="propertyGallery">
+        <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
+        ${thumbsHtml}
+      </div>
+      ${descriptionHtml}
     </div>
   `;
 }
