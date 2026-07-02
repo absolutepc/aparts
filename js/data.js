@@ -868,7 +868,7 @@ function isGeneralSectorTitle(title) {
 }
 
 const SECTOR_TITLE_COLLATOR = typeof Intl !== 'undefined'
-  ? new Intl.Collator('ru', { sensitivity: 'base', numeric: true })
+  ? new Intl.Collator('ru', { sensitivity: 'base' })
   : null;
 
 function compareSectorTitles(titleA, titleB) {
@@ -886,21 +886,23 @@ function sortSectorsAlphabetically(sectors) {
 }
 
 function getConfiguredSectorTitles(layoutsConfig, preferredOrder = []) {
-  const titles = new Set();
+  const configKeys = Object.keys(layoutsConfig || {})
+    .map((key) => stripSectorTitle(key))
+    .filter(Boolean);
+  const configKeySet = new Set(configKeys);
 
-  if (Array.isArray(preferredOrder)) {
-    preferredOrder.forEach((title) => {
-      const normalized = stripSectorTitle(title);
-      if (normalized) titles.add(normalized);
-    });
+  if (Array.isArray(preferredOrder) && preferredOrder.length) {
+    const ordered = preferredOrder
+      .map((title) => stripSectorTitle(title))
+      .filter((title) => configKeySet.has(title));
+    const orderedSet = new Set(ordered);
+    const remaining = configKeys
+      .filter((title) => !orderedSet.has(title))
+      .sort(compareSectorTitles);
+    return [...ordered, ...remaining];
   }
 
-  Object.keys(layoutsConfig || {}).forEach((title) => {
-    const normalized = stripSectorTitle(title);
-    if (normalized) titles.add(normalized);
-  });
-
-  return [...titles].sort(compareSectorTitles);
+  return configKeys.sort(compareSectorTitles);
 }
 
 function getJk2LayoutConfigForSector(layoutsConfig, sectorTitle) {
@@ -2153,8 +2155,8 @@ const JK2_BOMOND_DATA = {
     { floorMin: 15, floorMax: 19, price: 71000 },
   ],
 
-  // Порядок секторов на странице объекта (алфавитный)
-  sectorOrder: ['А-Г', 'Б-Д', 'В-Е', 'Ж-К', 'З-И'],
+  // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
+  sectorOrder: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
 
   // Сектор → тип квартир → ключ планировки → данные
   layouts: {
@@ -2272,7 +2274,7 @@ const JK2_BOMOND_DATA = {
       },
     },
 
-    '3': {
+    'З': {
       '1room': {
         '\u0416-\u0410': { totalApartments: 2, availableFloors: '4-5' },
         '\u0416-\u0411': { totalApartments: 6, availableFloors: '3-5, 8, 11, 19' },
