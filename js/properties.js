@@ -193,6 +193,7 @@ function initPropertyPage() {
             ${districtRow}
             ${addressRow}
           </div>
+          ${property.description ? `<p class="property-detail-desc">${escapeHtml(property.description)}</p>` : ''}
           <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
         </div>
       </div>
