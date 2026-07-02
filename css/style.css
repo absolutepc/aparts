@@ -575,10 +575,16 @@ main { flex: 1; }
 
 .property-floor-prices--compact {
   margin-top: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .property-floor-prices--compact .property-floor-prices-header {
-  margin-bottom: 12px;
+  margin-bottom: 0;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
 }
 
 .property-floor-prices--compact .property-floor-prices-header h3 {
@@ -593,20 +599,30 @@ main { flex: 1; }
   font-size: 0.92rem;
 }
 
+.property-floor-prices--compact .property-floor-prices-table-wrap {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
 .property-floor-prices-header {
   margin-bottom: 20px;
 }
 
 .property-floor-prices-table-wrap {
   overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .property-floor-prices-table {
   width: 100%;
   border-collapse: collapse;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  border-radius: 0;
 }
 
 .property-floor-prices-table th,
