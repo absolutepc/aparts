@@ -1,5 +1,20 @@
 let adminSection = 'properties';
 
+function setDeveloperFormValue(form, value) {
+  const select = form?.developer;
+  if (!select) return;
+
+  const developer = value || DEFAULT_DEVELOPER;
+  const exists = Array.from(select.options).some((option) => option.value === developer);
+  if (!exists) {
+    select.insertAdjacentHTML(
+      'beforeend',
+      `<option value="${escapeAttr(developer)}">${escapeHtml(developer)}</option>`
+    );
+  }
+  select.value = developer;
+}
+
 function initAdmin() {
   const user = getCurrentUser();
   if (!user || user.role !== 'admin') {
@@ -822,7 +837,11 @@ function renderPropertiesAdmin() {
             </div>
             <div class="form-group">
               <label>Застройщик</label>
-              <input type="text" name="developer" value="${escapeHtml(DEFAULT_DEVELOPER)}" placeholder="Кормат строй">
+              <select name="developer">
+                ${DEVELOPER_LIST.map((developer) => `
+                  <option value="${escapeAttr(developer)}">${escapeHtml(developer)}</option>
+                `).join('')}
+              </select>
             </div>
             <div class="form-group">
               <label>Срок предоставления рассрочки</label>
@@ -1277,7 +1296,7 @@ function bindPropertiesAdmin() {
       form.price.value = property.price ?? '';
       form.address.value = property.address || '';
       form.district.value = property.district || '';
-      form.developer.value = property.developer || DEFAULT_DEVELOPER;
+      setDeveloperFormValue(form, property.developer);
       form.installmentTerm.value = property.installmentTerm || '';
       form.deliveryDate.value = property.deliveryDate || '';
       form.maternityCapital.value = property.maternityCapital || '';
