@@ -866,10 +866,52 @@ function isGeneralSectorTitle(title) {
     || normalized === 'основной сектор';
 }
 
+const SECTOR_TITLE_COLLATOR = typeof Intl !== 'undefined'
+  ? new Intl.Collator('ru', { sensitivity: 'base', numeric: true })
+  : null;
+
+function compareSectorTitles(titleA, titleB) {
+  const left = stripSectorTitle(titleA);
+  const right = stripSectorTitle(titleB);
+  if (!left && !right) return 0;
+  if (!left) return 1;
+  if (!right) return -1;
+  if (SECTOR_TITLE_COLLATOR) return SECTOR_TITLE_COLLATOR.compare(left, right);
+  return left.localeCompare(right, 'ru', { sensitivity: 'base', numeric: true });
+}
+
 function sortSectorsAlphabetically(sectors) {
-  return [...sectors].sort((a, b) =>
-    stripSectorTitle(a.title).localeCompare(stripSectorTitle(b.title), 'ru', { sensitivity: 'base' })
+  return [...sectors].sort((a, b) => compareSectorTitles(a.title, b.title));
+}
+
+function getConfiguredSectorTitles(layoutsConfig, preferredOrder = []) {
+  const titles = new Set();
+
+  if (Array.isArray(preferredOrder)) {
+    preferredOrder.forEach((title) => {
+      const normalized = stripSectorTitle(title);
+      if (normalized) titles.add(normalized);
+    });
+  }
+
+  Object.keys(layoutsConfig || {}).forEach((title) => {
+    const normalized = stripSectorTitle(title);
+    if (normalized) titles.add(normalized);
+  });
+
+  return [...titles].sort(compareSectorTitles);
+}
+
+function getJk2LayoutConfigForSector(layoutsConfig, sectorTitle) {
+  const normalized = stripSectorTitle(sectorTitle);
+  if (!normalized || !layoutsConfig) return null;
+
+  if (layoutsConfig[normalized]) return layoutsConfig[normalized];
+
+  const matchedKey = Object.keys(layoutsConfig).find(
+    (key) => stripSectorTitle(key) === normalized
   );
+  return matchedKey ? layoutsConfig[matchedKey] : null;
 }
 
 function getLayoutDisplayLabel(label) {
@@ -2108,6 +2150,9 @@ const JK2_BOMOND_DATA = {
     { floorMin: 16, floorMax: 20, price: 79000 },
   ],
 
+  // Порядок секторов на странице объекта (алфавитный)
+  sectorOrder: ['А-Г', 'Б-Д', 'В-Е', 'Ж-К', 'З-И'],
+
   // Сектор → тип квартир → ключ планировки → данные
   layouts: {
     'А-Г': {
@@ -2237,8 +2282,11 @@ function buildJk2SectorsFromLayoutConfig(sourceVariants) {
 
   const sectors = [];
   const layoutsConfig = JK2_BOMOND_DATA.layouts || {};
+  const sectorTitles = getConfiguredSectorTitles(layoutsConfig, JK2_BOMOND_DATA.sectorOrder);
 
-  for (const [sectorTitle, flatTypesConfig] of Object.entries(layoutsConfig)) {
+  for (const sectorTitle of sectorTitles) {
+    const flatTypesConfig = getJk2LayoutConfigForSector(layoutsConfig, sectorTitle);
+    if (!flatTypesConfig) continue;
     const flatVariantsByType = new Map();
 
     for (const [flatType, layoutsForType] of Object.entries(flatTypesConfig || {})) {
@@ -2279,7 +2327,7 @@ function buildJk2SectorsFromLayoutConfig(sourceVariants) {
 }
 
 function buildJk2SectorsFromExplicitData(sectorsData) {
-  return sectorsData
+  return sortSectorsAlphabetically(sectorsData
     .map((sector, index) => {
       const title = formatSectorTitle(sector?.title || String.fromCharCode(65 + index));
       const flatVariants = (Array.isArray(sector?.flatVariants) ? sector.flatVariants : [])
@@ -2301,7 +2349,7 @@ function buildJk2SectorsFromExplicitData(sectorsData) {
         flatVariants,
       };
     })
-    .filter(Boolean);
+    .filter(Boolean));
 }
 
 function applyJk2LayoutDetailsToSectors(sectors) {
@@ -2361,7 +2409,7 @@ function applyJk2BomondDataFromConfig(property) {
       ? buildJk2SectorsFromLayoutConfig(source.flatVariants)
       : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source)));
 
-  sectors = applyJk2LayoutDetailsToSectors(sectors);
+  sectors = sortSectorsAlphabetically(applyJk2LayoutDetailsToSectors(sectors));
 
   const item = {
     ...source,

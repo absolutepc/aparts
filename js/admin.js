@@ -536,7 +536,7 @@ function collectSectorsFromForm(form) {
     return { error: 'Добавьте хотя бы один сектор с типами квартир' };
   }
 
-  return { sectors };
+  return { sectors: sortSectorsAlphabetically(sectors) };
 }
 
 function collectFloorPriceRangesFromForm(form) {
