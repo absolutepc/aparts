@@ -1843,12 +1843,20 @@ function renderComplexStatsTags(property) {
   `;
 }
 
-function renderComplexStatsTable(property, selectedVariant) {
+function renderComplexStatsTable(property, selectedVariant, options = {}) {
   if (selectedVariant) {
     return '';
   }
 
-  const variants = getComplexFlatVariants(property);
+  let variants = getComplexFlatVariants(property);
+
+  if (options.overview) {
+    variants = variants.filter(variant => variant.flatType !== '1room' && variant.flatType !== '2room');
+  }
+
+  if (!variants.length) {
+    return '';
+  }
 
   if (variants.length > 1) {
     return variants.map(variant => `

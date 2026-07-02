@@ -161,8 +161,10 @@ function initPropertyPage() {
       ? selectedVariant.price
       : property.price;
 
+  const isOverview = isComplex(property) && !flatTypeParam;
+
   const specsHtml = isComplex(property)
-    ? renderComplexStatsTable(property, selectedVariant)
+    ? renderComplexStatsTable(property, selectedVariant, { overview: isOverview })
     : `
       <div class="property-spec-row">
         <span class="property-spec-label">Площадь</span>
