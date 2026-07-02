@@ -1626,10 +1626,9 @@ function getPropertyCardTitle(property) {
   return property.title;
 }
 
-function getPropertyDetailHref(property, options = {}) {
+function getPropertyDetailHref(property) {
   const params = new URLSearchParams({ id: property.id });
-  const includeFlatType = options.includeFlatType ?? !options.overview;
-  if (includeFlatType && isComplex(property) && property.flatType) {
+  if (isComplex(property) && property.flatType) {
     params.set('flatType', property.flatType);
   }
   return `property.html?${params.toString()}`;
