@@ -2,7 +2,7 @@ function getPropertyGalleryImages(property) {
   return getPropertyImages(property).filter(Boolean);
 }
 
-function renderPropertyGalleryMedia(property) {
+function renderPropertyGalleryBlock(property) {
   const images = getPropertyGalleryImages(property);
   const mainSrc = resolveImageSrc(getPropertyImg(property));
   const fallback = escapeAttr(assetPath(DEFAULT_IMG));
@@ -26,29 +26,19 @@ function renderPropertyGalleryMedia(property) {
       </div>`
     : '';
 
-  return `
-    <div class="property-detail-image" id="propertyGallery">
-      <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
-      ${thumbsHtml}
-    </div>
-  `;
-}
+  const descriptionHtml = property.description
+    ? `<div class="property-detail-desc">
+        <p>${escapeHtml(property.description)}</p>
+      </div>`
+    : '';
 
-function renderPropertyDescriptionBlock(property) {
-  if (!property.description) return '';
-
-  return `
-    <div class="property-detail-desc">
-      <p>${escapeHtml(property.description)}</p>
-    </div>
-  `;
-}
-
-function renderPropertyGalleryBlock(property) {
   return `
     <div class="property-detail-gallery">
-      ${renderPropertyGalleryMedia(property)}
-      ${renderPropertyDescriptionBlock(property)}
+      <div class="property-detail-image" id="propertyGallery">
+        <img id="propertyMainImage" src="${escapeAttr(mainSrc)}" alt="${safeTitle}" onerror="this.src='${fallback}'">
+        ${thumbsHtml}
+      </div>
+      ${descriptionHtml}
     </div>
   `;
 }
