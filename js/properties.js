@@ -174,6 +174,10 @@ function initPropertyPage() {
 
   const pricePrefix = isComplex(property) ? 'от ' : '';
 
+  const floorPricesHtml = isComplex(property)
+    ? renderPropertyFloorPricesBlock(property, { compact: true })
+    : '';
+
   container.innerHTML = `
     <div class="container property-detail-page">
       <div class="breadcrumbs">
@@ -183,8 +187,10 @@ function initPropertyPage() {
       </div>
 
       <div class="property-detail-hero">
-        ${renderPropertyGalleryBlock(property)}
-        <div class="property-detail-info">
+        <div class="property-detail-hero-gallery">
+          ${renderPropertyGalleryMedia(property)}
+        </div>
+        <div class="property-detail-hero-info">
           ${renderPropertyDetailTitle(property, selectedVariant)}
           <div class="property-detail-head">
             <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
@@ -196,7 +202,12 @@ function initPropertyPage() {
             ${districtRow}
             ${addressRow}
           </div>
-          ${isComplex(property) ? renderPropertyFloorPricesBlock(property, { compact: true }) : ''}
+        </div>
+        <div class="property-detail-hero-desc">
+          ${renderPropertyDescriptionBlock(property)}
+        </div>
+        <div class="property-detail-hero-prices">
+          ${floorPricesHtml}
         </div>
       </div>
 

@@ -414,8 +414,44 @@ main { flex: 1; }
 .property-detail-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-rows: auto auto;
+  column-gap: 32px;
+  row-gap: 16px;
+  align-items: start;
   margin-top: 24px;
+}
+
+.property-detail-hero-gallery {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.property-detail-hero-info {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.property-detail-hero-desc {
+  grid-column: 1;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.property-detail-hero-desc .property-detail-desc {
+  height: 100%;
+}
+
+.property-detail-hero-prices {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+}
+
+.property-detail-hero-prices .property-floor-prices--compact {
+  margin-top: 0;
+  height: 100%;
 }
 
 .property-detail-gallery {
@@ -1475,6 +1511,22 @@ main { flex: 1; }
   .stats-grid,
   .admin-layout {
     grid-template-columns: 1fr;
+  }
+
+  .property-detail-hero {
+    grid-template-rows: auto;
+  }
+
+  .property-detail-hero-gallery,
+  .property-detail-hero-info,
+  .property-detail-hero-desc,
+  .property-detail-hero-prices {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .property-detail-hero-prices .property-floor-prices--compact {
+    margin-top: 0;
   }
 
   .footer-top {
