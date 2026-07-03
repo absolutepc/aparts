@@ -2053,8 +2053,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       const priceSpecsHtml = renderLayoutPriceSpecs(property, layout, variant);
       const layoutDescription = String(layout.description || '').trim();
       const layoutDescriptionHtml = layoutDescription
-        ? `<li>
-            <span class="floor-plan-spec-label">Описание</span>
+        ? `<li class="floor-plan-spec-description">
             <span class="floor-plan-spec-value floor-plan-spec-value--multiline">${escapeHtml(layoutDescription)}</span>
           </li>`
         : '';
@@ -2577,6 +2576,65 @@ function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
   return flatConfig[layoutKey] ?? flatConfig[String(layoutKey)] ?? null;
 }
 
+const JK2_LAYOUT_DESCRIPTION_OPENINGS = [
+  'Светлая {room} планировка {layout} в секторе {sector}.',
+  'Продуманная {room} планировка {layout} сектора {sector}.',
+  'Комфортная {room} планировка {layout} в секторе {sector}.',
+  'Функциональная {room} планировка {layout} в секторе {sector}.',
+  'Современная {room} планировка {layout} сектора {sector}.',
+  'Уютная {room} планировка {layout} в секторе {sector}.',
+];
+
+const JK2_LAYOUT_DESCRIPTION_DETAILS = [
+  'Высота потолков 3,1 м и панорамный вид на новый центр города.',
+  'Продуманная зонировка с удобной кухней-гостиной и местом для хранения.',
+  'Панорамное остекление, много естественного света и открытый вид.',
+  'Эргономичная планировка с комфортной зоной отдыха и работы.',
+  'Просторная прихожая, логичное зонирование и высокие потолки 3,1 м.',
+  'Удобная планировка для повседневной жизни с видом на новый центр.',
+  'Сбалансированное пространство, высокие потолки и качественное остекление.',
+  'Комфортная планировка с акцентом на функциональность и свет.',
+];
+
+function hashLayoutDescriptionKey(value) {
+  return String(value || '').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+}
+
+function fillJk2LayoutDescriptionTemplate(template, values) {
+  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => values[key] || '');
+}
+
+function buildJk2LayoutDescription(sectorTitle, flatType, layout, variant) {
+  const sector = formatSectorTitle(sectorTitle);
+  const layoutName = getLayoutDisplayLabel(layout?.label || layout?.key || '');
+  const roomLabel = flatType === '2room' ? 'двухкомнатная' : 'однокомнатная';
+  const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '';
+  const floorsLabel = formatFloorRangesCompactLabel(layout?.availableFloors);
+  const hash = hashLayoutDescriptionKey(`${sector}|${flatType}|${layout?.key}|${layoutName}`);
+  const values = {
+    room: roomLabel,
+    layout: layoutName,
+    sector,
+    area: areaLabel,
+    floors: floorsLabel,
+  };
+
+  const opening = fillJk2LayoutDescriptionTemplate(
+    JK2_LAYOUT_DESCRIPTION_OPENINGS[hash % JK2_LAYOUT_DESCRIPTION_OPENINGS.length],
+    values
+  );
+  let detail = fillJk2LayoutDescriptionTemplate(
+    JK2_LAYOUT_DESCRIPTION_DETAILS[(hash + flatType.length + layoutName.length) % JK2_LAYOUT_DESCRIPTION_DETAILS.length],
+    values
+  );
+
+  if (areaLabel) {
+    detail = `Площадь ${areaLabel}. ${detail}`;
+  }
+
+  return `${opening}\n${detail}`;
+}
+
 function resolveLayoutAvailableFloors(detail, layout) {
   if (detail?.availableFloors != null) {
     return typeof detail.availableFloors === 'string'
@@ -2697,10 +2755,14 @@ function applyJk2LayoutDetailsToSectors(sectors) {
         const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
         const customLabel = detail?.label ? String(detail.label).trim() : '';
         const customDescription = detail?.description ? String(detail.description).trim() : '';
+        const savedDescription = String(layout.description || '').trim();
+        const resolvedDescription = customDescription
+          || savedDescription
+          || buildJk2LayoutDescription(sectorTitle, variant.flatType, layout, variant);
         return normalizeLayoutVariant({
           ...layout,
           label: customLabel || layout.label,
-          description: customDescription || layout.description,
+          description: resolvedDescription,
           totalApartments,
           availableFloors: resolveLayoutAvailableFloors(detail, layout),
           sectorTitle: sectorTitle || resolveLayoutSectorTitle(layout) || undefined,

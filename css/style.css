@@ -836,6 +836,15 @@ main { flex: 1; }
   line-height: 1.5;
 }
 
+.floor-plan-spec-description {
+  justify-content: flex-end;
+}
+
+.floor-plan-spec-description .floor-plan-spec-value {
+  width: 100%;
+  text-align: right;
+}
+
 .empty-state {
   text-align: center;
   padding: 64px 24px;
