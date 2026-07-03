@@ -633,7 +633,7 @@ main { flex: 1; }
 }
 
 .property-floor-prices--compact .property-floor-prices-table-col-corner {
-  padding: 10px 18px 10px 14px;
+  padding: 10px 18px;
 }
 
 .property-floor-prices--compact .property-floor-prices-table-wrap {
@@ -660,6 +660,7 @@ main { flex: 1; }
   background: transparent;
   border: none;
   border-radius: 0;
+  table-layout: fixed;
 }
 
 .property-floor-prices-table th,
@@ -670,17 +671,22 @@ main { flex: 1; }
   vertical-align: middle;
 }
 
+.property-floor-prices-table th:first-child,
+.property-floor-prices-table td:first-child {
+  width: 38%;
+}
+
 .property-floor-prices-table-col-staroprom {
-  width: 100%;
+  width: 24%;
   text-align: center;
   padding: 14px 18px;
 }
 
 .property-floor-prices-table-col-corner {
-  width: 1%;
+  width: 38%;
   white-space: nowrap;
   text-align: right;
-  padding: 14px 18px 14px 14px;
+  padding: 14px 18px;
 }
 
 .property-floor-prices-table th {
