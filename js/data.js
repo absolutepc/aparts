@@ -541,10 +541,19 @@ function getApplicableFloorPrices(property, layout) {
   );
 }
 
-function formatFloorPriceRangeLabel(range) {
-  const normalized = normalizeFloorPriceRange(range);
-  if (!normalized) return '';
-  return `${formatFloorRangeLabel(normalized)} — от ${formatPrice(normalized.price)}`;
+const FLOOR_PRICE_TO_OFFSET = 2000;
+
+function getFloorPriceTo(price) {
+  const value = Number(price);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return value + FLOOR_PRICE_TO_OFFSET;
+}
+
+function formatFloorPriceFromTo(fromPrice) {
+  const from = Number(fromPrice);
+  const to = getFloorPriceTo(from);
+  if (!Number.isFinite(from) || from <= 0 || to == null) return '';
+  return `от ${formatPrice(from)} до ${formatPrice(to)}`;
 }
 
 function renderPropertyFloorPricesBlock(property, options = {}) {
@@ -578,7 +587,7 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
             ${ranges.map((range) => `
               <tr>
                 <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
-                <td>от ${formatPrice(range.price)}</td>
+                <td>${formatFloorPriceFromTo(range.price)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -600,13 +609,12 @@ function renderLayoutPriceSpecs(property, layout, variant) {
   }
 
   const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-
-  if (minPrice === maxPrice) {
-    return `<span class="floor-plan-spec-value">от ${formatPrice(minPrice)}</span>`;
+  const maxToPrice = getFloorPriceTo(Math.max(...prices));
+  if (maxToPrice == null) {
+    return '';
   }
 
-  return `<span class="floor-plan-spec-value">от ${formatPrice(minPrice)} до ${formatPrice(maxPrice)}</span>`;
+  return `<span class="floor-plan-spec-value">от ${formatPrice(minPrice)} до ${formatPrice(maxToPrice)}</span>`;
 }
 
 function isComplex(property) {
