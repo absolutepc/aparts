@@ -799,6 +799,26 @@ main { flex: 1; }
   font-weight: 700;
 }
 
+.floor-plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.floor-plan-description {
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+
+.floor-plan-description p {
+  margin: 0;
+  line-height: 1.6;
+}
+
 .floor-plan-specs {
   list-style: none;
   display: flex;
