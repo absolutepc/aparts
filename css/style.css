@@ -235,6 +235,14 @@ main { flex: 1; }
 
 .section-header p { color: var(--text-secondary); }
 
+.section-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
 .page-header {
   padding: 48px 0 32px;
   background: var(--bg-secondary);
