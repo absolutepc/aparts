@@ -695,7 +695,6 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
   const totalApartments = Number(layout?.totalApartments) || 0;
   const planImg = String(layout?.planImg || layout?.planImage || parentVariant?.planImg || '').trim();
   const availableFloors = normalizeFloorRanges(layout?.availableFloors);
-  const description = String(layout?.description || '').trim();
 
   const normalized = {
     key,
@@ -708,7 +707,6 @@ function normalizeLayoutVariant(layout, index, parentVariant = {}) {
     price: Number.isFinite(price) ? price : null,
   };
   if (sectorTitle) normalized.sectorTitle = sectorTitle;
-  if (description) normalized.description = description;
   return normalized;
 }
 
@@ -1722,51 +1720,6 @@ function preservePropertyContentFields(target, source) {
   return target;
 }
 
-function buildLayoutDescriptionLookup(property) {
-  const lookup = new Map();
-  if (!property || !isComplex(property)) return lookup;
-
-  for (const sector of getComplexSectors(property)) {
-    const sectorKey = stripSectorTitle(sector.title).toLowerCase();
-    for (const variant of sector.flatVariants || []) {
-      for (const layout of getVariantLayouts(variant)) {
-        const description = String(layout.description || '').trim();
-        if (!description) continue;
-        lookup.set(`${sectorKey}|${variant.flatType}|${layout.key}`, description);
-      }
-    }
-  }
-
-  return lookup;
-}
-
-function mergeSavedLayoutDescriptions(targetProperty, savedProperty) {
-  if (!targetProperty?.sectors?.length) return targetProperty;
-
-  const lookup = buildLayoutDescriptionLookup(savedProperty);
-  if (!lookup.size) return targetProperty;
-
-  return {
-    ...targetProperty,
-    sectors: targetProperty.sectors.map((sector) => ({
-      ...sector,
-      flatVariants: (sector.flatVariants || []).map((variant) => {
-        const sectorKey = stripSectorTitle(sector.title).toLowerCase();
-        const layouts = getVariantLayouts(variant).map((layout) => {
-          const savedDescription = lookup.get(`${sectorKey}|${variant.flatType}|${layout.key}`);
-          if (!savedDescription) return layout;
-          return { ...layout, description: savedDescription };
-        });
-
-        return normalizeFlatVariant({
-          ...variant,
-          layouts,
-        });
-      }).filter(Boolean),
-    })),
-  };
-}
-
 function enrichProperty(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const hasSavedSectors = Array.isArray(property.sectors) && property.sectors.length;
@@ -2051,12 +2004,6 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
         : (variant.totalApartments || '—');
       const floorsLabel = formatFloorRangesCompactLabel(layout.availableFloors);
       const priceSpecsHtml = renderLayoutPriceSpecs(property, layout, variant);
-      const layoutDescription = String(layout.description || '').trim();
-      const layoutDescriptionHtml = layoutDescription
-        ? `<li class="floor-plan-spec-description">
-            <span class="floor-plan-spec-value floor-plan-spec-value--multiline">${escapeHtml(layoutDescription)}</span>
-          </li>`
-        : '';
       const hiddenClass = layoutIndex === 0 ? '' : ' floor-plan-layout-panel--hidden';
 
       return `
@@ -2064,8 +2011,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
           <div class="floor-plan-image">
             ${renderPropertyImg(planImg, `Планировка ${layoutLabel}`)}
           </div>
-          <div class="floor-plan-details">
-            <ul class="floor-plan-specs">
+          <ul class="floor-plan-specs">
             <li>
               <span class="floor-plan-spec-label">Планировка</span>
               <span class="floor-plan-spec-value">${escapeHtml(layoutLabel)}</span>
@@ -2087,9 +2033,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               <span class="floor-plan-spec-label">Цена</span>
               ${priceSpecsHtml}
             </li>` : ''}
-            ${layoutDescriptionHtml}
-            </ul>
-          </div>
+          </ul>
         </div>
       `;
     }).join('');
@@ -2368,7 +2312,6 @@ function logoutUser() {
 // developer, deliveryDate, installmentTerm, maternityCapital, markupBasis — характеристики объекта
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
 //   label — своё название планировки (необязательно)
-//   description — описание планировки (необязательно)
 //   availableFloors: строка "3-8, 12" или массив [{ floorMin: 3, floorMax: 8 }]
 //
 // Если указать sectors целиком — используется он вместо автосборки из flatVariants
@@ -2570,30 +2513,6 @@ const JK2_BOMOND_DATA = {
   sectors: null,
 };
 
-const JK2_DEFAULT_LAYOUT_DESCRIPTIONS = {
-  '1room': 'Компактная однокомнатная планировка с функциональной зоной кухни-гостиной.\nВысота потолков 3,1 м и панорамный вид на новый центр города.',
-  '2room': 'Просторная двухкомнатная планировка с отдельной спальней и кухней-гостиной.\nВысота потолков 3,1 м и панорамный вид на новый центр города.',
-};
-
-for (const sectorConfig of Object.values(JK2_BOMOND_DATA.layouts || {})) {
-  for (const [flatType, layoutsForType] of Object.entries(sectorConfig || {})) {
-    const defaultDescription = JK2_DEFAULT_LAYOUT_DESCRIPTIONS[flatType]
-      || JK2_DEFAULT_LAYOUT_DESCRIPTIONS['1room'];
-    for (const detail of Object.values(layoutsForType || {})) {
-      if (!detail || typeof detail !== 'object') continue;
-      if (!String(detail.description || '').trim()) {
-        detail.description = defaultDescription;
-      }
-    }
-  }
-}
-
-function getDefaultJk2LayoutDescription(flatType) {
-  return JK2_DEFAULT_LAYOUT_DESCRIPTIONS[flatType]
-    || JK2_DEFAULT_LAYOUT_DESCRIPTIONS['1room']
-    || '';
-}
-
 function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
   const sectorConfig = JK2_BOMOND_DATA.layouts?.[stripSectorTitle(sectorTitle)];
   if (!sectorConfig) return null;
@@ -2721,14 +2640,9 @@ function applyJk2LayoutDetailsToSectors(sectors) {
         const detail = getJk2LayoutDetailConfig(sectorTitle, variant.flatType, layout.key);
         const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
         const customLabel = detail?.label ? String(detail.label).trim() : '';
-        const customDescription = detail?.description ? String(detail.description).trim() : '';
-        const resolvedDescription = customDescription
-          || String(layout.description || '').trim()
-          || getDefaultJk2LayoutDescription(variant.flatType);
         return normalizeLayoutVariant({
           ...layout,
           label: customLabel || layout.label,
-          description: resolvedDescription,
           totalApartments,
           availableFloors: resolveLayoutAvailableFloors(detail, layout),
           sectorTitle: sectorTitle || resolveLayoutSectorTitle(layout) || undefined,
@@ -2790,10 +2704,7 @@ function applyJk2BomondDataFromConfig(property) {
     sectors,
   };
 
-  return preservePropertyContentFields(
-    mergeSavedLayoutDescriptions(repairComplexSectorData(item), property),
-    property
-  );
+  return preservePropertyContentFields(repairComplexSectorData(item), property);
 }
 
 function applyJk2BomondDefaultsToCatalog() {

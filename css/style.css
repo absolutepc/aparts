@@ -799,12 +799,6 @@ main { flex: 1; }
   font-weight: 700;
 }
 
-.floor-plan-details {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .floor-plan-specs {
   list-style: none;
   display: flex;
@@ -834,20 +828,6 @@ main { flex: 1; }
 
 .floor-plan-spec-value {
   font-weight: 600;
-  text-align: right;
-}
-
-.floor-plan-spec-value--multiline {
-  white-space: pre-line;
-  line-height: 1.5;
-}
-
-.floor-plan-spec-description {
-  justify-content: flex-end;
-}
-
-.floor-plan-spec-description .floor-plan-spec-value {
-  width: 100%;
   text-align: right;
 }
 
