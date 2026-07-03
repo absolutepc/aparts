@@ -821,8 +821,8 @@ function renderPropertyOfferingSpecs(property) {
     renderPropertySpecRow('Застройщик', property.developer),
     renderPropertySpecRow('Срок сдачи объекта', property.deliveryDate),
     renderPropertySpecRow('Срок предоставления рассрочки', property.installmentTerm),
-    renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
+    renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
   ];
 
   if (noMarkupLabel) {
