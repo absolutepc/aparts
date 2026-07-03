@@ -644,10 +644,13 @@ main { flex: 1; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  display: flex;
+  justify-content: center;
 }
 
 .property-floor-prices-table {
-  width: 100%;
+  width: max-content;
+  max-width: 100%;
   border-collapse: collapse;
   background: transparent;
   border: none;
