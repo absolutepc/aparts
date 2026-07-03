@@ -2061,13 +2061,15 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
     `;
   }).join('');
 
+  const floorPlansSubtitle = selectedFlatType
+    ? (sectors.length > 1 ? 'Выберите обозначение и планировку' : 'Доступные планировки')
+    : (sectors.length > 1 ? '' : 'Доступные типы квартир в этом комплексе');
+
   return `
     <section class="property-floor-plans" data-property-id="${escapeAttr(property.id)}">
       <div class="section-header property-floor-plans-header">
         <h2>Планировки квартир</h2>
-        <p>${selectedFlatType
-          ? (sectors.length > 1 ? 'Выберите обозначение и планировку' : 'Доступные планировки')
-          : (sectors.length > 1 ? 'Выберите обозначение и тип квартиры' : 'Доступные типы квартир в этом комплексе')}</p>
+        ${floorPlansSubtitle ? `<p>${floorPlansSubtitle}</p>` : ''}
       </div>
       ${sectorPickerHtml}
       <div class="floor-plans-list">${cardsHtml}</div>
