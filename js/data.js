@@ -2499,8 +2499,8 @@ const COMPLEX_PROPERTY_CONFIGS = {
     'img/Ан-Нур/Ан-нур 5.jpg',
     'img/Ан-Нур/Ан-нур 10.jpg',
     'img/Ан-Нур/Ан-нур 8.jpg',
-    'img/Ан-Нур/Ан-нур 9.jpg',
     'img/Ан-Нур/Ан-нур 7.jpg',
+    'img/Ан-Нур/Ан-нур 9.jpg',
   ],
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
@@ -2516,27 +2516,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   ],
 
   // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
-  sectorOrder: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
+  sectorOrder: ['Б', 'В', 'Г', 'Д', 'Е', 'Ж'],
 
   // Сектор → тип квартир → ключ планировки → данные
   layouts: {
-    'А': {
-      '1room': {
-        A: { totalApartments: 11, availableFloors: '4, 6-8, 10-14 , 17, 19' }, /* 3\5 */
-        '\u0411': { totalApartments: 10, availableFloors: '4-12, 19' },  /* 3\5 */
-        '\u0412': { totalApartments: 11, availableFloors: '3-8, 10-11, 13-14, 18' }, 
-        '\u0413': { totalApartments: 12, availableFloors: '3-8, 10-11, 13-14, 17-18' },
-        '\u0414': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
-        '\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
-        '\u0416': { totalApartments: 11, availableFloors: '3-8, 10-14' },
-      },
-      
-      '2room': {
-        A: { totalApartments: 1, availableFloors: '5' },  /* 3\4 */
-        /*'\u0411': { totalApartments: 5, availableFloors: '5, 6-15' }, /* 3\4 */
-      },
-    },
-
     'Б': {
       '1room': {
         '\u0418': { totalApartments: 7, availableFloors: '4-5, 7-10, 18' },  /* */
@@ -2627,60 +2610,6 @@ const COMPLEX_PROPERTY_CONFIGS = {
         '\u0417-\u0416': { totalApartments: 1, availableFloors: '19' },
         '\u0417-\u0418': { totalApartments: 3, availableFloors: '4-5, 8' },
         '\u0417-\u041a': { totalApartments: 3, availableFloors: '4-5, 8' },
-      },
-      '2room': {
-        '\u041a': { totalApartments: 1, availableFloors: '3' },
-        '\u041b': { totalApartments: 1, availableFloors: '3' },
-      },
-    },
-
-    'З': {
-      '1room': {
-        '\u0416-\u0410': { totalApartments: 2, availableFloors: '4-5' },
-        '\u0416-\u0411': { totalApartments: 6, availableFloors: '3-5, 8, 11, 19' },
-        '\u0416-\u0412': { totalApartments: 1, availableFloors: '18' },
-        '\u0416-\u0413': { totalApartments: 1, availableFloors: '3' },
-        '\u0416-\u0414': { totalApartments: 1, availableFloors: '18' },
-        '\u0416-\u0415': { totalApartments: 2, availableFloors: '13, 18' },
-        '\u0416-\u0416': { totalApartments: 2, availableFloors: '13, 18' },
-        '\u0416-\u0418': { totalApartments: 4, availableFloors: '4-5, 10, 19' },
-        '\u0416-\u041a': { totalApartments: 7, availableFloors: '3-5, 8, 11, 18, 19' },
-      },
-      '2room': {
-        '\u0416': { totalApartments: 1, availableFloors: '3' },
-        '\u0418': { totalApartments: 1, availableFloors: '3' },
-      },
-    },
-
-    'И': {
-      '1room': {
-        '\u0416-\u0410': { totalApartments: 2, availableFloors: '4-5' },
-        '\u0416-\u0411': { totalApartments: 3, availableFloors: '4-5, 7' },
-        '\u0416-\u0412': { totalApartments: 6, availableFloors: '3-5, 7-8, 18' },
-        '\u0416-\u0413': { totalApartments: 7, availableFloors: '3-5, 7-9, 17' },
-        '\u0416-\u0414': { totalApartments: 11, availableFloors: '3-8, 10-11, 14, 18-19' },
-        '\u0416-\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 18-19' },
-        '\u0416-\u0416': { totalApartments: 9, availableFloors: '3-8, 13, 18-19' },
-        '\u0416-\u0418': { totalApartments: 8, availableFloors: '3-5, 7-9, 18-19' },
-        '\u0416-\u041a': { totalApartments: 9, availableFloors: '3-5, 7-8, 11, 14, 18-19' },
-      },
-      '2room': {
-        '\u0416': { totalApartments: 1, availableFloors: '3' },
-        '\u0418': { totalApartments: 2, availableFloors: '8, 17' },
-      },
-    },
-
-    'К': {
-      '1room': {
-        '\u0416-\u0410': { totalApartments: 8, availableFloors: '3-5, 7-8, 11, 18-19' },
-        '\u0416-\u0411': { totalApartments: 8, availableFloors: '3-5, 7-8, 11, 18-19' },
-        '\u0416-\u0412': { totalApartments: 12, availableFloors: '3-11, 14, 18-19' },
-        '\u0416-\u0413': { totalApartments: 11, availableFloors: '3-5, 7-11, 14, 18-19 ' },
-        '\u0416-\u0414': { totalApartments: 12, availableFloors: '3-11, 14, 18-19' },
-        '\u0416-\u0415': { totalApartments: 5, availableFloors: '3-5, 7-8' },
-        '\u0416-\u0416': { totalApartments: 5, availableFloors: '4-5, 7-8, 19' },
-        '\u0416-\u0418': { totalApartments: 1, availableFloors: '5' },
-        '\u0416-\u041a': { totalApartments: 2, availableFloors: '4-5' },
       },
       '2room': {
         '\u041a': { totalApartments: 1, availableFloors: '3' },
