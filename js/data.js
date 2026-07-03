@@ -2148,7 +2148,7 @@ function renderComplexStatsTags(property) {
 }
 
 function renderComplexStatsTable(property, selectedVariant, options = {}) {
-  if (selectedVariant) {
+  if (selectedVariant || property?.id === 'jk1') {
     return '';
   }
 
