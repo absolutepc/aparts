@@ -2053,7 +2053,10 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       const priceSpecsHtml = renderLayoutPriceSpecs(property, layout, variant);
       const layoutDescription = String(layout.description || '').trim();
       const layoutDescriptionHtml = layoutDescription
-        ? `<div class="floor-plan-description"><p>${escapeHtml(layoutDescription)}</p></div>`
+        ? `<li>
+            <span class="floor-plan-spec-label">Описание</span>
+            <span class="floor-plan-spec-value floor-plan-spec-value--multiline">${escapeHtml(layoutDescription)}</span>
+          </li>`
         : '';
       const hiddenClass = layoutIndex === 0 ? '' : ' floor-plan-layout-panel--hidden';
 
@@ -2085,8 +2088,8 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               <span class="floor-plan-spec-label">Цена</span>
               ${priceSpecsHtml}
             </li>` : ''}
-            </ul>
             ${layoutDescriptionHtml}
+            </ul>
           </div>
         </div>
       `;

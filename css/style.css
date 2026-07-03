@@ -802,22 +802,7 @@ main { flex: 1; }
 .floor-plan-details {
   display: flex;
   flex-direction: column;
-  gap: 16px;
   min-width: 0;
-}
-
-.floor-plan-description {
-  color: var(--text-secondary);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 16px 18px;
-}
-
-.floor-plan-description p {
-  margin: 0;
-  line-height: 1.6;
-  white-space: pre-line;
 }
 
 .floor-plan-specs {
@@ -850,6 +835,11 @@ main { flex: 1; }
 .floor-plan-spec-value {
   font-weight: 600;
   text-align: right;
+}
+
+.floor-plan-spec-value--multiline {
+  white-space: pre-line;
+  line-height: 1.5;
 }
 
 .empty-state {
