@@ -2604,19 +2604,16 @@ function pluralizeApartments(count) {
 }
 
 function buildJk2LayoutDescription(sectorTitle, flatType, layout, variant) {
-  const sector = formatSectorTitle(sectorTitle);
   const layoutLabel = preserveLayoutLabel(layout?.label || layout?.key || '');
   const layoutName = layoutLabel || getLayoutDisplayLabel(layout?.key || '') || 'планировка';
   const roomLabel = flatType === '2room' ? 'Двухкомнатная' : 'Однокомнатная';
   const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '';
-  const floorsLabel = formatFloorRangesCompactLabel(layout?.availableFloors);
   const apartmentsLabel = pluralizeApartments(layout?.totalApartments);
-  const hash = hashLayoutDescriptionKey(`${sector}|${flatType}|${layout?.key}|${layoutLabel}|${floorsLabel}`);
+  const hash = hashLayoutDescriptionKey(`${flatType}|${layout?.key}|${layoutLabel}`);
   const feature = JK2_LAYOUT_DESCRIPTION_FEATURES[hash % JK2_LAYOUT_DESCRIPTION_FEATURES.length];
 
-  const line1 = `${roomLabel} ${layoutName} в секторе ${sector}${areaLabel ? `, ${areaLabel}` : ''}.`;
+  const line1 = `${roomLabel} ${layoutName}${areaLabel ? `, ${areaLabel}` : ''}.`;
   const line2Parts = [`Планировка с ${feature}`];
-  if (floorsLabel) line2Parts.push(`доступна на этажах ${floorsLabel}`);
   if (apartmentsLabel) line2Parts.push(`в продаже ${apartmentsLabel}`);
   line2Parts.push('высота потолков 3,1 м');
 
