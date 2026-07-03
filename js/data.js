@@ -230,7 +230,6 @@ const DEFAULT_PROPERTIES = [
     developer: 'Кормат строй',
     deliveryDate: '2027г',
     installmentTerm: '1-6 лет',
-    recalculation: 'Нет',
     maternityCapital: 'no',
     markupBasis: 'after',
     recalculation: 'no',
