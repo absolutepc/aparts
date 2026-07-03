@@ -171,6 +171,10 @@ function renderAdminLayoutRow(flatType, index, layout = {}, sectorIndex = 0) {
           <label>Планировка (путь к файлу)</label>
           <input type="text" name="${prefix}_planImg" value="${escapeHtml(layout.planImg || '')}" placeholder="img/properties/plan.jpg">
         </div>
+        <div class="form-group admin-form-full">
+          <label>Описание</label>
+          <textarea name="${prefix}_description" rows="3" placeholder="Краткое описание планировки">${escapeHtml(layout.description || '')}</textarea>
+        </div>
       </div>
     </div>
   `;
@@ -337,11 +341,12 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
     const availableFloors = parseFloorRangesInput(
       row.querySelector(`[name="${prefix}_availableFloors"]`)?.value
     );
+    const description = row.querySelector(`[name="${prefix}_description"]`)?.value?.trim() || '';
 
     if (!areaMin) areaMin = fallbackAreaMin;
     if (!areaMax) areaMax = fallbackAreaMax || areaMin;
 
-    if (!label && !planImg && !areaMin && !areaMax && !totalApartments && !availableFloors.length) return;
+    if (!label && !planImg && !areaMin && !areaMax && !totalApartments && !availableFloors.length && !description) return;
 
     const layout = {
       key,
@@ -354,6 +359,7 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
     if (Number.isFinite(price)) layout.price = price;
     if (totalApartments > 0) layout.totalApartments = totalApartments;
     if (availableFloors.length) layout.availableFloors = availableFloors;
+    if (description) layout.description = description;
     layouts.push(layout);
   });
 
@@ -377,6 +383,7 @@ function reindexAdminLayoutRows(container, flatType, sectorIndex = 0) {
       totalApartments: row.querySelector('[name*="_totalApartments"]')?.value ?? '',
       availableFloors: row.querySelector('[name*="_availableFloors"]')?.value ?? '',
       planImg: row.querySelector('[name*="_planImg"]')?.value ?? '',
+      description: row.querySelector('[name*="_description"]')?.value ?? '',
     };
 
     row.dataset.layoutKey = keyValue;
@@ -415,6 +422,10 @@ function reindexAdminLayoutRows(container, flatType, sectorIndex = 0) {
         <div class="form-group admin-form-full">
           <label>Планировка (путь к файлу)</label>
           <input type="text" name="${prefix}_planImg" value="${escapeHtml(fields.planImg)}" placeholder="img/properties/plan.jpg">
+        </div>
+        <div class="form-group admin-form-full">
+          <label>Описание</label>
+          <textarea name="${prefix}_description" rows="3" placeholder="Краткое описание планировки">${escapeHtml(fields.description)}</textarea>
         </div>
       </div>
     `;
