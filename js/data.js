@@ -2576,63 +2576,51 @@ function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
   return flatConfig[layoutKey] ?? flatConfig[String(layoutKey)] ?? null;
 }
 
-const JK2_LAYOUT_DESCRIPTION_OPENINGS = [
-  'Светлая {room} планировка {layout} в секторе {sector}.',
-  'Продуманная {room} планировка {layout} сектора {sector}.',
-  'Комфортная {room} планировка {layout} в секторе {sector}.',
-  'Функциональная {room} планировка {layout} в секторе {sector}.',
-  'Современная {room} планировка {layout} сектора {sector}.',
-  'Уютная {room} планировка {layout} в секторе {sector}.',
-];
-
-const JK2_LAYOUT_DESCRIPTION_DETAILS = [
-  'Высота потолков 3,1 м и панорамный вид на новый центр города.',
-  'Продуманная зонировка с удобной кухней-гостиной и местом для хранения.',
-  'Панорамное остекление, много естественного света и открытый вид.',
-  'Эргономичная планировка с комфортной зоной отдыха и работы.',
-  'Просторная прихожая, логичное зонирование и высокие потолки 3,1 м.',
-  'Удобная планировка для повседневной жизни с видом на новый центр.',
-  'Сбалансированное пространство, высокие потолки и качественное остекление.',
-  'Комфортная планировка с акцентом на функциональность и свет.',
+const JK2_LAYOUT_DESCRIPTION_FEATURES = [
+  'удобной зоной кухни-гостиной',
+  'просторной прихожей',
+  'панорамным остеклением',
+  'логичным зонированием',
+  'комфортной спальной зоной',
+  'местом для гардеробной',
+  'светлыми жилыми комнатами',
+  'функциональной планировкой',
+  'видом на новый центр',
+  'эргономичным использованием площади',
 ];
 
 function hashLayoutDescriptionKey(value) {
   return String(value || '').split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 }
 
-function fillJk2LayoutDescriptionTemplate(template, values) {
-  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => values[key] || '');
+function pluralizeApartments(count) {
+  const value = Number(count) || 0;
+  if (value <= 0) return '';
+  const mod10 = value % 10;
+  const mod100 = value % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${value} квартира`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${value} квартиры`;
+  return `${value} квартир`;
 }
 
 function buildJk2LayoutDescription(sectorTitle, flatType, layout, variant) {
   const sector = formatSectorTitle(sectorTitle);
-  const layoutName = getLayoutDisplayLabel(layout?.label || layout?.key || '');
-  const roomLabel = flatType === '2room' ? 'двухкомнатная' : 'однокомнатная';
+  const layoutLabel = preserveLayoutLabel(layout?.label || layout?.key || '');
+  const layoutName = layoutLabel || getLayoutDisplayLabel(layout?.key || '') || 'планировка';
+  const roomLabel = flatType === '2room' ? 'Двухкомнатная' : 'Однокомнатная';
   const areaLabel = formatVariantAreaRange(layout) || formatVariantAreaRange(variant) || '';
   const floorsLabel = formatFloorRangesCompactLabel(layout?.availableFloors);
-  const hash = hashLayoutDescriptionKey(`${sector}|${flatType}|${layout?.key}|${layoutName}`);
-  const values = {
-    room: roomLabel,
-    layout: layoutName,
-    sector,
-    area: areaLabel,
-    floors: floorsLabel,
-  };
+  const apartmentsLabel = pluralizeApartments(layout?.totalApartments);
+  const hash = hashLayoutDescriptionKey(`${sector}|${flatType}|${layout?.key}|${layoutLabel}|${floorsLabel}`);
+  const feature = JK2_LAYOUT_DESCRIPTION_FEATURES[hash % JK2_LAYOUT_DESCRIPTION_FEATURES.length];
 
-  const opening = fillJk2LayoutDescriptionTemplate(
-    JK2_LAYOUT_DESCRIPTION_OPENINGS[hash % JK2_LAYOUT_DESCRIPTION_OPENINGS.length],
-    values
-  );
-  let detail = fillJk2LayoutDescriptionTemplate(
-    JK2_LAYOUT_DESCRIPTION_DETAILS[(hash + flatType.length + layoutName.length) % JK2_LAYOUT_DESCRIPTION_DETAILS.length],
-    values
-  );
+  const line1 = `${roomLabel} ${layoutName} в секторе ${sector}${areaLabel ? `, ${areaLabel}` : ''}.`;
+  const line2Parts = [`Планировка с ${feature}`];
+  if (floorsLabel) line2Parts.push(`доступна на этажах ${floorsLabel}`);
+  if (apartmentsLabel) line2Parts.push(`в продаже ${apartmentsLabel}`);
+  line2Parts.push('высота потолков 3,1 м');
 
-  if (areaLabel) {
-    detail = `Площадь ${areaLabel}. ${detail}`;
-  }
-
-  return `${opening}\n${detail}`;
+  return `${line1}\n${line2Parts.join(', ')}.`;
 }
 
 function resolveLayoutAvailableFloors(detail, layout) {
