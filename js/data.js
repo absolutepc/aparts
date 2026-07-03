@@ -592,7 +592,7 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
           <thead>
             <tr>
               <th>Этажи</th>
-              <th class="property-floor-prices-table-col-staroprom">Старопром</th>
+              <th>Старопром</th>
               <th class="property-floor-prices-table-col-corner">Угловые</th>
             </tr>
           </thead>
@@ -600,7 +600,7 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
             ${ranges.map((range) => `
               <tr>
                 <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
-                <td class="property-floor-prices-table-col-staroprom">${formatFloorPriceFromLabel(range.price)}</td>
+                <td>${formatFloorPriceFromLabel(range.price)}</td>
                 <td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price)}</td>
               </tr>
             `).join('')}

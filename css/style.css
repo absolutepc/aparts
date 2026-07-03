@@ -628,14 +628,6 @@ main { flex: 1; }
   font-size: 0.92rem;
 }
 
-.property-floor-prices--compact .property-floor-prices-table-col-staroprom {
-  padding: 10px 18px;
-}
-
-.property-floor-prices--compact .property-floor-prices-table-col-corner {
-  padding: 10px 18px;
-}
-
 .property-floor-prices--compact .property-floor-prices-table-wrap {
   border: none;
   border-radius: 0;
@@ -660,7 +652,6 @@ main { flex: 1; }
   background: transparent;
   border: none;
   border-radius: 0;
-  table-layout: fixed;
 }
 
 .property-floor-prices-table th,
@@ -668,25 +659,6 @@ main { flex: 1; }
   padding: 14px 18px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-.property-floor-prices-table th:first-child,
-.property-floor-prices-table td:first-child {
-  width: 38%;
-}
-
-.property-floor-prices-table-col-staroprom {
-  width: 24%;
-  text-align: center;
-  padding: 14px 18px;
-}
-
-.property-floor-prices-table-col-corner {
-  width: 38%;
-  white-space: nowrap;
-  text-align: right;
-  padding: 14px 18px;
 }
 
 .property-floor-prices-table th {
@@ -695,6 +667,10 @@ main { flex: 1; }
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.property-floor-prices-table-col-corner {
+  text-align: right;
 }
 
 .property-floor-prices-table tr:last-child td {
