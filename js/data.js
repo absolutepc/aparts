@@ -33,6 +33,10 @@ const MANDATORY_PAYMENT_OPTIONS = {
   6000: '6 000',
   7000: '7 000',
   8000: '8 000',
+  9000: '9 000',
+  10000: '10 000',
+  11000: '11 000',
+  12000: '12 000',
 };
 
 const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13'];
@@ -72,16 +76,21 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk1',
     title: 'ЖК «Ан-Нур»',
-    description: 'ЖК Ан Нур Грозный ЖК Ан Нур в Грозном – Жилой комплекс представляет собой впечатляющее сочетание восточного стиля и современных технологий в строительстве. Этот комплекс является одним из визитных карточек города и привлекает внимание как местных жителей, так и туристов.Архитектурный дизайн Ан Нур в Грозном воплощает в себе величие и элегантность восточных традиций. Здания комплекса возвышаются над Грозным с изящными куполами, изысканными арками и изогнутыми линиями, характерными для восточного стиля. Фасады зданий украшены красивыми резными узорами и узнаваемыми орнаментами, которые придают комплексу неповторимый вид.Одним из особых элементов ЖК Ан Нур является внутренний двор, оформленный в традиционном восточном стиле. Этот уютный и красиво оформленный двор становится местом отдыха и общения для жителей комплекса. Здесь можно насладиться зелёными насаждениями, фонтанами и комфортными скамейками в атмосфере умиротворения и красоты.Внутреннее убранство квартир в ЖК Ан Нур Грозный сочетает в себе современные удобства и элементы восточного дизайна. Просторные и светлые помещения оформлены с использованием натуральных материалов и высококачественной мебели, что создаёт атмосферу комфорта и роскоши',
+    description: 'ЖК Ан Нур Грозный ЖК Ан Нур в Грозном – Жилой комплекс представляет собой впечатляющее сочетание восточного стиля и современных технологий в строительстве. Этот комплекс является одним из визитных карточек города и привлекает внимание как местных жителей, так и туристов.Архитектурный дизайн Ан Нур в Грозном воплощает в себе величие и элегантность восточных традиций. Здания комплекса возвышаются над Грозным с изящными куполами, изысканными арками и изогнутыми линиями, характерными для восточного стиля. Фасады зданий украшены красивыми резными узорами и узнаваемыми орнаментами, которые придают комплексу неповторимый вид.Одним из особых элементов ЖК Ан Нур является внутренний двор, оформленный в традиционном восточном стиле. Этот уютный и красиво оформленный двор становится местом отдыха и общения для жителей комплекса.',
     type: 'jk',
     flatType: '1room',
     totalApartments: 120,
     flatVariants: [
       { flatType: '1room', totalApartments: 58, areaMin: 52, areaMax: 67,layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Сектор В|Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Сектор В|Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+        { key: 'A', label: 'Сектор В Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
+        { key: 'Б', label: 'Сектор В Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
+        { key: 'В', label: 'Сектор В Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
+        { key: 'Г', label: 'Сектор В Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+
+        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
+        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
+        { key: 'В', label: 'Сектор Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
+        { key: 'Г', label: 'Сектор Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
 
         { key: 'Д', label: 'Сектор Ж Тип-Б', areaMin: 52, areaMax: 52, planImg: 'img/luch/1G.jpg' },
         { key: 'Е', label: 'Сектор Ж Тип-В', areaMin: 53, areaMax: 53, planImg: 'img/luch/1D.jpg' },
@@ -99,8 +108,11 @@ const DEFAULT_PROPERTIES = [
       ]  },
 
       { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+        { key: 'A', label: 'Сектор В Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор В Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+
+        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
 
         { key: 'B', label: 'Сектор Ж Тип-А', areaMin: 57, areaMax: 57, planImg: 'img/luch/2V.jpg' },
         { key: 'Г', label: 'Сектор Ж Тип-Б', areaMin: 58, areaMax: 58, planImg: 'img/luch/2G.jpg' },
@@ -126,8 +138,11 @@ const DEFAULT_PROPERTIES = [
       ] },
 
       { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+        { key: 'A', label: 'Сектор В Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор В Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+
+        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
+        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
 
         { key: 'B', label: 'Сектор Г Тип-Б', areaMin: 95, areaMax: 95, planImg: 'img/luch/2V.jpg' },
       ] },
@@ -139,13 +154,17 @@ const DEFAULT_PROPERTIES = [
     district: 'Новый район',
     developer: 'Монолит',
     noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
+    mandatoryPayment: 10000,
+    img: 'img/Ан-Нур/Ан-нур 1.jpg',
     images: [
-      'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
-      'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg',
-      'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg',
-      'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg'
+      'img/Ан-Нур/Ан-нур.jpg',
+      'img/Ан-Нур/Ан-нур 3.jpg',
+      'img/Ан-Нур/Ан-нур 4.jpg',
+      'img/Ан-Нур/Ан-нур 5.jpg',
+      'img/Ан-Нур/Ан-нур 10.jpg',
+      'img/Ан-Нур/Ан-нур 8.jpg',
+      'img/Ан-Нур/Ан-нур 9.jpg',
+      'img/Ан-Нур/Ан-нур 7.jpg'
     ],
     published: true,
   },
@@ -229,7 +248,7 @@ const DEFAULT_PROPERTIES = [
     district: 'Новый район',
     developer: 'Кормат строй',
     deliveryDate: '2027г',
-    installmentTerm: '1-6 лет',
+    installmentTerm: 'до 6 лет',
     maternityCapital: 'no',
     markupBasis: 'after',
     recalculation: 'no',
@@ -2462,27 +2481,204 @@ function logoutUser() {
 // =============================================================================
 const COMPLEX_PROPERTY_CONFIGS = {
   jk1: {
-    developer: 'Монолит',
-    noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
-    images: [
-      'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
-      'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg',
-      'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg',
-      'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg',
-    ],
-    sectorOrder: null,
-    layouts: null,
-    sectors: null,
-    floorPriceRanges: null,
+  forceOfferingFromConfig: true,
+  developer: 'Монолит',
+  deliveryDate: '2027г',
+  installmentTerm: 'до 6 лет',
+  maternityCapital: 'no',
+  markupBasis: 'after',
+  recalculation: 'no',
+  floorPriceRanges: [
+    { floorMin: 3, floorMax: 5, price: 85000 },
+    { floorMin: 6, floorMax: 8, price: 80000 },
+    { floorMin: 9, floorMax: 11, price: 77000 },
+    { floorMin: 12, floorMax: 14, price: 74000 },
+    { floorMin: 15, floorMax: 19, price: 71000 },
+  ],
+
+  // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
+  sectorOrder: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
+
+  // Сектор → тип квартир → ключ планировки → данные
+  layouts: {
+    'А': {
+      '1room': {
+        A: { totalApartments: 11, availableFloors: '4, 6-8, 10-14 , 17, 19' }, /* 3\5 */
+        '\u0411': { totalApartments: 10, availableFloors: '4-12, 19' },  /* 3\5 */
+        '\u0412': { totalApartments: 11, availableFloors: '3-8, 10-11, 13-14, 18' }, 
+        '\u0413': { totalApartments: 12, availableFloors: '3-8, 10-11, 13-14, 17-18' },
+        '\u0414': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
+        '\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
+        '\u0416': { totalApartments: 11, availableFloors: '3-8, 10-14' },
+      },
+      
+      '2room': {
+        A: { totalApartments: 1, availableFloors: '5' },  /* 3\4 */
+        /*'\u0411': { totalApartments: 5, availableFloors: '5, 6-15' }, /* 3\4 */
+      },
+    },
+
+    'Б': {
+      '1room': {
+        '\u0418': { totalApartments: 7, availableFloors: '4-5, 7-10, 18' },  /* */
+        '\u041a': { totalApartments: 3, availableFloors: '5, 7, 15' },  /* */
+        '\u041b': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
+        '\u041c': { totalApartments: 14, availableFloors: '3-14, 17-18' }, 
+        '\u041d': { totalApartments: 1, availableFloors: '5' },  /* */
+        '\u041f': { totalApartments: 1, availableFloors: '8' },  /* */
+      },
+      '2room': {
+        B: { totalApartments: 2, availableFloors: '11, 17' },  /* */
+        '\u0413': { totalApartments: 1, availableFloors: '8' },  /* */
+      },
+    },
+
+    'В': {
+      '1room': {
+        '\u0420': { totalApartments: 5, availableFloors: '4-5, 7-8, 10' },  /* */
+        '\u0421': { totalApartments: 3, availableFloors: '4-5, 8' },  /* */
+        '\u0422': { totalApartments: 13, availableFloors: '3-11, 13-14, 17, 19' },
+        '\u0423': { totalApartments: 12, availableFloors: '3-14' },
+        '\u0424': { totalApartments: 12, availableFloors: '3-11, 13-15, 17' },
+        '\u0425': { totalApartments: 9, availableFloors: '3-8, 11, 13, 19,' },  
+        '\u0428': { totalApartments: 6, availableFloors: '4-5, 7-8, 11, 19' },  /* */
+      },
+      '2room': { 
+        '\u0414': { totalApartments: 1, availableFloors: '19' },  /* */
+        '\u0415': { totalApartments: 1, availableFloors: '19' },  /* */
+      },
+    },
+
+    'Г': {
+      '1room': {
+        A: { totalApartments: 6, availableFloors: '4-8, 11' },
+        '\u0411': { totalApartments: 10, availableFloors: '3-5, 7-8, 10-11, 14, 18-19' },  /* 3 */
+        '\u0412': { totalApartments: 13, availableFloors: '3-5, 7-14, 17, 19' },
+        '\u0413': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
+        '\u0414': { totalApartments: 14, availableFloors: '3-11, 13-14, 16-17, 19' },
+        '\u0415': { totalApartments: 3, availableFloors: '3-5' },
+        '\u0416': { totalApartments: 2, availableFloors: '5, 7' },
+      },
+
+      '2room': {
+        A: { totalApartments: 1, availableFloors: '3' },  /* 3 */
+        '\u0411': { totalApartments: 3, availableFloors: '8, 10, 19' }, /* 3 */
+      },
+    },
+
+    'Д': {
+      '1room': {
+        '\u0418': { totalApartments: 7, availableFloors: '3-8, 19' },  /* */
+        '\u041a': { totalApartments: 5, availableFloors: '3, 5, 14, 18-19' },  /* */
+        '\u041b': { totalApartments: 14, availableFloors: '3-5, 7-14, 17-19' },
+        '\u041c': { totalApartments: 13, availableFloors: '4-12, 14-15, 18-19' }, 
+        '\u041d': { totalApartments: 14, availableFloors: '3-5, 7-8, 10-11, 13, 19' },  /* */
+        '\u041f': { totalApartments: 7, availableFloors: '4-9, 19' },  /* */
+      },
+      '2room': {
+        B: { totalApartments: 2, availableFloors: '10, 13' },  /* */
+        '\u0413': { totalApartments: 4, availableFloors: '4-5, 10-11' },  /* */
+      },
+    },
+
+    'Е': {
+      '1room': {
+        '\u0420': { totalApartments: 11, availableFloors: '3-5, 7-11, 13-14, 17' },  /* */
+        '\u0421': { totalApartments: 8, availableFloors: '3-8, 11, 18' },  /* */
+        '\u0422': { totalApartments: 16, availableFloors: '3-14, 16-19' },
+        '\u0423': { totalApartments: 15, availableFloors: '3-14, 17-19' },
+        '\u0424': { totalApartments: 15, availableFloors: '3-14, 17-19' },
+        '\u0425': { totalApartments: 10, availableFloors: '4-11, 14, 19' },  
+        '\u0428': { totalApartments: 11, availableFloors: '3-5, 7-9, 11, 13-14, 18-19' },  /* */
+      },
+      '2room': { 
+        '\u0414': { totalApartments: 1, availableFloors: '3' },  /* */
+        '\u0415': { totalApartments: 1, availableFloors: '11' },  /* */
+      },
+    },
+
+    'Ж': {
+      '1room': {
+        '\u0417-\u0410': { totalApartments: 6, availableFloors: '3-5, 7-8, 19' },
+        '\u0417-\u0411': { totalApartments: 7, availableFloors: '3-4, 7-8, 10, 12, 19' },
+        '\u0417-\u0412': { totalApartments: 1, availableFloors: '19' },
+        '\u0417-\u0413': { totalApartments: 1, availableFloors: '19' },
+        '\u0417-\u0414': { totalApartments: 1, availableFloors: '19' },
+        '\u0417-\u0415': { totalApartments: 1, availableFloors: '8' },
+        '\u0417-\u0416': { totalApartments: 1, availableFloors: '19' },
+        '\u0417-\u0418': { totalApartments: 3, availableFloors: '4-5, 8' },
+        '\u0417-\u041a': { totalApartments: 3, availableFloors: '4-5, 8' },
+      },
+      '2room': {
+        '\u041a': { totalApartments: 1, availableFloors: '3' },
+        '\u041b': { totalApartments: 1, availableFloors: '3' },
+      },
+    },
+
+    'З': {
+      '1room': {
+        '\u0416-\u0410': { totalApartments: 2, availableFloors: '4-5' },
+        '\u0416-\u0411': { totalApartments: 6, availableFloors: '3-5, 8, 11, 19' },
+        '\u0416-\u0412': { totalApartments: 1, availableFloors: '18' },
+        '\u0416-\u0413': { totalApartments: 1, availableFloors: '3' },
+        '\u0416-\u0414': { totalApartments: 1, availableFloors: '18' },
+        '\u0416-\u0415': { totalApartments: 2, availableFloors: '13, 18' },
+        '\u0416-\u0416': { totalApartments: 2, availableFloors: '13, 18' },
+        '\u0416-\u0418': { totalApartments: 4, availableFloors: '4-5, 10, 19' },
+        '\u0416-\u041a': { totalApartments: 7, availableFloors: '3-5, 8, 11, 18, 19' },
+      },
+      '2room': {
+        '\u0416': { totalApartments: 1, availableFloors: '3' },
+        '\u0418': { totalApartments: 1, availableFloors: '3' },
+      },
+    },
+
+    'И': {
+      '1room': {
+        '\u0416-\u0410': { totalApartments: 2, availableFloors: '4-5' },
+        '\u0416-\u0411': { totalApartments: 3, availableFloors: '4-5, 7' },
+        '\u0416-\u0412': { totalApartments: 6, availableFloors: '3-5, 7-8, 18' },
+        '\u0416-\u0413': { totalApartments: 7, availableFloors: '3-5, 7-9, 17' },
+        '\u0416-\u0414': { totalApartments: 11, availableFloors: '3-8, 10-11, 14, 18-19' },
+        '\u0416-\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 18-19' },
+        '\u0416-\u0416': { totalApartments: 9, availableFloors: '3-8, 13, 18-19' },
+        '\u0416-\u0418': { totalApartments: 8, availableFloors: '3-5, 7-9, 18-19' },
+        '\u0416-\u041a': { totalApartments: 9, availableFloors: '3-5, 7-8, 11, 14, 18-19' },
+      },
+      '2room': {
+        '\u0416': { totalApartments: 1, availableFloors: '3' },
+        '\u0418': { totalApartments: 2, availableFloors: '8, 17' },
+      },
+    },
+
+    'К': {
+      '1room': {
+        '\u0416-\u0410': { totalApartments: 8, availableFloors: '3-5, 7-8, 11, 18-19' },
+        '\u0416-\u0411': { totalApartments: 8, availableFloors: '3-5, 7-8, 11, 18-19' },
+        '\u0416-\u0412': { totalApartments: 12, availableFloors: '3-11, 14, 18-19' },
+        '\u0416-\u0413': { totalApartments: 11, availableFloors: '3-5, 7-11, 14, 18-19 ' },
+        '\u0416-\u0414': { totalApartments: 12, availableFloors: '3-11, 14, 18-19' },
+        '\u0416-\u0415': { totalApartments: 5, availableFloors: '3-5, 7-8' },
+        '\u0416-\u0416': { totalApartments: 5, availableFloors: '4-5, 7-8, 19' },
+        '\u0416-\u0418': { totalApartments: 1, availableFloors: '5' },
+        '\u0416-\u041a': { totalApartments: 2, availableFloors: '4-5' },
+      },
+      '2room': {
+        '\u041a': { totalApartments: 1, availableFloors: '3' },
+        '\u041b': { totalApartments: 1, availableFloors: '3' },
+      },
+    },
+  },
+
+  // Опционально: полная структура sectors (если заполнить — layouts игнорируется)
+  sectors: null,
   },
 
   jk2: {
-    forceOfferingFromConfig: true,
-    developer: 'Кормат строй',
+  forceOfferingFromConfig: true,
+  developer: 'Кормат строй',
   deliveryDate: '2027г',
-  installmentTerm: '1-6 лет',
+  installmentTerm: 'до 6 лет',
   maternityCapital: 'no',
   markupBasis: 'after',
   recalculation: 'no',
