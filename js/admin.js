@@ -359,7 +359,10 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
     if (Number.isFinite(price)) layout.price = price;
     if (totalApartments > 0) layout.totalApartments = totalApartments;
     if (availableFloors.length) layout.availableFloors = availableFloors;
-    if (description) layout.description = description;
+    if (description) {
+      layout.description = description;
+      layout.descriptionManual = true;
+    }
     layouts.push(layout);
   });
 
