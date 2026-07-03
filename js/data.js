@@ -2973,11 +2973,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   noMarkupYears: 2,
 
   floorPriceRanges: [
-    { floorMin: 3, floorMax: 5, price: 85000 },
-    { floorMin: 6, floorMax: 8, price: 80000 },
-    { floorMin: 9, floorMax: 11, price: 77000 },
-    { floorMin: 12, floorMax: 14, price: 74000 },
-    { floorMin: 15, floorMax: 19, price: 71000 },
+    { floorMin: 3, floorMax: 5, price: 80000 },
+    { floorMin: 6, floorMax: 8, price: 75000 },
+    { floorMin: 9, floorMax: 11, price: 70000 },
+    { floorMin: 12, floorMax: 18, price: 65000 },
   ],
 
   // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
