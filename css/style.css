@@ -630,7 +630,7 @@ main { flex: 1; }
 
 .property-floor-prices--compact .property-floor-prices-table th.property-floor-prices-table-col-staroprom,
 .property-floor-prices--compact .property-floor-prices-table td.property-floor-prices-table-col-staroprom {
-  padding: 10px 150px;
+  padding: 10px 100px;
 }
 
 .property-floor-prices--compact .property-floor-prices-table-wrap {
@@ -678,7 +678,7 @@ main { flex: 1; }
 }
 
 .property-floor-prices-table-col-staroprom {
-  padding-inline: 150px;
+  padding-inline: 100px;
 }
 
 .property-floor-prices-table-col-corner {
