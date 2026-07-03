@@ -628,11 +628,6 @@ main { flex: 1; }
   font-size: 0.92rem;
 }
 
-.property-floor-prices--compact .property-floor-prices-table th.property-floor-prices-table-col-staroprom,
-.property-floor-prices--compact .property-floor-prices-table td.property-floor-prices-table-col-staroprom {
-  padding: 10px 100px;
-}
-
 .property-floor-prices--compact .property-floor-prices-table-wrap {
   border: none;
   border-radius: 0;
@@ -675,10 +670,6 @@ main { flex: 1; }
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-.property-floor-prices-table-col-staroprom {
-  padding-inline: 100px;
 }
 
 .property-floor-prices-table-col-corner {
