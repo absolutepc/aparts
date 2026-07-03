@@ -1736,7 +1736,7 @@ function mergePropertyDetails(property, defaults) {
 function preservePropertyContentFields(target, source) {
   if (!target || !source) return target;
 
-  for (const key of ['title', 'description', 'address', 'district', 'img', 'images', 'price', 'published']) {
+  for (const key of ['title', 'description', 'address', 'district', 'price', 'published']) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       target[key] = source[key];
     }
@@ -1847,11 +1847,7 @@ function enrichProperty(property) {
     }
   }
 
-  const repaired = repairPropertyImages({
-    ...merged,
-    img: property.img ?? property.imageUrl ?? '',
-    images: Array.isArray(property.images) ? property.images : undefined,
-  });
+  const repaired = repairPropertyImages(merged);
   merged.img = repaired.img;
   merged.images = repaired.images;
   delete merged.imageUrl;
@@ -1877,17 +1873,40 @@ function isBrokenImageSrc(src) {
     || (typeof src === 'string' && /unsplash\.com/i.test(src));
 }
 
+function hasAdminUploadedImages(property) {
+  const gallery = Array.isArray(property?.images) ? property.images : [];
+  return gallery.some(src => typeof src === 'string' && /^data:image\//i.test(src))
+    || /^data:image\//i.test(String(property?.img || property?.imageUrl || ''));
+}
+
+function getDefaultImagesForProperty(propertyId) {
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === propertyId);
+  const config = COMPLEX_PROPERTY_CONFIGS[propertyId];
+  return {
+    img: config?.img ?? defaults?.img ?? '',
+    images: config?.images ?? defaults?.images,
+  };
+}
+
 function repairPropertyImages(property) {
-  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  if (hasAdminUploadedImages(property)) {
+    return normalizePropertyImages(property);
+  }
+
+  const defaultImages = getDefaultImagesForProperty(property?.id);
+  const defaultNormalized = normalizePropertyImages(defaultImages);
+  const defaultValid = defaultNormalized.images.filter(src => !isBrokenImageSrc(src));
+
+  if (COMPLEX_PROPERTY_CONFIGS[property?.id] && defaultValid.length) {
+    return defaultNormalized;
+  }
+
   const normalized = normalizePropertyImages(property);
   const needsRepair = normalized.images.every(isBrokenImageSrc);
+  const savedValid = normalized.images.filter(src => !isBrokenImageSrc(src));
 
-  if (needsRepair && defaults) {
-    return normalizePropertyImages({
-      ...property,
-      img: defaults.img,
-      images: defaults.images,
-    });
+  if (defaultValid.length && (needsRepair || !savedValid.length)) {
+    return defaultNormalized;
   }
 
   return normalized;
@@ -2446,6 +2465,13 @@ const COMPLEX_PROPERTY_CONFIGS = {
     developer: 'Монолит',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
+    img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
+    images: [
+      'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
+      'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg',
+      'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg',
+      'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg',
+    ],
     sectorOrder: null,
     layouts: null,
     sectors: null,
@@ -2889,8 +2915,7 @@ function applyComplexConfigFromRegistry(property) {
 
   const images = repairPropertyImages({
     ...item,
-    img: property.img ?? defaults?.img ?? '',
-    images: Array.isArray(property.images) ? property.images : defaults?.images,
+    ...getDefaultImagesForProperty(property.id),
   });
   item.img = images.img;
   item.images = images.images;
