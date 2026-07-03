@@ -2202,6 +2202,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       developer: defaults.developer != null && String(defaults.developer).trim() !== ''
         ? defaults.developer
         : saved.developer,
+      recalculation: defaults.id === 'jk2' && JK2_BOMOND_DATA.recalculation
+        ? JK2_BOMOND_DATA.recalculation
+        : (saved.recalculation ?? defaults.recalculation),
       description: Object.prototype.hasOwnProperty.call(saved, 'description')
         ? saved.description
         : defaults.description,
