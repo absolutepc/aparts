@@ -2053,8 +2053,7 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       const priceSpecsHtml = renderLayoutPriceSpecs(property, layout, variant);
       const layoutDescription = String(layout.description || '').trim();
       const layoutDescriptionHtml = layoutDescription
-        ? `<li>
-            <span class="floor-plan-spec-label">Описание</span>
+        ? `<li class="floor-plan-spec-description">
             <span class="floor-plan-spec-value floor-plan-spec-value--multiline">${escapeHtml(layoutDescription)}</span>
           </li>`
         : '';
