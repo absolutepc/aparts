@@ -376,6 +376,8 @@ const DEFAULT_PROPERTIES = [
       'img/luch/luch 5.jpg',
       'img/luch/luch 6.jpg',
       'img/luch/luch 7.jpg',
+      'img/luch/1A.jpg',
+
     ],
     published: true,
   },
