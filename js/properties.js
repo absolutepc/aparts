@@ -149,12 +149,6 @@ function initPropertyPage() {
 
   const backLink = getBackLink(property);
   const backLabel = getBackLabel(property);
-  const districtRow = property.district
-    ? `<div class="property-spec-row"><span class="property-spec-label">Район</span><span class="property-spec-value">${escapeHtml(property.district)}</span></div>`
-    : '';
-  const addressRow = property.address
-    ? `<div class="property-spec-row"><span class="property-spec-label">Адрес</span><span class="property-spec-value">${escapeHtml(property.address)}</span></div>`
-    : '';
 
   const heroPrice =
     selectedVariant?.price != null && selectedVariant.price !== ''
@@ -193,8 +187,6 @@ function initPropertyPage() {
           <div class="property-specs-table">
             ${renderPropertyOfferingSpecs(property)}
             ${specsHtml}
-            ${districtRow}
-            ${addressRow}
           </div>
           ${isComplex(property) ? renderPropertyFloorPricesBlock(property, { compact: true }) : ''}
         </div>

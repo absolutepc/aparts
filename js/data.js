@@ -815,22 +815,18 @@ function renderPropertySpecRow(label, value) {
 }
 
 function renderPropertyOfferingSpecs(property) {
-  const noMarkupLabel = getNoMarkupYearsFilterLabel(property.noMarkupYears);
   const paymentLabel = getMandatoryPaymentLabel(property.mandatoryPayment);
   const rows = [
     renderPropertySpecRow('Застройщик', property.developer),
     renderPropertySpecRow('Срок сдачи объекта', property.deliveryDate),
     renderPropertySpecRow('Срок предоставления рассрочки', property.installmentTerm),
+    renderPropertySpecRow('Без наценки', getNoMarkupYearsLabel(property.noMarkupYears)),
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
     renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
+    renderPropertySpecRow('Обязательный платёж', paymentLabel),
+    renderPropertySpecRow('Район', property.district),
+    renderPropertySpecRow('Адрес', property.address),
   ];
-
-  if (noMarkupLabel) {
-    rows.push(renderPropertySpecRow('Без наценки', getNoMarkupYearsLabel(property.noMarkupYears)));
-  }
-  if (paymentLabel) {
-    rows.push(renderPropertySpecRow('Обязательный платёж', paymentLabel));
-  }
 
   return rows.join('');
 }
