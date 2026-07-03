@@ -309,54 +309,54 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 163,
     flatVariants: [
       { flatType: '1room', totalApartments: 42, areaMin: 43.8, areaMax: 48,layouts: [
-        { key: 'A', label: 'Дом 1 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Дом 1 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Дом 1 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Дом 1 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
-        { key: 'Д', label: 'Дом 1 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
-        { key: 'E', label: 'Дом 1 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
+        { key: '1-A', label: 'Дом 1 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
+        { key: '1-Б', label: 'Дом 1 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
+        { key: '1-В', label: 'Дом 1 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
+        { key: '1-Г', label: 'Дом 1 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
+        { key: '1-Д', label: 'Дом 1 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
+        { key: '1-E', label: 'Дом 1 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
 
-        { key: 'A', label: 'Дом 2 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Дом 2 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Дом 2 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Дом 2 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
-        { key: 'Д', label: 'Дом 2 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
-        { key: 'E', label: 'Дом 2 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
+        { key: '2-A', label: 'Дом 2 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
+        { key: '2-Б', label: 'Дом 2 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
+        { key: '2-В', label: 'Дом 2 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
+        { key: '2-Г', label: 'Дом 2 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
+        { key: '2-Д', label: 'Дом 2 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
+        { key: '2-E', label: 'Дом 2 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
 
-        { key: 'A', label: 'Дом 3 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Дом 3 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Дом 3 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Дом 3 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
-        { key: 'Д', label: 'Дом 3 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
-        { key: 'E', label: 'Дом 3 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
+        { key: '3-A', label: 'Дом 3 Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
+        { key: '3-Б', label: 'Дом 3 Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
+        { key: '3-В', label: 'Дом 3 Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
+        { key: '3-Г', label: 'Дом 3 Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
+        { key: '3-Д', label: 'Дом 3 Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
+        { key: '3-E', label: 'Дом 3 Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
       ]  },
       { flatType: '2room', totalApartments: 121, areaMin: 54.7, areaMax: 74.8, layouts: [
-        { key: 'A', label: 'Дом 1 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Дом 1 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
-        { key: 'B', label: 'Дом 1 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: 'Дом 1 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
-        { key: 'Д', label: 'Дом 1 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
-        { key: 'Е', label: 'Дом 1 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
-        { key: 'Ж', label: 'Дом 1 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
-        { key: 'И', label: 'Дом 1 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
+        { key: '1-A', label: 'Дом 1 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
+        { key: '1-Б', label: 'Дом 1 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
+        { key: '1-B', label: 'Дом 1 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
+        { key: '1-Г', label: 'Дом 1 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
+        { key: '1-Д', label: 'Дом 1 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
+        { key: '1-Е', label: 'Дом 1 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
+        { key: '1-Ж', label: 'Дом 1 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
+        { key: '1-И', label: 'Дом 1 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
 
-        { key: 'A', label: 'Дом 2 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Дом 2 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
-        { key: 'B', label: 'Дом 2 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: 'Дом 2 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
-        { key: 'Д', label: 'Дом 2 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
-        { key: 'Е', label: 'Дом 2 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
-        { key: 'Ж', label: 'Дом 2 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
-        { key: 'И', label: 'Дом 2 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
+        { key: '2-A', label: 'Дом 2 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
+        { key: '2-Б', label: 'Дом 2 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
+        { key: '2-B', label: 'Дом 2 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
+        { key: '2-Г', label: 'Дом 2 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
+        { key: '2-Д', label: 'Дом 2 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
+        { key: '2-Е', label: 'Дом 2 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
+        { key: '2-Ж', label: 'Дом 2 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
+        { key: '2-И', label: 'Дом 2 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
 
-        { key: 'A', label: 'Дом 3 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Дом 3 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
-        { key: 'B', label: 'Дом 3 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: 'Дом 3 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
-        { key: 'Д', label: 'Дом 3 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
-        { key: 'Е', label: 'Дом 3 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
-        { key: 'Ж', label: 'Дом 3 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
-        { key: 'И', label: 'Дом 3 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
+        { key: '3-A', label: 'Дом 3 Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
+        { key: '3-Б', label: 'Дом 3 Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
+        { key: '3-B', label: 'Дом 3 Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
+        { key: '3-Г', label: 'Дом 3 Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
+        { key: '3-Д', label: 'Дом 3 Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
+        { key: '3-Е', label: 'Дом 3 Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
+        { key: '3-Ж', label: 'Дом 3 Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
+        { key: '3-И', label: 'Дом 3 Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
       ] },
     ],
     areaMin: 43.8,
@@ -2973,6 +2973,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   markupBasis: 'after',
   recalculation: 'no',
   noMarkupYears: 2,
+  mandatoryPayment: 4000,
 
   floorPriceRanges: [
     { floorMin: 3, floorMax: 5, price: 80000 },
@@ -2981,61 +2982,75 @@ const COMPLEX_PROPERTY_CONFIGS = {
     { floorMin: 12, floorMax: 18, price: 65000 },
   ],
 
-  // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
-  sectorOrder: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
+  // Порядок секторов на странице объекта (дом 1, 2, 3)
+  sectorOrder: ['1', '2', '3'],
 
-  // Сектор → тип квартир → ключ планировки → данные
+  // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
   layouts: {
-    'А': {
+    '1': {
       '1room': {
-        A: { totalApartments: 11, availableFloors: '4, 6-8, 10-14 , 17, 19' }, /* 3\5 */
-        '\u0411': { totalApartments: 10, availableFloors: '4-12, 19' },  /* 3\5 */
-        '\u0412': { totalApartments: 11, availableFloors: '3-8, 10-11, 13-14, 18' }, 
-        '\u0413': { totalApartments: 12, availableFloors: '3-8, 10-11, 13-14, 17-18' },
-        '\u0414': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
-        '\u0415': { totalApartments: 10, availableFloors: '3-8, 10-11, 14, 19' },
-        '\u0416': { totalApartments: 11, availableFloors: '3-8, 10-14' },
+        '1-A': {},
+        '1-Б': {},
+        '1-В': {},
+        '1-Г': {},
+        '1-Д': {},
+        '1-E': {},
       },
-      
       '2room': {
-        A: { totalApartments: 1, availableFloors: '5' },  /* 3\4 */
-        /*'\u0411': { totalApartments: 5, availableFloors: '5, 6-15' }, /* 3\4 */
+        '1-A': {},
+        '1-Б': {},
+        '1-B': {},
+        '1-Г': {},
+        '1-Д': {},
+        '1-Е': {},
+        '1-Ж': {},
+        '1-И': {},
       },
     },
 
-    'Б': {
+    '2': {
       '1room': {
-        '\u0418': { totalApartments: 7, availableFloors: '4-5, 7-10, 18' },  /* */
-        '\u041a': { totalApartments: 3, availableFloors: '5, 7, 15' },  /* */
-        '\u041b': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
-        '\u041c': { totalApartments: 14, availableFloors: '3-14, 17-18' }, 
-        '\u041d': { totalApartments: 1, availableFloors: '5' },  /* */
-        '\u041f': { totalApartments: 1, availableFloors: '8' },  /* */
+        '2-A': {},
+        '2-Б': {},
+        '2-В': {},
+        '2-Г': {},
+        '2-Д': {},
+        '2-E': {},
       },
       '2room': {
-        B: { totalApartments: 2, availableFloors: '11, 17' },  /* */
-        '\u0413': { totalApartments: 1, availableFloors: '8' },  /* */
+        '2-A': {},
+        '2-Б': {},
+        '2-B': {},
+        '2-Г': {},
+        '2-Д': {},
+        '2-Е': {},
+        '2-Ж': {},
+        '2-И': {},
       },
     },
 
-    'В': {
+    '3': {
       '1room': {
-        '\u0420': { totalApartments: 5, availableFloors: '4-5, 7-8, 10' },  /* */
-        '\u0421': { totalApartments: 3, availableFloors: '4-5, 8' },  /* */
-        '\u0422': { totalApartments: 13, availableFloors: '3-11, 13-14, 17, 19' },
-        '\u0423': { totalApartments: 12, availableFloors: '3-14' },
-        '\u0424': { totalApartments: 12, availableFloors: '3-11, 13-15, 17' },
-        '\u0425': { totalApartments: 9, availableFloors: '3-8, 11, 13, 19,' },  
-        '\u0428': { totalApartments: 6, availableFloors: '4-5, 7-8, 11, 19' },  /* */
+        '3-A': {},
+        '3-Б': {},
+        '3-В': {},
+        '3-Г': {},
+        '3-Д': {},
+        '3-E': {},
       },
-      '2room': { 
-        '\u0414': { totalApartments: 1, availableFloors: '19' },  /* */
-        '\u0415': { totalApartments: 1, availableFloors: '19' },  /* */
+      '2room': {
+        '3-A': {},
+        '3-Б': {},
+        '3-B': {},
+        '3-Г': {},
+        '3-Д': {},
+        '3-Е': {},
+        '3-Ж': {},
+        '3-И': {},
       },
     },
   },
 
-  // Опционально: полная структура sectors (если заполнить — layouts игнорируется)
   sectors: null,
   },
 };
