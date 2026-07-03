@@ -1,13 +1,13 @@
-const STORE_KEY = 'aparts_data_v17';
-const DATA_JS_VERSION = '17';
+const STORE_KEY = 'aparts_data_v18';
+const DATA_JS_VERSION = '18';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
 const LOGO_IMG = 'img/logo.svg';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
-// Исходные flatVariants «Бомонд» с подписями «Сектор …» — заполняется после DEFAULT_PROPERTIES
-let JK2_SOURCE_FLAT_VARIANTS = [];
+// Исходные flatVariants ЖК/МФК — заполняется после DEFAULT_PROPERTIES
+const COMPLEX_SOURCE_FLAT_VARIANTS = {};
 
 const COMPLEX_TYPES = ['jk', 'mfk'];
 
@@ -1042,7 +1042,7 @@ function getConfiguredSectorTitles(layoutsConfig, preferredOrder = []) {
   return configKeys.sort(compareSectorTitles);
 }
 
-function getJk2LayoutConfigForSector(layoutsConfig, sectorTitle) {
+function getComplexLayoutConfigForSector(layoutsConfig, sectorTitle) {
   const normalized = stripSectorTitle(sectorTitle);
   if (!normalized || !layoutsConfig) return null;
 
@@ -1279,8 +1279,9 @@ function buildSectorVariantFromLayouts(flatType, sourceVariant, layouts) {
 function getFlatVariantsForSectorBuild(property) {
   const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
   const savedVariants = getLegacyRootFlatVariants(property);
-  const baselineVariants = property.id === 'jk2' && Array.isArray(JK2_SOURCE_FLAT_VARIANTS) && JK2_SOURCE_FLAT_VARIANTS.length
-    ? JK2_SOURCE_FLAT_VARIANTS
+  const sourceVariants = COMPLEX_SOURCE_FLAT_VARIANTS[property.id];
+  const baselineVariants = Array.isArray(sourceVariants) && sourceVariants.length
+    ? sourceVariants
     : defaults?.flatVariants;
 
   if (!baselineVariants?.length) return savedVariants;
@@ -1840,8 +1841,8 @@ function enrichProperty(property) {
   if (isComplex(merged)) {
     Object.assign(merged, normalizeComplexProperty(merged));
     restoreMissingSectorVariantsFromDefaults(merged);
-    if (merged.id === 'jk2') {
-      Object.assign(merged, applyJk2BomondDataFromConfig(merged));
+    if (COMPLEX_PROPERTY_CONFIGS[merged.id]) {
+      Object.assign(merged, applyComplexConfigFromRegistry(merged));
       preservePropertyContentFields(merged, property);
     }
   }
@@ -2202,8 +2203,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       developer: defaults.developer != null && String(defaults.developer).trim() !== ''
         ? defaults.developer
         : saved.developer,
-      recalculation: defaults.id === 'jk2' && JK2_BOMOND_DATA.recalculation
-        ? JK2_BOMOND_DATA.recalculation
+      recalculation: COMPLEX_PROPERTY_CONFIGS[defaults.id]?.forceOfferingFromConfig
+        && COMPLEX_PROPERTY_CONFIGS[defaults.id]?.recalculation
+        ? COMPLEX_PROPERTY_CONFIGS[defaults.id].recalculation
         : (saved.recalculation ?? defaults.recalculation),
       description: Object.prototype.hasOwnProperty.call(saved, 'description')
         ? saved.description
@@ -2233,6 +2235,23 @@ function initStore() {
 
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
+
+  const recentKeys = ['aparts_data_v17'];
+  for (const key of recentKeys) {
+    const raw = localStorage.getItem(key);
+    if (!raw) continue;
+
+    try {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data?.properties)) {
+        const merged = mergeStoredPropertiesWithDefaults(data.properties);
+        saveProperties(merged.map(enrichProperty));
+        return;
+      }
+    } catch {
+      // пробуем следующий ключ
+    }
+  }
 
   const legacyKeys = [
     'aparts_data_v16',
@@ -2414,24 +2433,28 @@ function logoutUser() {
 }
 
 // =============================================================================
-// БОМОНД (jk2) — редактируйте данные здесь в data.js
+// ЖК / МФК — редактируйте данные здесь в data.js (COMPLEX_PROPERTY_CONFIGS)
 // После изменений: git pull (если нужно) + Ctrl+Shift+R в браузере
 //
-// floorPriceRanges — цены по диапазонам этажей для всего объекта
-// developer, deliveryDate, installmentTerm, maternityCapital, markupBasis, recalculation — характеристики объекта
+// forceOfferingFromConfig — принудительно брать характеристики из конфига (jk2)
+// floorPriceRanges — цены по диапазонам этажей
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
-//   label — своё название планировки (необязательно)
-//   description — описание планировки (необязательно)
-//   availableFloors: строка "3-8, 12" или массив [{ floorMin: 3, floorMax: 8 }]
-//
-// Если указать sectors целиком — используется он вместо автосборки из flatVariants
+// sectors — полная структура секторов (если заполнить — layouts игнорируется)
 // =============================================================================
-JK2_SOURCE_FLAT_VARIANTS = JSON.parse(JSON.stringify(
-  (DEFAULT_PROPERTIES.find(item => item.id === 'jk2') || {}).flatVariants || []
-));
+const COMPLEX_PROPERTY_CONFIGS = {
+  jk1: {
+    developer: 'Монолит',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
+    sectorOrder: null,
+    layouts: null,
+    sectors: null,
+    floorPriceRanges: null,
+  },
 
-const JK2_BOMOND_DATA = {
-  developer: 'Кормат строй',
+  jk2: {
+    forceOfferingFromConfig: true,
+    developer: 'Кормат строй',
   deliveryDate: '2027г',
   installmentTerm: '1-6 лет',
   maternityCapital: 'no',
@@ -2622,10 +2645,37 @@ const JK2_BOMOND_DATA = {
 
   // Опционально: полная структура sectors (если заполнить — layouts игнорируется)
   sectors: null,
+  },
+
+  jk3: {
+    developer: 'Квартал 777',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
+    sectorOrder: null,
+    layouts: null,
+    sectors: null,
+    floorPriceRanges: null,
+  },
+
+  jk4: {
+    developer: 'Квартал 777',
+    noMarkupYears: 2,
+    mandatoryPayment: 4000,
+    sectorOrder: null,
+    layouts: null,
+    sectors: null,
+    floorPriceRanges: null,
+  },
 };
 
-function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
-  const sectorConfig = JK2_BOMOND_DATA.layouts?.[stripSectorTitle(sectorTitle)];
+for (const complexId of Object.keys(COMPLEX_PROPERTY_CONFIGS)) {
+  COMPLEX_SOURCE_FLAT_VARIANTS[complexId] = JSON.parse(JSON.stringify(
+    (DEFAULT_PROPERTIES.find(item => item.id === complexId) || {}).flatVariants || []
+  ));
+}
+
+function getComplexLayoutDetailConfig(sectorTitle, flatType, layoutKey, config) {
+  const sectorConfig = config?.layouts?.[stripSectorTitle(sectorTitle)];
   if (!sectorConfig) return null;
   const flatConfig = sectorConfig[flatType];
   if (!flatConfig) return null;
@@ -2651,7 +2701,7 @@ function distributeApartmentsAcrossLayouts(total, layoutCount) {
   return result;
 }
 
-function buildJk2SectorsFromLayoutConfig(sourceVariants) {
+function buildComplexSectorsFromLayoutConfig(sourceVariants, config) {
   const layoutLookup = new Map();
 
   for (const variant of sourceVariants || []) {
@@ -2666,11 +2716,11 @@ function buildJk2SectorsFromLayoutConfig(sourceVariants) {
   }
 
   const sectors = [];
-  const layoutsConfig = JK2_BOMOND_DATA.layouts || {};
-  const sectorTitles = getConfiguredSectorTitles(layoutsConfig, JK2_BOMOND_DATA.sectorOrder);
+  const layoutsConfig = config?.layouts || {};
+  const sectorTitles = getConfiguredSectorTitles(layoutsConfig, config?.sectorOrder);
 
   for (const sectorTitle of sectorTitles) {
-    const flatTypesConfig = getJk2LayoutConfigForSector(layoutsConfig, sectorTitle);
+    const flatTypesConfig = getComplexLayoutConfigForSector(layoutsConfig, sectorTitle);
     if (!flatTypesConfig) continue;
     const flatVariantsByType = new Map();
 
@@ -2711,7 +2761,7 @@ function buildJk2SectorsFromLayoutConfig(sourceVariants) {
   return sortSectorsAlphabetically(sectors);
 }
 
-function buildJk2SectorsFromExplicitData(sectorsData) {
+function buildComplexSectorsFromExplicitData(sectorsData) {
   return sortSectorsAlphabetically(sectorsData
     .map((sector, index) => {
       const title = formatSectorTitle(sector?.title || String.fromCharCode(65 + index));
@@ -2737,7 +2787,7 @@ function buildJk2SectorsFromExplicitData(sectorsData) {
     .filter(Boolean));
 }
 
-function applyJk2LayoutDetailsToSectors(sectors) {
+function applyComplexLayoutDetailsToSectors(sectors, config) {
   return sectors.map((sector) => {
     const sectorTitle = stripSectorTitle(sector.title);
     const flatVariants = (sector.flatVariants || []).map((variant) => {
@@ -2748,7 +2798,7 @@ function applyJk2LayoutDetailsToSectors(sectors) {
       );
 
       const layouts = rawLayouts.map((layout, index) => {
-        const detail = getJk2LayoutDetailConfig(sectorTitle, variant.flatType, layout.key);
+        const detail = getComplexLayoutDetailConfig(sectorTitle, variant.flatType, layout.key, config);
         const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
         const customLabel = detail?.label ? String(detail.label).trim() : '';
         const customDescription = detail?.description ? String(detail.description).trim() : '';
@@ -2781,8 +2831,7 @@ function applyJk2LayoutDetailsToSectors(sectors) {
   });
 }
 
-function getJk2PropertyDetailsFromConfig() {
-  const config = JK2_BOMOND_DATA;
+function getComplexPropertyDetailsFromConfig(config) {
   const details = {};
   for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation']) {
     const value = config?.[key];
@@ -2793,33 +2842,58 @@ function getJk2PropertyDetailsFromConfig() {
   return details;
 }
 
-function applyJk2BomondDataFromConfig(property) {
-  if (property?.id !== 'jk2') return property;
+function applyComplexConfigFromRegistry(property) {
+  const config = COMPLEX_PROPERTY_CONFIGS[property?.id];
+  if (!config || !isComplex(property)) return property;
 
-  const defaults = DEFAULT_PROPERTIES.find(item => item.id === 'jk2');
+  const defaults = DEFAULT_PROPERTIES.find(item => item.id === property.id);
+  const sourceVariants = COMPLEX_SOURCE_FLAT_VARIANTS[property.id];
   const source = {
     ...defaults,
     ...property,
-    flatVariants: JK2_SOURCE_FLAT_VARIANTS.length
-      ? JK2_SOURCE_FLAT_VARIANTS
+    flatVariants: Array.isArray(sourceVariants) && sourceVariants.length
+      ? sourceVariants
       : (defaults?.flatVariants || property.flatVariants),
   };
 
-  let sectors = Array.isArray(JK2_BOMOND_DATA.sectors) && JK2_BOMOND_DATA.sectors.length
-    ? buildJk2SectorsFromExplicitData(JK2_BOMOND_DATA.sectors)
-    : (JK2_BOMOND_DATA.layouts && Object.keys(JK2_BOMOND_DATA.layouts).length
-      ? buildJk2SectorsFromLayoutConfig(source.flatVariants)
+  let sectors = Array.isArray(config.sectors) && config.sectors.length
+    ? buildComplexSectorsFromExplicitData(config.sectors)
+    : (config.layouts && Object.keys(config.layouts).length
+      ? buildComplexSectorsFromLayoutConfig(source.flatVariants, config)
       : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source)));
 
-  sectors = sortSectorsAlphabetically(applyJk2LayoutDetailsToSectors(sectors));
+  sectors = sortSectorsAlphabetically(applyComplexLayoutDetailsToSectors(sectors, config));
 
-  const item = {
-    ...source,
-    ...getJk2PropertyDetailsFromConfig(),
-    recalculation: JK2_BOMOND_DATA.recalculation || 'no',
-    floorPriceRanges: normalizeFloorPriceRanges(JK2_BOMOND_DATA.floorPriceRanges),
-    sectors,
-  };
+  const item = { ...source, sectors };
+
+  if (config.forceOfferingFromConfig) {
+    Object.assign(item, getComplexPropertyDetailsFromConfig(config));
+    item.recalculation = config.recalculation || 'no';
+    if (config.floorPriceRanges) {
+      item.floorPriceRanges = normalizeFloorPriceRanges(config.floorPriceRanges);
+    }
+  } else {
+    const details = getComplexPropertyDetailsFromConfig(config);
+    for (const [key, value] of Object.entries(details)) {
+      if (item[key] == null || String(item[key]).trim() === '') {
+        item[key] = value;
+      }
+    }
+    if (config.noMarkupYears != null && item.noMarkupYears == null) {
+      item.noMarkupYears = config.noMarkupYears;
+    }
+    if (config.mandatoryPayment != null && item.mandatoryPayment == null) {
+      item.mandatoryPayment = config.mandatoryPayment;
+    }
+  }
+
+  const images = repairPropertyImages({
+    ...item,
+    img: property.img ?? defaults?.img ?? '',
+    images: Array.isArray(property.images) ? property.images : defaults?.images,
+  });
+  item.img = images.img;
+  item.images = images.images;
 
   return preservePropertyContentFields(
     mergeSavedLayoutDescriptions(repairComplexSectorData(item), property),
@@ -2827,11 +2901,13 @@ function applyJk2BomondDataFromConfig(property) {
   );
 }
 
-function applyJk2BomondDefaultsToCatalog() {
-  const jk2 = DEFAULT_PROPERTIES.find(item => item.id === 'jk2');
-  if (!jk2) return;
-  Object.assign(jk2, applyJk2BomondDataFromConfig(jk2));
+function applyComplexDefaultsToCatalog() {
+  for (const complexId of Object.keys(COMPLEX_PROPERTY_CONFIGS)) {
+    const property = DEFAULT_PROPERTIES.find(item => item.id === complexId);
+    if (!property) continue;
+    Object.assign(property, applyComplexConfigFromRegistry(property));
+  }
 }
 
-applyJk2BomondDefaultsToCatalog();
+applyComplexDefaultsToCatalog();
 initStore();
