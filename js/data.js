@@ -87,10 +87,10 @@ const DEFAULT_PROPERTIES = [
         { key: 'В', label: 'Сектор В Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
         { key: 'Г', label: 'Сектор В Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
 
-        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Сектор Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Сектор Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+        { key: 'Д-A', label: 'Сектор Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
+        { key: 'Д-Б', label: 'Сектор Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
+        { key: 'Д-В', label: 'Сектор Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
+        { key: 'Д-Г', label: 'Сектор Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
 
         { key: 'Д', label: 'Сектор Ж Тип-Б', areaMin: 52, areaMax: 52, planImg: 'img/luch/1G.jpg' },
         { key: 'Е', label: 'Сектор Ж Тип-В', areaMin: 53, areaMax: 53, planImg: 'img/luch/1D.jpg' },
@@ -111,8 +111,8 @@ const DEFAULT_PROPERTIES = [
         { key: 'A', label: 'Сектор В Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
         { key: 'Б', label: 'Сектор В Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
 
-        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+        { key: 'Д-A', label: 'Сектор Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
+        { key: 'Д-Б', label: 'Сектор Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
 
         { key: 'B', label: 'Сектор Ж Тип-А', areaMin: 57, areaMax: 57, planImg: 'img/luch/2V.jpg' },
         { key: 'Г', label: 'Сектор Ж Тип-Б', areaMin: 58, areaMax: 58, planImg: 'img/luch/2G.jpg' },
@@ -141,8 +141,8 @@ const DEFAULT_PROPERTIES = [
         { key: 'A', label: 'Сектор В Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
         { key: 'Б', label: 'Сектор В Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
 
-        { key: 'A', label: 'Сектор Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+        { key: 'Д-A', label: 'Сектор Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
+        { key: 'Д-Б', label: 'Сектор Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
 
         { key: 'B', label: 'Сектор Г Тип-Б', areaMin: 95, areaMax: 95, planImg: 'img/luch/2V.jpg' },
       ] },
@@ -2515,105 +2515,99 @@ const COMPLEX_PROPERTY_CONFIGS = {
     { floorMin: 15, floorMax: 19, price: 71000 },
   ],
 
-  // Порядок секторов на странице объекта (алфавитный, одна буква = один сектор)
+  // Порядок секторов на странице объекта
   sectorOrder: ['Б', 'В', 'Г', 'Д', 'Е', 'Ж'],
 
-  // Сектор → тип квартир → ключ планировки → данные
+  // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
   layouts: {
     'Б': {
       '1room': {
-        '\u0418': { totalApartments: 7, availableFloors: '4-5, 7-10, 18' },  /* */
-        '\u041a': { totalApartments: 3, availableFloors: '5, 7, 15' },  /* */
-        '\u041b': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
-        '\u041c': { totalApartments: 14, availableFloors: '3-14, 17-18' }, 
-        '\u041d': { totalApartments: 1, availableFloors: '5' },  /* */
-        '\u041f': { totalApartments: 1, availableFloors: '8' },  /* */
+        '\u0416': {},
       },
       '2room': {
-        B: { totalApartments: 2, availableFloors: '11, 17' },  /* */
-        '\u0413': { totalApartments: 1, availableFloors: '8' },  /* */
+        '\u0414': {},
+        '\u0415': {},
+        '\u0401': {},
+        '\u0416': {},
+        '\u0417': {},
+        '\u0418': {},
+        '\u0419': {},
+        '\u041a': {},
       },
     },
 
     'В': {
       '1room': {
-        '\u0420': { totalApartments: 5, availableFloors: '4-5, 7-8, 10' },  /* */
-        '\u0421': { totalApartments: 3, availableFloors: '4-5, 8' },  /* */
-        '\u0422': { totalApartments: 13, availableFloors: '3-11, 13-14, 17, 19' },
-        '\u0423': { totalApartments: 12, availableFloors: '3-14' },
-        '\u0424': { totalApartments: 12, availableFloors: '3-11, 13-15, 17' },
-        '\u0425': { totalApartments: 9, availableFloors: '3-8, 11, 13, 19,' },  
-        '\u0428': { totalApartments: 6, availableFloors: '4-5, 7-8, 11, 19' },  /* */
+        A: {},
+        '\u0411': {},
+        '\u0412': {},
+        '\u0413': {},
       },
-      '2room': { 
-        '\u0414': { totalApartments: 1, availableFloors: '19' },  /* */
-        '\u0415': { totalApartments: 1, availableFloors: '19' },  /* */
+      '2room': {
+        A: {},
+        '\u0411': {},
+      },
+      '3room': {
+        A: {},
+        '\u0411': {},
       },
     },
 
     'Г': {
       '1room': {
-        A: { totalApartments: 6, availableFloors: '4-8, 11' },
-        '\u0411': { totalApartments: 10, availableFloors: '3-5, 7-8, 10-11, 14, 18-19' },  /* 3 */
-        '\u0412': { totalApartments: 13, availableFloors: '3-5, 7-14, 17, 19' },
-        '\u0413': { totalApartments: 14, availableFloors: '3-11, 13-14, 17-19' },
-        '\u0414': { totalApartments: 14, availableFloors: '3-11, 13-14, 16-17, 19' },
-        '\u0415': { totalApartments: 3, availableFloors: '3-5' },
-        '\u0416': { totalApartments: 2, availableFloors: '5, 7' },
+        '\u0417': {},
       },
-
-      '2room': {
-        A: { totalApartments: 1, availableFloors: '3' },  /* 3 */
-        '\u0411': { totalApartments: 3, availableFloors: '8, 10, 19' }, /* 3 */
+      '3room': {
+        B: {},
       },
     },
 
     'Д': {
       '1room': {
-        '\u0418': { totalApartments: 7, availableFloors: '3-8, 19' },  /* */
-        '\u041a': { totalApartments: 5, availableFloors: '3, 5, 14, 18-19' },  /* */
-        '\u041b': { totalApartments: 14, availableFloors: '3-5, 7-14, 17-19' },
-        '\u041c': { totalApartments: 13, availableFloors: '4-12, 14-15, 18-19' }, 
-        '\u041d': { totalApartments: 14, availableFloors: '3-5, 7-8, 10-11, 13, 19' },  /* */
-        '\u041f': { totalApartments: 7, availableFloors: '4-9, 19' },  /* */
+        'Д-A': {},
+        'Д-Б': {},
+        'Д-В': {},
+        'Д-Г': {},
       },
       '2room': {
-        B: { totalApartments: 2, availableFloors: '10, 13' },  /* */
-        '\u0413': { totalApartments: 4, availableFloors: '4-5, 10-11' },  /* */
+        'Д-A': {},
+        'Д-Б': {},
+      },
+      '3room': {
+        'Д-A': {},
+        'Д-Б': {},
       },
     },
 
     'Е': {
       '1room': {
-        '\u0420': { totalApartments: 11, availableFloors: '3-5, 7-11, 13-14, 17' },  /* */
-        '\u0421': { totalApartments: 8, availableFloors: '3-8, 11, 18' },  /* */
-        '\u0422': { totalApartments: 16, availableFloors: '3-14, 16-19' },
-        '\u0423': { totalApartments: 15, availableFloors: '3-14, 17-19' },
-        '\u0424': { totalApartments: 15, availableFloors: '3-14, 17-19' },
-        '\u0425': { totalApartments: 10, availableFloors: '4-11, 14, 19' },  
-        '\u0428': { totalApartments: 11, availableFloors: '3-5, 7-9, 11, 13-14, 18-19' },  /* */
+        '\u0418': {},
+        '\u0419': {},
+        '\u041a': {},
+        '\u041b': {},
       },
-      '2room': { 
-        '\u0414': { totalApartments: 1, availableFloors: '3' },  /* */
-        '\u0415': { totalApartments: 1, availableFloors: '11' },  /* */
+      '2room': {
+        '\u041b': {},
+        '\u041c': {},
+        '\u041d': {},
+        '\u041e': {},
+        '\u041f': {},
+        '\u0420': {},
+        '\u0421': {},
+        '\u0422': {},
+        '\u0423': {},
       },
     },
 
     'Ж': {
       '1room': {
-        '\u0417-\u0410': { totalApartments: 6, availableFloors: '3-5, 7-8, 19' },
-        '\u0417-\u0411': { totalApartments: 7, availableFloors: '3-4, 7-8, 10, 12, 19' },
-        '\u0417-\u0412': { totalApartments: 1, availableFloors: '19' },
-        '\u0417-\u0413': { totalApartments: 1, availableFloors: '19' },
-        '\u0417-\u0414': { totalApartments: 1, availableFloors: '19' },
-        '\u0417-\u0415': { totalApartments: 1, availableFloors: '8' },
-        '\u0417-\u0416': { totalApartments: 1, availableFloors: '19' },
-        '\u0417-\u0418': { totalApartments: 3, availableFloors: '4-5, 8' },
-        '\u0417-\u041a': { totalApartments: 3, availableFloors: '4-5, 8' },
+        '\u0414': {},
+        '\u0415': {},
+        '\u0401': {},
       },
       '2room': {
-        '\u041a': { totalApartments: 1, availableFloors: '3' },
-        '\u041b': { totalApartments: 1, availableFloors: '3' },
+        B: {},
+        '\u0413': {},
       },
     },
   },
