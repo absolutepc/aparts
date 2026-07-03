@@ -233,6 +233,7 @@ const DEFAULT_PROPERTIES = [
     recalculation: 'Нет',
     maternityCapital: 'no',
     markupBasis: 'after',
+    recalculation: 'no',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/1111111.jpeg',
@@ -2433,6 +2434,7 @@ const JK2_BOMOND_DATA = {
   installmentTerm: '1-6 лет',
   maternityCapital: 'no',
   markupBasis: 'after',
+  recalculation: 'no',
 
   floorPriceRanges: [
     { floorMin: 3, floorMax: 5, price: 85000 },
