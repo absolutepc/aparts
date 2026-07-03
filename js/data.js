@@ -157,6 +157,7 @@ const DEFAULT_PROPERTIES = [
     mandatoryPayment: 10000,
     img: 'img/Ан-Нур/Ан-нур 1.jpg',
     images: [
+      'img/Ан-Нур/Ан-нур 1.jpg',
       'img/Ан-Нур/Ан-нур.jpg',
       'img/Ан-Нур/Ан-нур 3.jpg',
       'img/Ан-Нур/Ан-нур 4.jpg',
@@ -164,7 +165,7 @@ const DEFAULT_PROPERTIES = [
       'img/Ан-Нур/Ан-нур 10.jpg',
       'img/Ан-Нур/Ан-нур 8.jpg',
       'img/Ан-Нур/Ан-нур 9.jpg',
-      'img/Ан-Нур/Ан-нур 7.jpg'
+      'img/Ан-Нур/Ан-нур 7.jpg',
     ],
     published: true,
   },
@@ -1937,11 +1938,17 @@ function normalizePropertyImages(property) {
     ? property.images.map(src => String(src).trim()).filter(Boolean)
     : [];
 
-  // Порядок в галерее — главный; поле img синхронизируется с images[0]
-  let combined = uniqueImages([
-    ...gallery,
-    ...(mainField ? [mainField] : []),
-  ]);
+  let combined;
+  if (gallery.length) {
+    combined = uniqueImages(gallery);
+    if (mainField && !combined.includes(mainField)) {
+      combined = uniqueImages([mainField, ...combined]);
+    }
+  } else if (mainField) {
+    combined = [mainField];
+  } else {
+    combined = [];
+  }
 
   const realImages = combined.filter(src => !isBrokenImageSrc(src));
   if (realImages.length) {
@@ -2483,6 +2490,18 @@ const COMPLEX_PROPERTY_CONFIGS = {
   jk1: {
   forceOfferingFromConfig: true,
   developer: 'Монолит',
+  img: 'img/Ан-Нур/Ан-нур 1.jpg',
+  images: [
+    'img/Ан-Нур/Ан-нур 1.jpg',
+    'img/Ан-Нур/Ан-нур.jpg',
+    'img/Ан-Нур/Ан-нур 3.jpg',
+    'img/Ан-Нур/Ан-нур 4.jpg',
+    'img/Ан-Нур/Ан-нур 5.jpg',
+    'img/Ан-Нур/Ан-нур 10.jpg',
+    'img/Ан-Нур/Ан-нур 8.jpg',
+    'img/Ан-Нур/Ан-нур 9.jpg',
+    'img/Ан-Нур/Ан-нур 7.jpg',
+  ],
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'no',
