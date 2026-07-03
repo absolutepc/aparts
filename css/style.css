@@ -524,7 +524,7 @@ main { flex: 1; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  margin-top: 37px;
+  margin-top: -15px;
 }
 
 .property-spec-row {
