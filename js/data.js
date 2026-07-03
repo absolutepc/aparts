@@ -482,10 +482,25 @@ function formatFloorRangeLabel(range) {
   return `${normalized.floorMin}–${normalized.floorMax} этаж`;
 }
 
+function formatFloorRangeCompactLabel(range) {
+  const normalized = normalizeFloorRange(range);
+  if (!normalized) return '';
+  if (normalized.floorMin === normalized.floorMax) {
+    return String(normalized.floorMin);
+  }
+  return `${normalized.floorMin}–${normalized.floorMax}`;
+}
+
 function formatFloorRangesLabel(ranges) {
   const normalized = normalizeFloorRanges(ranges);
   if (!normalized.length) return '—';
   return normalized.map(formatFloorRangeLabel).join(', ');
+}
+
+function formatFloorRangesCompactLabel(ranges) {
+  const normalized = normalizeFloorRanges(ranges);
+  if (!normalized.length) return '—';
+  return normalized.map(formatFloorRangeCompactLabel).join(', ');
 }
 
 function floorRangesOverlap(a, b) {
@@ -575,21 +590,23 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
 
 function renderLayoutPriceSpecs(property, layout, variant) {
   const applicablePrices = getApplicableFloorPrices(property, layout);
-  if (applicablePrices.length) {
-    if (applicablePrices.length === 1) {
-      return `<span class="floor-plan-spec-value">от ${formatPrice(applicablePrices[0].price)}</span>`;
-    }
-    return `
-      <ul class="floor-plan-price-list">
-        ${applicablePrices.map((range) => `
-          <li>${escapeHtml(formatFloorRangeLabel(range))}: от ${formatPrice(range.price)}</li>
-        `).join('')}
-      </ul>
-    `;
+  if (!applicablePrices.length) {
+    return '';
   }
 
-  const priceValue = layout.price ?? variant.price ?? property.price;
-  return `<span class="floor-plan-spec-value">от ${formatPrice(priceValue)}</span>`;
+  const prices = applicablePrices.map((range) => Number(range.price)).filter((price) => price > 0);
+  if (!prices.length) {
+    return '';
+  }
+
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+
+  if (minPrice === maxPrice) {
+    return `<span class="floor-plan-spec-value">от ${formatPrice(minPrice)}</span>`;
+  }
+
+  return `<span class="floor-plan-spec-value">от ${formatPrice(minPrice)} до ${formatPrice(maxPrice)}</span>`;
 }
 
 function isComplex(property) {
@@ -1967,7 +1984,8 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
       const apartmentsValue = layout.totalApartments > 0
         ? layout.totalApartments
         : (variant.totalApartments || '—');
-      const floorsLabel = formatFloorRangesLabel(layout.availableFloors);
+      const floorsLabel = formatFloorRangesCompactLabel(layout.availableFloors);
+      const priceSpecsHtml = renderLayoutPriceSpecs(property, layout, variant);
       const hiddenClass = layoutIndex === 0 ? '' : ' floor-plan-layout-panel--hidden';
 
       return `
@@ -1992,10 +2010,11 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               <span class="floor-plan-spec-label">Этажи</span>
               <span class="floor-plan-spec-value">${escapeHtml(floorsLabel)}</span>
             </li>
+            ${priceSpecsHtml ? `
             <li class="floor-plan-spec-prices">
               <span class="floor-plan-spec-label">Цена</span>
-              ${renderLayoutPriceSpecs(property, layout, variant)}
-            </li>
+              ${priceSpecsHtml}
+            </li>` : ''}
           </ul>
         </div>
       `;
