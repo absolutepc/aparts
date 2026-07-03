@@ -1,43 +1,21 @@
 function initHomePage() {
-  const allComplexes = getPublishedProperties(['jk', 'mfk']);
+  const jkProperties = getFeaturedProperties(['jk', 'mfk'], 3);
   const commercialProperties = getFeaturedProperties(['commercial'], 3);
+  const complexes = getPublishedProperties(['jk', 'mfk']);
   const commercial = getPublishedProperties(['commercial']);
-  const featuredLimit = 3;
-  let showAllComplexes = false;
 
   const statsEl = document.getElementById('homeStats');
   if (statsEl) {
-    statsEl.textContent = `${allComplexes.length} комплексов (ЖК и МФК) и ${commercial.length} коммерческих предложений`;
+    statsEl.textContent = `${complexes.length} комплексов (ЖК и МФК) и ${commercial.length} коммерческих предложений`;
   }
 
   const jkGridEl = document.getElementById('featuredJkProperties');
-  const toggleBtn = document.getElementById('toggleAllJkBtn');
-
-  function renderJkGrid() {
-    if (!jkGridEl) return;
-
-    const list = showAllComplexes ? allComplexes : allComplexes.slice(0, featuredLimit);
+  if (jkGridEl) {
     jkGridEl.innerHTML = renderPropertiesGridCompact(
-      list,
+      jkProperties,
       'ЖК пока нет. Добавьте объекты через админ-панель.'
     );
-
-    if (toggleBtn && allComplexes.length > featuredLimit) {
-      toggleBtn.hidden = false;
-      toggleBtn.textContent = showAllComplexes
-        ? 'Свернуть'
-        : `Показать все ЖК и МФК (${allComplexes.length})`;
-    }
   }
-
-  if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => {
-      showAllComplexes = !showAllComplexes;
-      renderJkGrid();
-    });
-  }
-
-  renderJkGrid();
 
   const commercialGridEl = document.getElementById('featuredCommercialProperties');
   if (commercialGridEl) {
