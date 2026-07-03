@@ -594,6 +594,103 @@ function formatFloorPriceFromTo(fromPrice) {
   return `${fromLabel} ${toLabel}`;
 }
 
+function normalizeSectorPriceGroup(group) {
+  if (!group || !Array.isArray(group.sectors) || !group.sectors.length) return null;
+
+  const sectors = group.sectors
+    .map((sector) => stripSectorTitle(sector))
+    .filter(Boolean);
+  if (!sectors.length) return null;
+
+  const full = Number(group.full);
+  const installment30 = Number(group.installment30);
+  const noDownPayment = Number(group.noDownPayment);
+  if (![full, installment30, noDownPayment].every((price) => Number.isFinite(price) && price > 0)) {
+    return null;
+  }
+
+  return { sectors, full, installment30, noDownPayment };
+}
+
+function normalizeSectorPriceGroups(groups) {
+  if (!Array.isArray(groups)) return [];
+  return groups.map(normalizeSectorPriceGroup).filter(Boolean);
+}
+
+function getPropertySectorPriceGroups(property) {
+  return normalizeSectorPriceGroups(property?.sectorPriceGroups);
+}
+
+function getSectorPriceGroupForSector(property, sectorTitle) {
+  const normalized = stripSectorTitle(sectorTitle);
+  if (!normalized) return null;
+
+  return getPropertySectorPriceGroups(property).find((group) =>
+    group.sectors.some((sector) => stripSectorTitle(sector) === normalized)
+  ) || null;
+}
+
+function getMinSectorFullPrice(property) {
+  const groups = getPropertySectorPriceGroups(property);
+  if (!groups.length) return null;
+  return Math.min(...groups.map((group) => group.full));
+}
+
+function formatSectorPriceGroupLabel(group) {
+  return group.sectors.map((sector) => getSectorDisplayTitle(formatSectorTitle(sector))).join(', ');
+}
+
+function renderPropertySectorPricesBlock(property, options = {}) {
+  const groups = getPropertySectorPriceGroups(property);
+  if (!groups.length) return '';
+
+  const compact = options.compact === true;
+  const sectionClass = compact
+    ? 'property-floor-prices property-floor-prices--compact property-sector-prices'
+    : 'property-floor-prices property-sector-prices';
+  const headingTag = compact ? 'h3' : 'h2';
+  const subtitleHtml = compact
+    ? ''
+    : '<p>Стоимость зависит от сектора и формы оплаты</p>';
+
+  return `
+    <section class="${sectionClass}">
+      <div class="section-header property-floor-prices-header">
+        <${headingTag}>Цены по секторам</${headingTag}>
+        ${subtitleHtml}
+      </div>
+      <div class="property-floor-prices-table-wrap">
+        <table class="property-floor-prices-table property-sector-prices-table">
+          <thead>
+            <tr>
+              <th>Сектор</th>
+              <th>Полная оплата</th>
+              <th>Рассрочка 30%</th>
+              <th>Без взноса</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${groups.map((group) => `
+              <tr>
+                <td>${escapeHtml(formatSectorPriceGroupLabel(group))}</td>
+                <td>${formatPrice(group.full)}</td>
+                <td>${formatPrice(group.installment30)}</td>
+                <td>${formatPrice(group.noDownPayment)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `;
+}
+
+function renderPropertyPricesBlock(property, options = {}) {
+  const sectorPrices = renderPropertySectorPricesBlock(property, options);
+  if (sectorPrices) return sectorPrices;
+  return renderPropertyFloorPricesBlock(property, options);
+}
+
 function renderPropertyFloorPricesBlock(property, options = {}) {
   const ranges = getPropertyFloorPriceRanges(property);
   if (!ranges.length) return '';
@@ -638,6 +735,11 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
 }
 
 function renderLayoutPriceSpecs(property, layout, variant) {
+  const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(layout));
+  if (sectorGroup) {
+    return `<span class="floor-plan-spec-value floor-plan-spec-value--multiline">Полная оплата: ${formatPrice(sectorGroup.full)}<br>Рассрочка 30%: ${formatPrice(sectorGroup.installment30)}<br>Без взноса: ${formatPrice(sectorGroup.noDownPayment)}</span>`;
+  }
+
   const applicablePrices = getApplicableFloorPrices(property, layout);
   if (!applicablePrices.length) {
     return '';
@@ -832,9 +934,12 @@ function normalizePropertyOffering(property) {
   }
 
   if (isComplex(item)) {
+    item.sectorPriceGroups = normalizeSectorPriceGroups(item.sectorPriceGroups);
+    if (!item.sectorPriceGroups.length) delete item.sectorPriceGroups;
     item.floorPriceRanges = normalizeFloorPriceRanges(item.floorPriceRanges);
     if (!item.floorPriceRanges.length) delete item.floorPriceRanges;
   } else {
+    delete item.sectorPriceGroups;
     delete item.floorPriceRanges;
   }
 
@@ -2363,6 +2468,7 @@ function getProperties() {
           || JSON.stringify(property.flatVariants) !== JSON.stringify(source.flatVariants)
           || JSON.stringify(property.sectors) !== JSON.stringify(source.sectors)
           || JSON.stringify(property.floorPriceRanges) !== JSON.stringify(source.floorPriceRanges)
+          || JSON.stringify(property.sectorPriceGroups) !== JSON.stringify(source.sectorPriceGroups)
           || source.count1room != null
           || source.count2room != null
           || source.count3room != null
@@ -2483,6 +2589,7 @@ function logoutUser() {
 //
 // forceOfferingFromConfig — принудительно брать характеристики из конфига (jk2)
 // floorPriceRanges — цены по диапазонам этажей
+// sectorPriceGroups — цены по секторам (полная оплата / рассрочка 30% / без взноса)
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
 // sectors — полная структура секторов (если заполнить — layouts игнорируется)
 // =============================================================================
@@ -2507,12 +2614,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
   maternityCapital: 'no',
   markupBasis: 'after',
   recalculation: 'no',
-  floorPriceRanges: [
-    { floorMin: 3, floorMax: 5, price: 85000 },
-    { floorMin: 6, floorMax: 8, price: 80000 },
-    { floorMin: 9, floorMax: 11, price: 77000 },
-    { floorMin: 12, floorMax: 14, price: 74000 },
-    { floorMin: 15, floorMax: 19, price: 71000 },
+
+  // Сектор → полная оплата / рассрочка 30% / без взноса
+  sectorPriceGroups: [
+    { sectors: ['Б', 'В', 'Г'], full: 90000, installment30: 100000, noDownPayment: 107000 },
+    { sectors: ['Д', 'Е'], full: 100000, installment30: 110000, noDownPayment: 107000 },
+    { sectors: ['Ж'], full: 110000, installment30: 120000, noDownPayment: 130000 },
   ],
 
   // Порядок секторов на странице объекта
@@ -3033,8 +3140,12 @@ function applyComplexConfigFromRegistry(property) {
   if (config.forceOfferingFromConfig) {
     Object.assign(item, getComplexPropertyDetailsFromConfig(config));
     item.recalculation = config.recalculation || 'no';
-    if (config.floorPriceRanges) {
+    if (config.sectorPriceGroups) {
+      item.sectorPriceGroups = normalizeSectorPriceGroups(config.sectorPriceGroups);
+      delete item.floorPriceRanges;
+    } else if (config.floorPriceRanges) {
       item.floorPriceRanges = normalizeFloorPriceRanges(config.floorPriceRanges);
+      delete item.sectorPriceGroups;
     }
   } else {
     const details = getComplexPropertyDetailsFromConfig(config);

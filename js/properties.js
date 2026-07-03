@@ -153,7 +153,7 @@ function initPropertyPage() {
   const heroPrice =
     selectedVariant?.price != null && selectedVariant.price !== ''
       ? selectedVariant.price
-      : property.price;
+      : (getMinSectorFullPrice(property) ?? property.price);
 
   const isOverview = isComplex(property) && !flatTypeParam;
 
@@ -188,7 +188,7 @@ function initPropertyPage() {
             ${renderPropertyOfferingSpecs(property)}
             ${specsHtml}
           </div>
-          ${isComplex(property) ? renderPropertyFloorPricesBlock(property, { compact: true }) : ''}
+          ${isComplex(property) ? renderPropertyPricesBlock(property, { compact: true }) : ''}
         </div>
       </div>
 
