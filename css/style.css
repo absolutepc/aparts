@@ -652,6 +652,7 @@ main { flex: 1; }
   background: transparent;
   border: none;
   border-radius: 0;
+  table-layout: fixed;
 }
 
 .property-floor-prices-table th,
@@ -661,16 +662,29 @@ main { flex: 1; }
   border-bottom: 1px solid var(--border);
 }
 
+.property-floor-prices-table th:first-child,
+.property-floor-prices-table td:first-child {
+  width: 30%;
+}
+
+.property-floor-prices-table-col-staroprom {
+  text-align: center;
+  padding-inline: 18px;
+}
+
+.property-floor-prices-table-col-corner {
+  text-align: right;
+  padding-left: 18px;
+  padding-right: 18px;
+  white-space: nowrap;
+}
+
 .property-floor-prices-table th {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-}
-
-.property-floor-prices-table-col-corner {
-  text-align: right;
 }
 
 .property-floor-prices-table tr:last-child td {
