@@ -1,5 +1,7 @@
-const STORE_KEY = 'aparts_data_v18';
-const DATA_JS_VERSION = '18';
+const STORE_KEY = 'aparts_data_v19';
+const DATA_JS_VERSION = '19';
+
+const DEPRECATED_PROPERTY_IDS = new Set(['jk1', 'jk3', 'jk4']);
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -69,87 +71,6 @@ const ADMIN_CREDENTIALS = {
 };
 
 const DEFAULT_PROPERTIES = [
-  {
-    id: 'jk1',
-    title: 'ЖК «Ан-Нур»',
-    description: 'ЖК Ан Нур Грозный ЖК Ан Нур в Грозном – Жилой комплекс представляет собой впечатляющее сочетание восточного стиля и современных технологий в строительстве. Этот комплекс является одним из визитных карточек города и привлекает внимание как местных жителей, так и туристов.Архитектурный дизайн Ан Нур в Грозном воплощает в себе величие и элегантность восточных традиций. Здания комплекса возвышаются над Грозным с изящными куполами, изысканными арками и изогнутыми линиями, характерными для восточного стиля. Фасады зданий украшены красивыми резными узорами и узнаваемыми орнаментами, которые придают комплексу неповторимый вид.Одним из особых элементов ЖК Ан Нур является внутренний двор, оформленный в традиционном восточном стиле. Этот уютный и красиво оформленный двор становится местом отдыха и общения для жителей комплекса. Здесь можно насладиться зелёными насаждениями, фонтанами и комфортными скамейками в атмосфере умиротворения и красоты.Внутреннее убранство квартир в ЖК Ан Нур Грозный сочетает в себе современные удобства и элементы восточного дизайна. Просторные и светлые помещения оформлены с использованием натуральных материалов и высококачественной мебели, что создаёт атмосферу комфорта и роскоши',
-    type: 'jk',
-    flatType: '1room',
-    totalApartments: 120,
-    flatVariants: [
-      { flatType: '1room', totalApartments: 58, areaMin: 52, areaMax: 67,layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Сектор В|Д Тип-В', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Сектор В|Д Тип-Г', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
-
-        { key: 'Д', label: 'Сектор Ж Тип-Б', areaMin: 52, areaMax: 52, planImg: 'img/luch/1G.jpg' },
-        { key: 'Е', label: 'Сектор Ж Тип-В', areaMin: 53, areaMax: 53, planImg: 'img/luch/1D.jpg' },
-        { key: 'Ё', label: 'Сектор Ж Тип-Г', areaMin: 67, areaMax: 67, planImg: 'img/luch/1E.jpg' },
-
-        { key: 'Ж', label: 'Сектор Б Тип-И', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
-
-        { key: 'З', label: 'Сектор Г Тип-Г', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
-
-        { key: 'И', label: 'Сектор Е Тип-Д', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
-        { key: 'Й', label: 'Сектор Е Тип-Е', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
-        { key: 'К', label: 'Сектор Е Тип-Ж', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
-        { key: 'Л', label: 'Сектор Е Тип-И', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
-
-      ]  },
-
-      { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
-
-        { key: 'B', label: 'Сектор Ж Тип-А', areaMin: 57, areaMax: 57, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: 'Сектор Ж Тип-Б', areaMin: 58, areaMax: 58, planImg: 'img/luch/2G.jpg' },
-
-        { key: 'Д', label: 'Сектор Б Тип-В', areaMin: 82, areaMax: 82, planImg: 'img/luch/1G.jpg' },
-        { key: 'Е', label: 'Сектор Б Тип-Б', areaMin: 84, areaMax: 84, planImg: 'img/luch/1D.jpg' },
-        { key: 'Ё', label: 'Сектор Б Тип-Г', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'Ж', label: 'Сектор Б Тип-Д', areaMin: 84, areaMax: 84, planImg: 'img/luch/1G.jpg' },
-        { key: 'З', label: 'Сектор Б Тип-Ж', areaMin: 78, areaMax: 78, planImg: 'img/luch/1D.jpg' },
-        { key: 'И', label: 'Сектор Б Тип-К', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
-        { key: 'Й', label: 'Сектор Б Тип-Л', areaMin: 81, areaMax: 81, planImg: 'img/luch/1D.jpg' },
-        { key: 'К', label: 'Сектор Б Тип-Н', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
-
-        { key: 'Л', label: 'Сектор Е Тип-Б', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
-        { key: 'М', label: 'Сектор Е Тип-В', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'Н', label: 'Сектор Е Тип-Г', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'О', label: 'Сектор Е Тип-Д', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
-        { key: 'П', label: 'Сектор Е Тип-Ж', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
-        { key: 'Р', label: 'Сектор Е Тип-И', areaMin: 74, areaMax: 74, planImg: 'img/luch/1E.jpg' },
-        { key: 'С', label: 'Сектор Е Тип-К', areaMin: 81, areaMax: 81, planImg: 'img/luch/1E.jpg' },
-        { key: 'Т', label: 'Сектор Е Тип-Л', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
-        { key: 'У', label: 'Сектор Е Тип-Н', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
-      ] },
-
-      { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
-        { key: 'A', label: 'Сектор В|Д Тип-A', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Сектор В|Д Тип-Б', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
-
-        { key: 'B', label: 'Сектор Г Тип-Б', areaMin: 95, areaMax: 95, planImg: 'img/luch/2V.jpg' },
-      ] },
-    ],
-    areaMin: 52,
-    areaMax: 95,
-    price: 90000,
-    address: '​Проспект Владимира Владимировича Путина, 22/4​',
-    district: 'Новый район',
-    developer: 'Монолит',
-    noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
-    images: [
-      'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
-      'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg',
-      'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg',
-      'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg'
-    ],
-    published: true,
-  },
-
   {
     id: 'jk2',
     title: 'ЖК «Бомонд»',
@@ -249,83 +170,6 @@ const DEFAULT_PROPERTIES = [
     published: true,
   },
 
-  {
-    id: 'jk3',
-    title: 'ЖК «Дубайский»',
-    description: 'Жилой комплекс с разными планировками и развитой инфраструктурой на территории.',
-    type: 'mfk',
-    flatType: '2room',
-    totalApartments: 55,
-    flatVariants: [
-      { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44 },
-      { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68 },
-      { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85 },
-      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55 },
-    ],
-    areaMin: 30,
-    areaMax: 85,
-    price: 98000,
-    address: 'В.В.Путина 001',
-    district: 'САО',
-    developer: 'Квартал 777',
-    noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    img: 'img/eAqRhD17Bf2ScTaaYF0mk8uGCSr7mKfeaiU0prAym2EAScR2bw8PJ9c2bg08c4REWbijEhXdYlrNYWjM8IKaXTSd.jpg',
-    images: [
-      'img/eAqRhD17Bf2ScTaaYF0mk8uGCSr7mKfeaiU0prAym2EAScR2bw8PJ9c2bg08c4REWbijEhXdYlrNYWjM8IKaXTSd.jpg',
-      'img/UpeIcL-raLgBmiX_y4MzKlqJRXfNEY3bLSNBavOOZauKEJ5ufXlaELh-5dAtA-Bk2KInur9zpmnf91RVrJ1ijJaL.jpg',
-    ],
-    published: true,
-  },
-  
-  {
-    id: 'jk4',
-    title: 'ЖК «Луч»',
-    description: 'ЖК «Луч» — это современный жилой комплекс семейного типа, расположенный в престижном районе Минутка, всего в нескольких минутах от центра города. Комплекс состоит из трех 20-этажных кирпичных домов, каждый из которых имеет 2 подъезда и 3 скоростных лифта, подключенных к резервным генераторам, что обеспечивает бесперебойную работу даже при отключении электричества.',
-    type: 'jk',
-    flatType: '1room',
-    totalApartments: 163,
-    flatVariants: [
-      { flatType: '1room', totalApartments: 42, areaMin: 43.8, areaMax: 48,layouts: [
-        { key: 'A', label: 'Вариант A', areaMin: 48, areaMax: 48, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: 'Вариант Б', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: 'Вариант В', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: 'Вариант Г', areaMin: 43.8, areaMax: 43.8, planImg: 'img/luch/1G.jpg' },
-        { key: 'Д', label: 'Вариант Д', areaMin: 46.1, areaMax: 46.1, planImg: 'img/luch/1D.jpg' },
-        { key: 'E', label: 'Вариант E', areaMin: 48, areaMax: 48, planImg: 'img/luch/1E.jpg' },
-      ]  },
-      { flatType: '2room', totalApartments: 121, areaMin: 54.7, areaMax: 74.8, layouts: [
-        { key: 'A', label: 'Вариант A', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: 'Вариант Б', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2B.jpg' },
-        { key: 'B', label: 'Вариант В', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: 'Вариант Г', areaMin: 69, areaMax: 69, planImg: 'img/luch/2G.jpg' },
-        { key: 'Д', label: 'Вариант Д', areaMin: 69, areaMax: 69, planImg: 'img/luch/2D.jpg' },
-        { key: 'Е', label: 'Вариант Е', areaMin: 74.8, areaMax: 74.8, planImg: 'img/luch/2E.jpg' },
-        { key: 'Ж', label: 'Вариант Ж', areaMin: 62.88, areaMax: 62.88, planImg: 'img/luch/2J.jpg' },
-        { key: 'И', label: 'Вариант И', areaMin: 54.7, areaMax: 54.7, planImg: 'img/luch/2I.jpg' },
-      ] },
-    ],
-    areaMin: 43.8,
-    areaMax: 74.8,
-    price: 65000,
-    address: 'Проспект А.А. Кадырова 201',
-    district: 'Байсангуровский',
-    developer: 'Квартал 777',
-    noMarkupYears: 2,
-    mandatoryPayment: 4000,
-    img: 'img/luch/luch.jpg',
-    images: [
-      'img/luch/luch 1.jpg',
-      'img/luch/luch 2.jpg',
-      'img/luch/luch 3.jpg',
-      'img/luch/luch 4.jpg',
-      'img/luch/luch 5.jpg',
-      'img/luch/luch 6.jpg',
-      'img/luch/luch 7.jpg',
-    ],
-    published: true,
-  },
-  
   {
     id: 'comm1',
     title: 'Офисное помещение в БЦ',
@@ -2239,6 +2083,7 @@ function mergeStoredPropertiesWithDefaults(stored) {
   });
 
   for (const item of stored) {
+    if (DEPRECATED_PROPERTY_IDS.has(item.id)) continue;
     if (!defaultIds.has(item.id)) merged.push(item);
   }
 
@@ -2255,7 +2100,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const recentKeys = ['aparts_data_v17'];
+  const recentKeys = ['aparts_data_v18', 'aparts_data_v17'];
   for (const key of recentKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -2461,23 +2306,6 @@ function logoutUser() {
 // sectors — полная структура секторов (если заполнить — layouts игнорируется)
 // =============================================================================
 const COMPLEX_PROPERTY_CONFIGS = {
-  jk1: {
-    developer: 'Монолит',
-    noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    img: 'img/Ан-Нур/zkce-_S0DR-uHLYhQ42LmDihuwCc8DA9TBOkbC3OnO3gx_xMSm4H97gd8Fm6oXHNQUJ_BjNgjVfM8oAVuaFex-5r.jpg',
-    images: [
-      'img/Ан-Нур/wCYKz4htObP5MvEWcjJe9vAa6lOZtHk6_QyKtxXqScG5_vY6C3Aj8XEDMg7k2ZV3xA4SoAQswLg9PFmh4q97i1CK.jpg',
-      'img/Ан-Нур/SsXxF6na521hu_tBGzPp-yXM6_oYwgku8WeOGcVk5ZKbvKLD-I9xv-KhdGBJVfzZTY5PoJdu5FLFMnxsX0u_te41.jpg',
-      'img/Ан-Нур/tVVKaTIKy3Ml1dlOiyg_BMqtHZPs07xGlHAdX74nTV0iSbuU3Ryssm3x00ZF9tuE6309UiBmQfQ3rnMsFLOMFb_D.jpg',
-      'img/Ан-Нур/lrjRLoyH8TapAdBLyxFOFYS7ysVJkE9u7iKl-50rszu3Kt5jKdErplY4yEQsPhECT4BywWiYtgxBhn4LMetLxLj6.jpg',
-    ],
-    sectorOrder: null,
-    layouts: null,
-    sectors: null,
-    floorPriceRanges: null,
-  },
-
   jk2: {
     forceOfferingFromConfig: true,
     developer: 'Кормат строй',
@@ -2671,26 +2499,6 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   // Опционально: полная структура sectors (если заполнить — layouts игнорируется)
   sectors: null,
-  },
-
-  jk3: {
-    developer: 'Квартал 777',
-    noMarkupYears: 1,
-    mandatoryPayment: 5000,
-    sectorOrder: null,
-    layouts: null,
-    sectors: null,
-    floorPriceRanges: null,
-  },
-
-  jk4: {
-    developer: 'Квартал 777',
-    noMarkupYears: 2,
-    mandatoryPayment: 4000,
-    sectorOrder: null,
-    layouts: null,
-    sectors: null,
-    floorPriceRanges: null,
   },
 };
 
