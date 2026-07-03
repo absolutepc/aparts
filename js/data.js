@@ -2568,6 +2568,30 @@ const JK2_BOMOND_DATA = {
   sectors: null,
 };
 
+const JK2_DEFAULT_LAYOUT_DESCRIPTIONS = {
+  '1room': 'Компактная однокомнатная планировка с функциональной зоной кухни-гостиной.\nВысота потолков 3,1 м и панорамный вид на новый центр города.',
+  '2room': 'Просторная двухкомнатная планировка с отдельной спальней и кухней-гостиной.\nВысота потолков 3,1 м и панорамный вид на новый центр города.',
+};
+
+for (const sectorConfig of Object.values(JK2_BOMOND_DATA.layouts || {})) {
+  for (const [flatType, layoutsForType] of Object.entries(sectorConfig || {})) {
+    const defaultDescription = JK2_DEFAULT_LAYOUT_DESCRIPTIONS[flatType]
+      || JK2_DEFAULT_LAYOUT_DESCRIPTIONS['1room'];
+    for (const detail of Object.values(layoutsForType || {})) {
+      if (!detail || typeof detail !== 'object') continue;
+      if (!String(detail.description || '').trim()) {
+        detail.description = defaultDescription;
+      }
+    }
+  }
+}
+
+function getDefaultJk2LayoutDescription(flatType) {
+  return JK2_DEFAULT_LAYOUT_DESCRIPTIONS[flatType]
+    || JK2_DEFAULT_LAYOUT_DESCRIPTIONS['1room']
+    || '';
+}
+
 function getJk2LayoutDetailConfig(sectorTitle, flatType, layoutKey) {
   const sectorConfig = JK2_BOMOND_DATA.layouts?.[stripSectorTitle(sectorTitle)];
   if (!sectorConfig) return null;
@@ -2696,10 +2720,13 @@ function applyJk2LayoutDetailsToSectors(sectors) {
         const totalApartments = detail?.totalApartments ?? layout.totalApartments ?? distributed[index] ?? 0;
         const customLabel = detail?.label ? String(detail.label).trim() : '';
         const customDescription = detail?.description ? String(detail.description).trim() : '';
+        const resolvedDescription = customDescription
+          || String(layout.description || '').trim()
+          || getDefaultJk2LayoutDescription(variant.flatType);
         return normalizeLayoutVariant({
           ...layout,
           label: customLabel || layout.label,
-          description: customDescription || layout.description,
+          description: resolvedDescription,
           totalApartments,
           availableFloors: resolveLayoutAvailableFloors(detail, layout),
           sectorTitle: sectorTitle || resolveLayoutSectorTitle(layout) || undefined,
