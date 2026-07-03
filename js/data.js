@@ -47,6 +47,11 @@ const MARKUP_BASIS_OPTIONS = {
   before: 'До вычета',
 };
 
+const RECALCULATION_OPTIONS = {
+  yes: 'Да',
+  no: 'Нет',
+};
+
 function assetPath(relativePath) {
   const base = window.location.pathname.replace(/[^/]*$/, '');
   return `${base}${relativePath}`;
@@ -756,6 +761,10 @@ function getMarkupBasisLabel(value) {
   return MARKUP_BASIS_OPTIONS[value] || '';
 }
 
+function getRecalculationLabel(value) {
+  return RECALCULATION_OPTIONS[value] || '';
+}
+
 function normalizePropertyOffering(property) {
   const item = { ...property };
   const years = Number(item.noMarkupYears);
@@ -791,6 +800,14 @@ function normalizePropertyOffering(property) {
     item.markupBasis = item.markupBasis;
   } else {
     delete item.markupBasis;
+  }
+
+  if (item.recalculation === true) item.recalculation = 'yes';
+  if (item.recalculation === false) item.recalculation = 'no';
+  if (RECALCULATION_OPTIONS[item.recalculation]) {
+    item.recalculation = item.recalculation;
+  } else {
+    delete item.recalculation;
   }
 
   if (isComplex(item)) {
@@ -849,6 +866,7 @@ function renderPropertyOfferingSpecs(property) {
     renderPropertySpecRow('Срок предоставления рассрочки', property.installmentTerm),
     renderPropertySpecRow('Без наценки', getNoMarkupYearsLabel(property.noMarkupYears)),
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
+    renderPropertySpecRow('Перерасчет', getRecalculationLabel(property.recalculation)),
     renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
     renderPropertySpecRow('Обязательный платёж', paymentLabel),
     renderPropertySpecRow('Район', property.district),
@@ -1703,7 +1721,7 @@ function mergePropertyDetails(property, defaults) {
   if (!defaults) return property;
 
   const item = { ...property };
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation']) {
     const saved = item[key];
     const fallback = defaults[key];
     if ((saved == null || String(saved).trim() === '') && fallback != null && String(fallback).trim() !== '') {
@@ -2396,7 +2414,7 @@ function logoutUser() {
 // После изменений: git pull (если нужно) + Ctrl+Shift+R в браузере
 //
 // floorPriceRanges — цены по диапазонам этажей для всего объекта
-// developer, deliveryDate, installmentTerm, maternityCapital, markupBasis — характеристики объекта
+// developer, deliveryDate, installmentTerm, maternityCapital, markupBasis, recalculation — характеристики объекта
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
 //   label — своё название планировки (необязательно)
 //   description — описание планировки (необязательно)
@@ -2761,7 +2779,7 @@ function applyJk2LayoutDetailsToSectors(sectors) {
 function getJk2PropertyDetailsFromConfig() {
   const config = JK2_BOMOND_DATA;
   const details = {};
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation']) {
     const value = config?.[key];
     if (value != null && String(value).trim() !== '') {
       details[key] = value;

@@ -872,19 +872,28 @@ function renderPropertiesAdmin() {
               <input type="text" name="deliveryDate" placeholder="например, 4 кв. 2026">
             </div>
             <div class="form-group">
-              <label>Материнский капитал</label>
-              <select name="maternityCapital">
+              <label>Наценка</label>
+              <select name="markupBasis">
                 <option value="">—</option>
-                ${Object.entries(MATERNITY_CAPITAL_OPTIONS).map(([value, label]) => `
+                ${Object.entries(MARKUP_BASIS_OPTIONS).map(([value, label]) => `
                   <option value="${value}">${escapeHtml(label)}</option>
                 `).join('')}
               </select>
             </div>
             <div class="form-group">
-              <label>Наценка</label>
-              <select name="markupBasis">
+              <label>Перерасчет</label>
+              <select name="recalculation">
                 <option value="">—</option>
-                ${Object.entries(MARKUP_BASIS_OPTIONS).map(([value, label]) => `
+                ${Object.entries(RECALCULATION_OPTIONS).map(([value, label]) => `
+                  <option value="${value}">${escapeHtml(label)}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Материнский капитал</label>
+              <select name="maternityCapital">
+                <option value="">—</option>
+                ${Object.entries(MATERNITY_CAPITAL_OPTIONS).map(([value, label]) => `
                   <option value="${value}">${escapeHtml(label)}</option>
                 `).join('')}
               </select>
@@ -1221,6 +1230,7 @@ function bindPropertiesAdmin() {
       deliveryDate: formData.get('deliveryDate')?.toString().trim() || '',
       maternityCapital: formData.get('maternityCapital')?.toString() || '',
       markupBasis: formData.get('markupBasis')?.toString() || '',
+      recalculation: formData.get('recalculation')?.toString() || '',
       noMarkupYears,
       mandatoryPayment,
       img: normalizedImages.img,
@@ -1321,6 +1331,7 @@ function bindPropertiesAdmin() {
       form.deliveryDate.value = property.deliveryDate || '';
       form.maternityCapital.value = property.maternityCapital || '';
       form.markupBasis.value = property.markupBasis || '';
+      form.recalculation.value = property.recalculation || '';
       form.noMarkupYears.value = property.noMarkupYears ?? 1;
       form.mandatoryPayment.value = property.mandatoryPayment ?? 3000;
       const normalizedImages = normalizePropertyImages(property);
