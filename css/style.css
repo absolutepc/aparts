@@ -669,6 +669,10 @@ main { flex: 1; }
   letter-spacing: 0.04em;
 }
 
+.property-floor-prices-table-col-corner {
+  text-align: right;
+}
+
 .property-floor-prices-table tr:last-child td {
   border-bottom: none;
 }

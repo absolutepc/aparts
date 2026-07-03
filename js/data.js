@@ -549,11 +549,23 @@ function getFloorPriceTo(price) {
   return value + FLOOR_PRICE_TO_OFFSET;
 }
 
-function formatFloorPriceFromTo(fromPrice) {
+function formatFloorPriceFromLabel(fromPrice) {
   const from = Number(fromPrice);
-  const to = getFloorPriceTo(from);
-  if (!Number.isFinite(from) || from <= 0 || to == null) return '';
-  return `от ${formatPrice(from)} до ${formatPrice(to)}`;
+  if (!Number.isFinite(from) || from <= 0) return '';
+  return `от ${formatPrice(from)}`;
+}
+
+function formatFloorPriceToLabel(fromPrice) {
+  const to = getFloorPriceTo(fromPrice);
+  if (to == null) return '';
+  return `до ${formatPrice(to)}`;
+}
+
+function formatFloorPriceFromTo(fromPrice) {
+  const fromLabel = formatFloorPriceFromLabel(fromPrice);
+  const toLabel = formatFloorPriceToLabel(fromPrice);
+  if (!fromLabel || !toLabel) return '';
+  return `${fromLabel} ${toLabel}`;
 }
 
 function renderPropertyFloorPricesBlock(property, options = {}) {
@@ -580,14 +592,16 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
           <thead>
             <tr>
               <th>Этажи</th>
-              <th>Цена</th>
+              <th>Старопром</th>
+              <th class="property-floor-prices-table-col-corner">Угловые</th>
             </tr>
           </thead>
           <tbody>
             ${ranges.map((range) => `
               <tr>
                 <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
-                <td>${formatFloorPriceFromTo(range.price)}</td>
+                <td>${formatFloorPriceFromLabel(range.price)}</td>
+                <td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price)}</td>
               </tr>
             `).join('')}
           </tbody>
