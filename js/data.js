@@ -280,16 +280,36 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 55,
     flatVariants: [
       { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44, layouts: [
-        { key: 'A', label: '1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '1-A', label: '1A — 1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '1-Б', label: '1Б — 1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '2-A', label: '2A — 1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '2-Б', label: '2Б — 1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '3-A', label: '3A — 1-комнатная', areaMin: 30, areaMax: 44 },
+        { key: '3-Б', label: '3Б — 1-комнатная', areaMin: 30, areaMax: 44 },
       ] },
       { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68, layouts: [
-        { key: 'A', label: '2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '1-A', label: '1A — 2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '1-Б', label: '1Б — 2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '2-A', label: '2A — 2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '2-Б', label: '2Б — 2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '3-A', label: '3A — 2-комнатная', areaMin: 48, areaMax: 68 },
+        { key: '3-Б', label: '3Б — 2-комнатная', areaMin: 48, areaMax: 68 },
       ] },
       { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85, layouts: [
-        { key: 'A', label: '3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '1-A', label: '1A — 3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '1-Б', label: '1Б — 3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '2-A', label: '2A — 3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '2-Б', label: '2Б — 3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '3-A', label: '3A — 3-комнатная', areaMin: 72, areaMax: 85 },
+        { key: '3-Б', label: '3Б — 3-комнатная', areaMin: 72, areaMax: 85 },
       ] },
       { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55, layouts: [
-        { key: 'A', label: 'Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '1-A', label: '1A — Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '1-Б', label: '1Б — Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '2-A', label: '2A — Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '2-Б', label: '2Б — Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '3-A', label: '3A — Евро-2', areaMin: 40, areaMax: 55 },
+        { key: '3-Б', label: '3Б — Евро-2', areaMin: 40, areaMax: 55 },
       ] },
     ],
     areaMin: 30,
@@ -2976,8 +2996,70 @@ const COMPLEX_PROPERTY_CONFIGS = {
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
-    sectorOrder: null,
-    layouts: null,
+
+    // Порядок секторов на странице объекта (корпуса 1, 2, 3)
+    sectorOrder: ['1', '2', '3'],
+
+    // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
+    layouts: {
+      '1': {
+        '1room': {
+          '1-A': {},
+          '1-Б': {},
+        },
+        '2room': {
+          '1-A': {},
+          '1-Б': {},
+        },
+        '3room': {
+          '1-A': {},
+          '1-Б': {},
+        },
+        'euro2': {
+          '1-A': {},
+          '1-Б': {},
+        },
+      },
+
+      '2': {
+        '1room': {
+          '2-A': {},
+          '2-Б': {},
+        },
+        '2room': {
+          '2-A': {},
+          '2-Б': {},
+        },
+        '3room': {
+          '2-A': {},
+          '2-Б': {},
+        },
+        'euro2': {
+          '2-A': {},
+          '2-Б': {},
+        },
+      },
+
+      '3': {
+        '1room': {
+          '3-A': {},
+          '3-Б': {},
+        },
+        '2room': {
+          '3-A': {},
+          '3-Б': {},
+        },
+        '3room': {
+          '3-A': {},
+          '3-Б': {},
+        },
+        'euro2': {
+          '3-A': {},
+          '3-Б': {},
+        },
+      },
+    },
+
     sectors: null,
     floorPriceRanges: null,
   },
