@@ -281,112 +281,77 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 75,
     flatVariants: [
       { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55, layouts: [
-        { key: '5-A', label: '5A — Евродвушка', areaMin: 40, areaMax: 55 },
-        { key: '5-Б', label: '5Б — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '5-A', label: '1В — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '5-Б', label: '1Ж — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '6-A', label: '6A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '6-Б', label: '6Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '7-A', label: '7A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '7-Б', label: '7Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '8-A', label: '8A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '8-Б', label: '8Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '9-A', label: '9A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '9-Б', label: '9Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '10-A', label: '10A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '10-Б', label: '10Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '12-A', label: '12A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '12-Б', label: '12Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '13-A', label: '13A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '13-Б', label: '13Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '14-A', label: '14A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '14-Б', label: '14Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '15-A', label: '15A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '15-Б', label: '15Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '16-A', label: '16A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '16-Б', label: '16Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '17-A', label: '17A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '17-Б', label: '17Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '18-A', label: '18A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '18-Б', label: '18Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '19-A', label: '19A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '19-Б', label: '19Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '26-A', label: '26A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '26-Б', label: '26Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '27-A', label: '27A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '27-Б', label: '27Б — Евродвушка', areaMin: 40, areaMax: 55 },
+
         { key: '28-A', label: '28A — Евродвушка', areaMin: 40, areaMax: 55 },
         { key: '28-Б', label: '28Б — Евродвушка', areaMin: 40, areaMax: 55 },
       ] },
-      { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85, layouts: [
-        { key: '5-A', label: '5A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '5-Б', label: '5Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '6-A', label: '6A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '6-Б', label: '6Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '7-A', label: '7A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '7-Б', label: '7Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '8-A', label: '8A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '8-Б', label: '8Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '9-A', label: '9A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '9-Б', label: '9Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '10-A', label: '10A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '10-Б', label: '10Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '12-A', label: '12A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '12-Б', label: '12Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '13-A', label: '13A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '13-Б', label: '13Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '14-A', label: '14A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '14-Б', label: '14Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '15-A', label: '15A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '15-Б', label: '15Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '16-A', label: '16A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '16-Б', label: '16Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '17-A', label: '17A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '17-Б', label: '17Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '18-A', label: '18A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '18-Б', label: '18Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '19-A', label: '19A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '19-Б', label: '19Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '26-A', label: '26A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '26-Б', label: '26Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '27-A', label: '27A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '27-Б', label: '27Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '28-A', label: '28A — 3-комнатная', areaMin: 72, areaMax: 85 },
-        { key: '28-Б', label: '28Б — 3-комнатная', areaMin: 72, areaMax: 85 },
-      ] },
       { flatType: 'penthouse', totalApartments: 10, areaMin: 239.7, areaMax: 239.7, layouts: [
-        { key: '5-A', label: '5A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '5-Б', label: '5Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '6-A', label: '6A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '6-Б', label: '6Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '7-A', label: '7A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '7-Б', label: '7Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '8-A', label: '8A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '8-Б', label: '8Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '9-A', label: '9A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '9-Б', label: '9Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '10-A', label: '10A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '10-Б', label: '10Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '12-A', label: '12A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '12-Б', label: '12Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '13-A', label: '13A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '13-Б', label: '13Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '14-A', label: '14A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '14-Б', label: '14Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '15-A', label: '15A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
         { key: '15-Б', label: '15Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '16-A', label: '16A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '16-Б', label: '16Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '17-A', label: '17A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
         { key: '17-Б', label: '17Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '18-A', label: '18A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
         { key: '18-Б', label: '18Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
         { key: '19-A', label: '19A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
         { key: '19-Б', label: '19Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '26-A', label: '26A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '26-Б', label: '26Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '27-A', label: '27A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '27-Б', label: '27Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '28-A', label: '28A — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
-        { key: '28-Б', label: '28Б — Пентхаус 239.7 м²', areaMin: 239.7, areaMax: 239.7 },
+
       ] },
     ],
     areaMin: 40,
@@ -3111,8 +3076,8 @@ const COMPLEX_PROPERTY_CONFIGS = {
     layouts: {
       '5': {
         'euro2': {
-          '5-A': {},
-          '5-Б': {},
+          '5-В': {totalApartments: 1, availableFloors: '3'},
+          '5-Ж': {totalApartments: 1, availableFloors: '7'},
         },
         '3room': {
           '5-A': {},
