@@ -727,11 +727,21 @@ function renderPropertyPricesBlock(property, options = {}) {
   return renderPropertyFloorPricesBlock(property, options);
 }
 
+function getFloorPriceColumnLabels(property) {
+  const from = property?.floorPriceColumnLabels?.from;
+  const to = property?.floorPriceColumnLabels?.to;
+  return {
+    from: from != null && String(from).trim() !== '' ? String(from).trim() : 'Старопром',
+    to: to != null && String(to).trim() !== '' ? String(to).trim() : 'Угловые',
+  };
+}
+
 function renderPropertyFloorPricesBlock(property, options = {}) {
   const ranges = getPropertyFloorPriceRanges(property);
   if (!ranges.length) return '';
 
   const compact = options.compact === true;
+  const columnLabels = getFloorPriceColumnLabels(property);
   const sectionClass = compact
     ? 'property-floor-prices property-floor-prices--compact'
     : 'property-floor-prices';
@@ -751,8 +761,8 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
           <thead>
             <tr>
               <th>Этажи</th>
-              <th>Старопром</th>
-              <th class="property-floor-prices-table-col-corner">Угловые</th>
+              <th>${escapeHtml(columnLabels.from)}</th>
+              <th class="property-floor-prices-table-col-corner">${escapeHtml(columnLabels.to)}</th>
             </tr>
           </thead>
           <tbody>
@@ -2981,6 +2991,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
     { floorMin: 9, floorMax: 11, price: 70000 },
     { floorMin: 12, floorMax: 18, price: 65000 },
   ],
+  floorPriceColumnLabels: { from: 'Двор', to: 'Видовые' },
 
   // Порядок секторов на странице объекта (дом 1, 2, 3)
   sectorOrder: ['1', '2', '3'],
@@ -3256,6 +3267,14 @@ function applyComplexConfigFromRegistry(property) {
     } else if (config.floorPriceRanges) {
       item.floorPriceRanges = normalizeFloorPriceRanges(config.floorPriceRanges);
       delete item.sectorPriceGroups;
+    }
+    if (config.floorPriceColumnLabels) {
+      item.floorPriceColumnLabels = {
+        from: String(config.floorPriceColumnLabels.from || '').trim() || 'Старопром',
+        to: String(config.floorPriceColumnLabels.to || '').trim() || 'Угловые',
+      };
+    } else {
+      delete item.floorPriceColumnLabels;
     }
   } else {
     const details = getComplexPropertyDetailsFromConfig(config);
