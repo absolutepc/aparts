@@ -17,6 +17,7 @@ const FLAT_TYPE_LABELS = {
   '3room': 'Трёхкомнатные',
   '4room': 'Четырёхкомнатные',
   euro2: 'Евродвушки',
+  penthouse: 'Пентхаусы',
 };
 
 const FLAT_TYPE_KEYS = Object.keys(FLAT_TYPE_LABELS);
@@ -276,24 +277,16 @@ const DEFAULT_PROPERTIES = [
     title: 'ЖК «Дубайский»',
     description: 'Жилой комплекс с разными планировками и развитой инфраструктурой на территории.',
     type: 'jk',
-    flatType: '2room',
-    totalApartments: 55,
+    flatType: 'euro2',
+    totalApartments: 75,
     flatVariants: [
-      { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44, layouts: [
-        { key: '1-A', label: '1A — 1-комнатная', areaMin: 30, areaMax: 44 },
-        { key: '1-Б', label: '1Б — 1-комнатная', areaMin: 30, areaMax: 44 },
-        { key: '2-A', label: '2A — 1-комнатная', areaMin: 30, areaMax: 44 },
-        { key: '2-Б', label: '2Б — 1-комнатная', areaMin: 30, areaMax: 44 },
-        { key: '3-A', label: '3A — 1-комнатная', areaMin: 30, areaMax: 44 },
-        { key: '3-Б', label: '3Б — 1-комнатная', areaMin: 30, areaMax: 44 },
-      ] },
-      { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68, layouts: [
-        { key: '1-A', label: '1A — 2-комнатная', areaMin: 48, areaMax: 68 },
-        { key: '1-Б', label: '1Б — 2-комнатная', areaMin: 48, areaMax: 68 },
-        { key: '2-A', label: '2A — 2-комнатная', areaMin: 48, areaMax: 68 },
-        { key: '2-Б', label: '2Б — 2-комнатная', areaMin: 48, areaMax: 68 },
-        { key: '3-A', label: '3A — 2-комнатная', areaMin: 48, areaMax: 68 },
-        { key: '3-Б', label: '3Б — 2-комнатная', areaMin: 48, areaMax: 68 },
+      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55, layouts: [
+        { key: '1-A', label: '1A — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '1-Б', label: '1Б — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '2-A', label: '2A — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '2-Б', label: '2Б — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '3-A', label: '3A — Евродвушка', areaMin: 40, areaMax: 55 },
+        { key: '3-Б', label: '3Б — Евродвушка', areaMin: 40, areaMax: 55 },
       ] },
       { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85, layouts: [
         { key: '1-A', label: '1A — 3-комнатная', areaMin: 72, areaMax: 85 },
@@ -303,17 +296,17 @@ const DEFAULT_PROPERTIES = [
         { key: '3-A', label: '3A — 3-комнатная', areaMin: 72, areaMax: 85 },
         { key: '3-Б', label: '3Б — 3-комнатная', areaMin: 72, areaMax: 85 },
       ] },
-      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55, layouts: [
-        { key: '1-A', label: '1A — Евро-2', areaMin: 40, areaMax: 55 },
-        { key: '1-Б', label: '1Б — Евро-2', areaMin: 40, areaMax: 55 },
-        { key: '2-A', label: '2A — Евро-2', areaMin: 40, areaMax: 55 },
-        { key: '2-Б', label: '2Б — Евро-2', areaMin: 40, areaMax: 55 },
-        { key: '3-A', label: '3A — Евро-2', areaMin: 40, areaMax: 55 },
-        { key: '3-Б', label: '3Б — Евро-2', areaMin: 40, areaMax: 55 },
+      { flatType: 'penthouse', totalApartments: 10, areaMin: 90, areaMax: 120, layouts: [
+        { key: '1-A', label: '1A — Пентхаус', areaMin: 90, areaMax: 120 },
+        { key: '1-Б', label: '1Б — Пентхаус', areaMin: 90, areaMax: 120 },
+        { key: '2-A', label: '2A — Пентхаус', areaMin: 90, areaMax: 120 },
+        { key: '2-Б', label: '2Б — Пентхаус', areaMin: 90, areaMax: 120 },
+        { key: '3-A', label: '3A — Пентхаус', areaMin: 90, areaMax: 120 },
+        { key: '3-Б', label: '3Б — Пентхаус', areaMin: 90, areaMax: 120 },
       ] },
     ],
-    areaMin: 30,
-    areaMax: 85,
+    areaMin: 40,
+    areaMax: 120,
     price: 98000,
     address: 'В.В.Путина 001',
     district: 'САО',
@@ -843,6 +836,7 @@ function getLegacyCountForFlatType(property, flatType) {
     case '2room': return Number(property.count2room) || 0;
     case '3room': return Number(property.count3room) || 0;
     case 'euro2': return Number(property.countEuroTwo) || 0;
+    case 'penthouse': return Number(property.countPenthouse) || 0;
     default: return 0;
   }
 }
@@ -869,6 +863,7 @@ function getFlatTypeShortLabel(flatType) {
     case '3room': return '3к';
     case '4room': return '4к';
     case 'euro2': return 'Евро-2';
+    case 'penthouse': return 'Пентхаус';
     default: return getFlatTypeLabel(flatType);
   }
 }
@@ -1701,6 +1696,7 @@ function normalizeComplexProperty(property) {
     delete item.count2room;
     delete item.count3room;
     delete item.countEuroTwo;
+    delete item.countPenthouse;
     return item;
   }
 
@@ -1744,6 +1740,7 @@ function normalizeComplexProperty(property) {
   delete item.count2room;
   delete item.count3room;
   delete item.countEuroTwo;
+  delete item.countPenthouse;
 
   return item;
 }
@@ -2546,7 +2543,8 @@ function getProperties() {
           || source.count1room != null
           || source.count2room != null
           || source.count3room != null
-          || source.countEuroTwo != null;
+          || source.countEuroTwo != null
+          || source.countPenthouse != null;
       })
       || stored.some(item => !merged.some(property => property.id === item.id));
 
@@ -3003,11 +3001,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
     // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
     layouts: {
       '1': {
-        '1room': {
-          '1-A': {},
-          '1-Б': {},
-        },
-        '2room': {
+        'euro2': {
           '1-A': {},
           '1-Б': {},
         },
@@ -3015,18 +3009,14 @@ const COMPLEX_PROPERTY_CONFIGS = {
           '1-A': {},
           '1-Б': {},
         },
-        'euro2': {
+        'penthouse': {
           '1-A': {},
           '1-Б': {},
         },
       },
 
       '2': {
-        '1room': {
-          '2-A': {},
-          '2-Б': {},
-        },
-        '2room': {
+        'euro2': {
           '2-A': {},
           '2-Б': {},
         },
@@ -3034,18 +3024,14 @@ const COMPLEX_PROPERTY_CONFIGS = {
           '2-A': {},
           '2-Б': {},
         },
-        'euro2': {
+        'penthouse': {
           '2-A': {},
           '2-Б': {},
         },
       },
 
       '3': {
-        '1room': {
-          '3-A': {},
-          '3-Б': {},
-        },
-        '2room': {
+        'euro2': {
           '3-A': {},
           '3-Б': {},
         },
@@ -3053,7 +3039,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
           '3-A': {},
           '3-Б': {},
         },
-        'euro2': {
+        'penthouse': {
           '3-A': {},
           '3-Б': {},
         },
