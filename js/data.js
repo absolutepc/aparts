@@ -2219,7 +2219,8 @@ function renderComplexStatsTags(property) {
 }
 
 function renderComplexStatsTable(property, selectedVariant, options = {}) {
-  if (selectedVariant || property?.id === 'jk1') {
+  const hideFlatTypeStats = property?.id === 'jk1' || property?.id === 'jk3';
+  if (selectedVariant || hideFlatTypeStats) {
     return '';
   }
 
