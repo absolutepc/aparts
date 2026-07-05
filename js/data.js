@@ -309,7 +309,7 @@ const DEFAULT_PROPERTIES = [
     areaMax: 239.7,
     price: 98000,
     address: 'В.В.Путина 001',
-    district: 'САО',
+    district: 'Новый район',
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
