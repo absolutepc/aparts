@@ -1434,12 +1434,20 @@ function sanitizeComplexPropertyForStorage(property) {
           .map((variant) => {
             const normalized = normalizeFlatVariant(variant);
             if (!normalized) return null;
+            const sectorTitle = stripSectorTitle(title);
             return {
               ...normalized,
               layouts: getVariantLayouts(normalized).map((layout, layoutIndex) => {
-                const sectorTitle = resolveLayoutSectorTitle(layout) || undefined;
+                const layoutKey = resolveConfigLayoutKey(
+                  item.id,
+                  sectorTitle,
+                  normalized.flatType,
+                  layout,
+                  layoutIndex
+                );
                 return normalizeLayoutVariant({
                   ...layout,
+                  key: layoutKey,
                   sectorTitle,
                   label: sanitizeLayoutLabel(layout.label) || layout.label,
                 }, layoutIndex, normalized);
@@ -1457,7 +1465,10 @@ function sanitizeComplexPropertyForStorage(property) {
       })
       .filter(Boolean);
 
-    item.sectors = sortSectorsAlphabetically(item.sectors);
+    item.sectors = sortSectorsByPreferredOrder(
+      item.sectors,
+      COMPLEX_PROPERTY_CONFIGS[item.id]?.sectorOrder
+    );
     item.flatVariants = mergeAggregatedFlatVariants(
       item.sectors.flatMap(sector => sector.flatVariants)
     );
@@ -1704,11 +1715,11 @@ function getComplexSectors(property) {
   if (!isComplex(property)) return [];
 
   if (Array.isArray(property.sectors) && property.sectors.length) {
-    return sortSectorsAlphabetically(
-      property.sectors
-        .map((sector, index) => normalizeSector(sector, index))
-        .filter(Boolean)
-    );
+    const sectors = property.sectors
+      .map((sector, index) => normalizeSector(sector, index))
+      .filter(Boolean);
+    const config = COMPLEX_PROPERTY_CONFIGS[property?.id];
+    return sortSectorsByPreferredOrder(sectors, config?.sectorOrder);
   }
 
   const legacyVariants = getFlatVariantsForSectorBuild(property);
@@ -2072,18 +2083,32 @@ function shouldPreserveSavedLayoutDescription(savedEntry) {
 }
 
 function buildLayoutDescriptionLookup(property) {
+  return buildSavedLayoutLookup(property);
+}
+
+function buildSavedLayoutLookup(property) {
   const lookup = new Map();
   if (!property || !isComplex(property)) return lookup;
 
-  for (const sector of getComplexSectors(property)) {
+  const sectors = Array.isArray(property.sectors) && property.sectors.length
+    ? property.sectors
+    : getComplexSectors(property);
+
+  for (const sector of sectors) {
     const sectorKey = stripSectorTitle(sector.title).toLowerCase();
     for (const variant of sector.flatVariants || []) {
       for (const layout of getVariantLayouts(variant)) {
-        const description = String(layout.description || '').trim();
-        if (!description) continue;
+        if (!layout?.key) continue;
         lookup.set(`${sectorKey}|${variant.flatType}|${layout.key}`, {
-          description,
+          label: String(layout.label || '').trim(),
+          description: String(layout.description || '').trim(),
           descriptionManual: layout.descriptionManual === true,
+          planImg: String(layout.planImg || '').trim(),
+          areaMin: layout.areaMin,
+          areaMax: layout.areaMax,
+          totalApartments: layout.totalApartments,
+          availableFloors: layout.availableFloors,
+          price: layout.price,
         });
       }
     }
@@ -2092,10 +2117,33 @@ function buildLayoutDescriptionLookup(property) {
   return lookup;
 }
 
-function mergeSavedLayoutDescriptions(targetProperty, savedProperty) {
-  if (!targetProperty?.sectors?.length) return targetProperty;
+function getConfiguredLayoutKeys(propertyId, sectorTitle, flatType) {
+  const config = COMPLEX_PROPERTY_CONFIGS[propertyId];
+  if (!config?.layouts) return [];
+  const sectorConfig = getComplexLayoutConfigForSector(config.layouts, sectorTitle);
+  const flatConfig = sectorConfig?.[flatType];
+  if (!flatConfig) return [];
+  return Object.keys(flatConfig);
+}
 
-  const lookup = buildLayoutDescriptionLookup(savedProperty);
+function resolveConfigLayoutKey(propertyId, sectorTitle, flatType, layout, index) {
+  const existingKey = String(layout?.key || '').trim();
+  const configuredKeys = getConfiguredLayoutKeys(propertyId, sectorTitle, flatType);
+  if (configuredKeys.length) {
+    if (existingKey && configuredKeys.includes(existingKey)) return existingKey;
+    if (configuredKeys[index] != null) return String(configuredKeys[index]);
+  }
+  return existingKey || getLayoutKey(index);
+}
+
+function mergeSavedLayoutDescriptions(targetProperty, savedProperty) {
+  return mergeSavedLayoutData(targetProperty, savedProperty);
+}
+
+function mergeSavedLayoutData(targetProperty, savedProperty) {
+  if (!targetProperty?.sectors?.length || !savedProperty) return targetProperty;
+
+  const lookup = buildSavedLayoutLookup(savedProperty);
   if (!lookup.size) return targetProperty;
 
   return {
@@ -2106,12 +2154,27 @@ function mergeSavedLayoutDescriptions(targetProperty, savedProperty) {
         const sectorKey = stripSectorTitle(sector.title).toLowerCase();
         const layouts = getVariantLayouts(variant).map((layout) => {
           const savedEntry = lookup.get(`${sectorKey}|${variant.flatType}|${layout.key}`);
-          if (!shouldPreserveSavedLayoutDescription(savedEntry)) return layout;
-          return {
-            ...layout,
-            description: savedEntry.description,
-            descriptionManual: savedEntry.descriptionManual === true,
-          };
+          if (!savedEntry) return layout;
+
+          const merged = { ...layout };
+          if (savedEntry.label) merged.label = savedEntry.label;
+          if (shouldPreserveSavedLayoutDescription(savedEntry)) {
+            merged.description = savedEntry.description;
+            merged.descriptionManual = savedEntry.descriptionManual === true;
+          }
+          if (savedEntry.planImg) merged.planImg = savedEntry.planImg;
+          if (Number(savedEntry.areaMin) > 0) merged.areaMin = Number(savedEntry.areaMin);
+          if (Number(savedEntry.areaMax) > 0) merged.areaMax = Number(savedEntry.areaMax);
+          if (Number(savedEntry.totalApartments) > 0) {
+            merged.totalApartments = Number(savedEntry.totalApartments);
+          }
+          if (Array.isArray(savedEntry.availableFloors) && savedEntry.availableFloors.length) {
+            merged.availableFloors = savedEntry.availableFloors;
+          }
+          if (savedEntry.price != null && savedEntry.price !== '') {
+            merged.price = savedEntry.price;
+          }
+          return merged;
         });
 
         return normalizeFlatVariant({
@@ -3699,7 +3762,7 @@ function applyComplexConfigFromRegistry(property) {
   item.images = images.images;
 
   return preservePropertyContentFields(
-    mergeSavedLayoutDescriptions(repairComplexSectorData(item), property),
+    mergeSavedLayoutData(repairComplexSectorData(item), property),
     property
   );
 }
