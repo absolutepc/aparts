@@ -279,18 +279,10 @@ const DEFAULT_PROPERTIES = [
     flatType: '2room',
     totalApartments: 55,
     flatVariants: [
-      { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44, layouts: [
-        { key: 'A', label: '1-комнатная', areaMin: 30, areaMax: 44 },
-      ] },
-      { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68, layouts: [
-        { key: 'A', label: '2-комнатная', areaMin: 48, areaMax: 68 },
-      ] },
-      { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85, layouts: [
-        { key: 'A', label: '3-комнатная', areaMin: 72, areaMax: 85 },
-      ] },
-      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55, layouts: [
-        { key: 'A', label: 'Евро-2', areaMin: 40, areaMax: 55 },
-      ] },
+      { flatType: '1room', totalApartments: 40, areaMin: 30, areaMax: 44 },
+      { flatType: '2room', totalApartments: 55, areaMin: 48, areaMax: 68 },
+      { flatType: '3room', totalApartments: 35, areaMin: 72, areaMax: 85 },
+      { flatType: 'euro2', totalApartments: 30, areaMin: 40, areaMax: 55 },
     ],
     areaMin: 30,
     areaMax: 85,
@@ -2976,27 +2968,8 @@ const COMPLEX_PROPERTY_CONFIGS = {
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
-
-    sectorOrder: ['А'],
-
-    // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
-    layouts: {
-      'А': {
-        '1room': {
-          A: {},
-        },
-        '2room': {
-          A: {},
-        },
-        '3room': {
-          A: {},
-        },
-        'euro2': {
-          A: {},
-        },
-      },
-    },
-
+    sectorOrder: null,
+    layouts: null,
     sectors: null,
     floorPriceRanges: null,
   },
