@@ -1283,7 +1283,7 @@ function isGeneralSectorTitle(title) {
 }
 
 const SECTOR_TITLE_COLLATOR = typeof Intl !== 'undefined'
-  ? new Intl.Collator('ru', { sensitivity: 'base' })
+  ? new Intl.Collator('ru', { sensitivity: 'base', numeric: true })
   : null;
 
 function compareSectorTitles(titleA, titleB) {
@@ -1298,6 +1298,29 @@ function compareSectorTitles(titleA, titleB) {
 
 function sortSectorsAlphabetically(sectors) {
   return [...sectors].sort((a, b) => compareSectorTitles(a.title, b.title));
+}
+
+function sortSectorsByPreferredOrder(sectors, preferredOrder = []) {
+  if (!Array.isArray(sectors) || !sectors.length) return sectors || [];
+  if (!Array.isArray(preferredOrder) || !preferredOrder.length) {
+    return sortSectorsAlphabetically(sectors);
+  }
+
+  const orderMap = new Map(
+    preferredOrder
+      .map((title) => stripSectorTitle(title))
+      .filter(Boolean)
+      .map((title, index) => [title, index])
+  );
+
+  return [...sectors].sort((a, b) => {
+    const left = stripSectorTitle(a.title);
+    const right = stripSectorTitle(b.title);
+    const leftIndex = orderMap.has(left) ? orderMap.get(left) : Number.MAX_SAFE_INTEGER;
+    const rightIndex = orderMap.has(right) ? orderMap.get(right) : Number.MAX_SAFE_INTEGER;
+    if (leftIndex !== rightIndex) return leftIndex - rightIndex;
+    return compareSectorTitles(left, right);
+  });
 }
 
 function getConfiguredSectorTitles(layoutsConfig, preferredOrder = []) {
@@ -3518,7 +3541,7 @@ function buildComplexSectorsFromLayoutConfig(sourceVariants, config) {
     });
   }
 
-  return sortSectorsAlphabetically(sectors);
+  return sortSectorsByPreferredOrder(sectors, config?.sectorOrder);
 }
 
 function buildComplexSectorsFromExplicitData(sectorsData) {
@@ -3622,7 +3645,10 @@ function applyComplexConfigFromRegistry(property) {
       ? buildComplexSectorsFromLayoutConfig(source.flatVariants, config)
       : buildSectorsFromFlatVariants(getFlatVariantsForSectorBuild(source)));
 
-  sectors = sortSectorsAlphabetically(applyComplexLayoutDetailsToSectors(sectors, config));
+  sectors = sortSectorsByPreferredOrder(
+    applyComplexLayoutDetailsToSectors(sectors, config),
+    config?.sectorOrder
+  );
 
   const item = { ...source, sectors };
 
