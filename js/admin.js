@@ -314,7 +314,7 @@ function renderAdminSectorsEditor(sectors = [], floorPriceRanges = []) {
   `;
 }
 
-function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
+function collectLayoutsForFlatType(form, flatType, sectorIndex = 0, propertyId = '') {
   const container = form.querySelector(`.admin-layout-rows[data-flat-type="${flatType}"][data-sector-index="${sectorIndex}"]`);
   if (!container) return [];
 
@@ -334,7 +334,9 @@ function collectLayoutsForFlatType(form, flatType, sectorIndex = 0) {
     const label = row.querySelector(`[name="${prefix}_label"]`)?.value?.trim() || getLayoutLabel(index);
     const key = row.querySelector(`[name="${prefix}_key"]`)?.value?.trim()
       || row.dataset.layoutKey
-      || getLayoutKey(index);
+      || (typeof resolveConfigLayoutKey === 'function'
+        ? resolveConfigLayoutKey(propertyId, sectorTitle, flatType, {}, index)
+        : getLayoutKey(index));
     const priceRaw = row.querySelector(`[name="${prefix}_price"]`)?.value;
     const price = priceRaw !== '' && priceRaw != null ? Number(priceRaw) : null;
     const totalApartments = Number(row.querySelector(`[name="${prefix}_totalApartments"]`)?.value) || 0;
@@ -474,7 +476,7 @@ function setAdminFlatVariantLayouts(form, flatType, layouts = [], sectorIndex = 
   container.innerHTML = rows.map((layout, index) => renderAdminLayoutRow(flatType, index, layout, sectorIndex)).join('');
 }
 
-function collectFlatVariantsFromSectorForm(form, sectorIndex) {
+function collectFlatVariantsFromSectorForm(form, sectorIndex, propertyId = '') {
   const variants = [];
 
   for (const flatType of FLAT_TYPE_KEYS) {
@@ -483,7 +485,7 @@ function collectFlatVariantsFromSectorForm(form, sectorIndex) {
     const totalApartments = Number(totalRaw);
     const areaMin = parseArea(form.querySelector(`[name="${prefix}_areaMin"]`)?.value) ?? 0;
     const areaMax = parseArea(form.querySelector(`[name="${prefix}_areaMax"]`)?.value) ?? 0;
-    const layouts = collectLayoutsForFlatType(form, flatType, sectorIndex);
+    const layouts = collectLayoutsForFlatType(form, flatType, sectorIndex, propertyId);
     const layoutApartmentSum = layouts.reduce(
       (sum, layout) => sum + (Number(layout.totalApartments) || 0),
       0
@@ -538,7 +540,7 @@ function collectFlatVariantsFromSectorForm(form, sectorIndex) {
   return { variants };
 }
 
-function collectSectorsFromForm(form) {
+function collectSectorsFromForm(form, propertyId = '') {
   const sectorPanels = [...form.querySelectorAll('.admin-sector-panel')];
   const sectors = [];
 
@@ -552,7 +554,7 @@ function collectSectorsFromForm(form) {
       return { error: `Укажите название сектора ${Number(sectorIndex) + 1}` };
     }
 
-    const variantResult = collectFlatVariantsFromSectorForm(form, Number(sectorIndex));
+    const variantResult = collectFlatVariantsFromSectorForm(form, Number(sectorIndex), propertyId);
     if (variantResult.error) return variantResult;
 
     if (!variantResult.variants.length) {
@@ -570,7 +572,7 @@ function collectSectorsFromForm(form) {
     return { error: 'Добавьте хотя бы один сектор с типами квартир' };
   }
 
-  return { sectors: sortSectorsAlphabetically(sectors) };
+  return { sectors: sortSectorsByPreferredOrder(sectors, COMPLEX_PROPERTY_CONFIGS[propertyId]?.sectorOrder) };
 }
 
 function collectFloorPriceRangesFromForm(form) {
@@ -682,11 +684,12 @@ function bindAdminFloorPriceRows(form) {
   });
 }
 
-function fillSectorFormPanel(form, sector, sectorIndex) {
+function fillSectorFormPanel(form, sector, sectorIndex, propertyId = '') {
   form.querySelector(`[name="sector_${sectorIndex}_title"]`).value = stripSectorTitle(sector.title || '');
   form.querySelector(`[name="sector_${sectorIndex}_id"]`).value = sector.id || '';
 
   const byType = Object.fromEntries((sector.flatVariants || []).map(variant => [variant.flatType, variant]));
+  const sectorTitle = stripSectorTitle(sector.title || '');
 
   for (const flatType of FLAT_TYPE_KEYS) {
     const variant = byType[flatType];
@@ -701,7 +704,7 @@ function fillSectorFormPanel(form, sector, sectorIndex) {
     if (areaMaxInput) areaMaxInput.value = variant?.areaMax || '';
     if (priceInput) priceInput.value = variant?.price ?? '';
 
-    const layouts = variant?.layouts?.length
+    const sourceLayouts = variant?.layouts?.length
       ? variant.layouts
       : (variant?.planImg || variant?.areaMin || variant?.areaMax
         ? [{
@@ -712,6 +715,12 @@ function fillSectorFormPanel(form, sector, sectorIndex) {
           price: variant.price,
         }]
         : [{}]);
+    const layouts = sourceLayouts.map((layout, index) => ({
+      ...layout,
+      key: typeof resolveConfigLayoutKey === 'function'
+        ? resolveConfigLayoutKey(propertyId, sectorTitle, flatType, layout, index)
+        : (layout.key || getLayoutKey(index)),
+    }));
     setAdminFlatVariantLayouts(form, flatType, layouts, sectorIndex);
   }
 }
@@ -723,7 +732,7 @@ function fillSectorsForm(form, property) {
   const sectorRows = form.querySelector('#sectorRows');
   if (sectorRows) {
     sectorRows.innerHTML = sectors.map((sector, index) => renderAdminSectorPanel(sector, index)).join('');
-    sectors.forEach((sector, index) => fillSectorFormPanel(form, sector, index));
+    sectors.forEach((sector, index) => fillSectorFormPanel(form, sector, index, property.id));
   }
 
   if (form.flatType) {
@@ -746,7 +755,7 @@ function clearSectorsForm(form) {
   if (form.flatType) form.flatType.value = '1room';
 }
 
-function reindexAdminSectorPanels(form) {
+function reindexAdminSectorPanels(form, propertyId = '') {
   const sectorRows = form.querySelector('#sectorRows');
   if (!sectorRows) return;
 
@@ -756,13 +765,13 @@ function reindexAdminSectorPanels(form) {
     const sector = {
       id: form.querySelector(`[name="sector_${oldIndex}_id"]`)?.value || '',
       title: form.querySelector(`[name="sector_${oldIndex}_title"]`)?.value || '',
-      flatVariants: collectFlatVariantsFromSectorForm(form, Number(oldIndex)).variants,
+      flatVariants: collectFlatVariantsFromSectorForm(form, Number(oldIndex), propertyId).variants,
     };
     return { sector, oldIndex, nextIndex };
   });
 
   sectorRows.innerHTML = saved.map(({ sector }, index) => renderAdminSectorPanel(sector, index)).join('');
-  saved.forEach(({ sector }, index) => fillSectorFormPanel(form, sector, index));
+  saved.forEach(({ sector }, index) => fillSectorFormPanel(form, sector, index, propertyId));
 }
 
 function bindAdminSectorRows(form) {
@@ -792,7 +801,7 @@ function bindAdminSectorRows(form) {
     }
 
     removeBtn.closest('.admin-sector-panel')?.remove();
-    reindexAdminSectorPanels(form);
+    reindexAdminSectorPanels(form, form.querySelector('[name="editId"]')?.value || '');
   });
 }
 
@@ -1239,7 +1248,7 @@ function bindPropertiesAdmin() {
     };
 
     if (isComplex({ type })) {
-      const sectorResult = collectSectorsFromForm(form);
+      const sectorResult = collectSectorsFromForm(form, property.id);
       if (sectorResult.error) {
         showToast(sectorResult.error, 'error');
         return;
