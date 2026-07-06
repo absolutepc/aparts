@@ -3199,6 +3199,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
           '6-Д': {totalApartments: 2, availableFloors: '8-9'},
           '6-И': {totalApartments: 3, availableFloors: '2, 8-9'},
           '6-К': {totalApartments: 1, availableFloors: '9'},
+        },
       },
 
       '7': {
@@ -3225,9 +3226,9 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
       '9': {
         'euro2': {
-          '8-A': {totalApartments: 1, availableFloors: '3'},
-          '8-Ж': {totalApartments: 2, availableFloors: '5, 9'},
-          '8-И': {totalApartments: 1, availableFloors: '8'},
+          '9-A': {totalApartments: 1, availableFloors: '3'},
+          '9-Ж': {totalApartments: 2, availableFloors: '5, 9'},
+          '9-И': {totalApartments: 1, availableFloors: '8'},
         },
       },
 
@@ -3264,18 +3265,18 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
       '14': {
         'euro2': {
-          '14-А': {totalApartments: 1, availableFloors: '8'},
+          '14-A': {totalApartments: 1, availableFloors: '8'},
           '14-Е': {totalApartments: 1, availableFloors: '6'},
           '14-К': {totalApartments: 2, availableFloors: '7-8'},
         },
         'penthouse': {
-          '14-Б': {totalApartments: 1, availableFloors: '10'},
+          '14-A': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '15': {
         'euro2': {
-          '15-А': {totalApartments: 2, availableFloors: '2'},
+          '15-A': {totalApartments: 2, availableFloors: '2'},
           '15-В': {totalApartments: 2, availableFloors: '5, 8'},
           '15-Д': {totalApartments: 1, availableFloors: '4'},
           '15-И': {totalApartments: 1, availableFloors: '9'},
@@ -3313,7 +3314,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
       '18': {
         'euro2': {
-          '18-А': {totalApartments: 3, availableFloors: '3-4, 6'},
+          '18-A': {totalApartments: 3, availableFloors: '3-4, 6'},
           '18-В': {totalApartments: 4, availableFloors: '2, 4, 6'},
           '18-Г': {totalApartments: 1, availableFloors: '9'},
           '18-Ж': {totalApartments: 2, availableFloors: '7-8'},
@@ -3351,7 +3352,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
       '27': {
         'euro2': {
-          '27-А': {totalApartments: 4, availableFloors: '4, 7-8'},
+          '27-A': {totalApartments: 4, availableFloors: '4, 7-8'},
           '27-Г': {totalApartments: 2, availableFloors: '9'},
           '27-Д': {totalApartments: 3, availableFloors: '6-7'},
           '27-Ж': {totalApartments: 3, availableFloors: '2, 6, 8'},
@@ -3490,6 +3491,14 @@ function distributeApartmentsAcrossLayouts(total, layoutCount) {
   return result;
 }
 
+function layoutKeyMatchesSector(layoutKey, sectorTitle) {
+  const sector = stripSectorTitle(sectorTitle);
+  const key = String(layoutKey || '').trim();
+  if (!sector || !key) return false;
+  const prefix = key.split('-')[0];
+  return stripSectorTitle(prefix) === sector;
+}
+
 function buildComplexSectorsFromLayoutConfig(sourceVariants, config) {
   const layoutLookup = new Map();
 
@@ -3520,8 +3529,9 @@ function buildComplexSectorsFromLayoutConfig(sourceVariants, config) {
       const sourceVariant = (sourceVariants || []).find(variant => variant.flatType === flatType);
       if (!sourceMap || !sourceVariant) continue;
 
+      const configuredEntries = Object.entries(layoutsForType || {});
       const sectorLayouts = [];
-      for (const [layoutKey, detail] of Object.entries(layoutsForType || {})) {
+      for (const [layoutKey, detail] of configuredEntries) {
         const sourceLayout = sourceMap.get(String(layoutKey));
         if (!sourceLayout) continue;
 
@@ -3529,6 +3539,22 @@ function buildComplexSectorsFromLayoutConfig(sourceVariants, config) {
           ...sourceLayout,
           sectorTitle,
           label: detail?.label ? String(detail.label).trim() : sourceLayout.label,
+        });
+      }
+
+      if (!sectorLayouts.length) {
+        const sourceForSector = [...sourceMap.entries()]
+          .filter(([layoutKey]) => layoutKeyMatchesSector(layoutKey, sectorTitle));
+
+        sourceForSector.forEach(([layoutKey, sourceLayout], index) => {
+          const detail = layoutsForType?.[layoutKey]
+            || configuredEntries[index]?.[1]
+            || {};
+          sectorLayouts.push({
+            ...sourceLayout,
+            sectorTitle,
+            label: detail?.label ? String(detail.label).trim() : sourceLayout.label,
+          });
         });
       }
 
