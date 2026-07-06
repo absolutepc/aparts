@@ -3190,253 +3190,183 @@ const COMPLEX_PROPERTY_CONFIGS = {
           '5-В': {totalApartments: 1, availableFloors: '3'},
           '5-Ж': {totalApartments: 1, availableFloors: '7'},
         },
-        '3room': {
-          '5-A': {},
-          '5-Б': {},
-        },
-        'penthouse': {
-          '5-A': {},
-          '5-Б': {},
-        },
       },
 
       '6': {
         'euro2': {
-          '6-A': {},
-          '6-Б': {},
-        },
-        '3room': {
-          '6-A': {},
-          '6-Б': {},
-        },
-        'penthouse': {
-          '6-A': {},
-          '6-Б': {},
-        },
+          '6-A': {totalApartments: 1, availableFloors: '8'},
+          '6-Г': {totalApartments: 1, availableFloors: '9'},
+          '6-Д': {totalApartments: 2, availableFloors: '8-9'},
+          '6-И': {totalApartments: 3, availableFloors: '2, 8-9'},
+          '6-К': {totalApartments: 1, availableFloors: '9'},
       },
 
       '7': {
         'euro2': {
-          '7-A': {},
-          '7-Б': {},
-        },
-        '3room': {
-          '7-A': {},
-          '7-Б': {},
-        },
-        'penthouse': {
-          '7-A': {},
-          '7-Б': {},
+          '7-A': {totalApartments: 2, availableFloors: '6,8'},
+          '7-В': {totalApartments: 1, availableFloors: '8'},
+          '7-Г': {totalApartments: 1, availableFloors: '9'},
+          '7-Д': {totalApartments: 2, availableFloors: '4'},
+          '7-Ж': {totalApartments: 2, availableFloors: '8'},
+          '7-И': {totalApartments: 7, availableFloors: '4-6, 8-9'},
+          '7-К': {totalApartments: 3, availableFloors: '8, 9'},
         },
       },
 
       '8': {
         'euro2': {
-          '8-A': {},
-          '8-Б': {},
-        },
-        '3room': {
-          '8-A': {},
-          '8-Б': {},
-        },
-        'penthouse': {
-          '8-A': {},
-          '8-Б': {},
+          '8-A': {totalApartments: 1, availableFloors: '5'},
+          '8-Д': {totalApartments: 1, availableFloors: '7'},
+          '8-Ж': {totalApartments: 1, availableFloors: '5'},
+          '8-И': {totalApartments: 10, availableFloors: '2-5, 8-9'},
+          '8-К': {totalApartments: 7, availableFloors: '4, 6-9'},
         },
       },
 
       '9': {
         'euro2': {
-          '9-A': {},
-          '9-Б': {},
-        },
-        '3room': {
-          '9-A': {},
-          '9-Б': {},
-        },
-        'penthouse': {
-          '9-A': {},
-          '9-Б': {},
+          '8-A': {totalApartments: 1, availableFloors: '3'},
+          '8-Ж': {totalApartments: 2, availableFloors: '5, 9'},
+          '8-И': {totalApartments: 1, availableFloors: '8'},
         },
       },
 
       '10': {
         'euro2': {
-          '10-A': {},
-          '10-Б': {},
-        },
-        '3room': {
-          '10-A': {},
-          '10-Б': {},
+          '10-A': {totalApartments: 1, availableFloors: '7'},
+          '10-Д': {totalApartments: 1, availableFloors: '9'},
+          '10-И': {totalApartments: 4, availableFloors: '2-3, 5, 9'},
+          '10-К': {totalApartments: 2, availableFloors: '9'},
         },
         'penthouse': {
-          '10-A': {},
-          '10-Б': {},
+          '10-A': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '12': {
         'euro2': {
-          '12-A': {},
-          '12-Б': {},
-        },
-        '3room': {
-          '12-A': {},
-          '12-Б': {},
-        },
-        'penthouse': {
-          '12-A': {},
-          '12-Б': {},
+          '12-В': {totalApartments: 1, availableFloors: '8'},
+          '12-Д': {totalApartments: 1, availableFloors: '3'},
+          '12-Е': {totalApartments: 1, availableFloors: '6'},
         },
       },
 
       '13': {
         'euro2': {
-          '13-A': {},
-          '13-Б': {},
-        },
-        '3room': {
-          '13-A': {},
-          '13-Б': {},
+          '13-Ж': {totalApartments: 1, availableFloors: '3'},
+          '13-И': {totalApartments: 1, availableFloors: '3'},
+          '13-К': {totalApartments: 2, availableFloors: '8-9'},
         },
         'penthouse': {
-          '13-A': {},
-          '13-Б': {},
+          '13-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '14': {
         'euro2': {
-          '14-A': {},
-          '14-Б': {},
-        },
-        '3room': {
-          '14-A': {},
-          '14-Б': {},
+          '14-А': {totalApartments: 1, availableFloors: '8'},
+          '14-Е': {totalApartments: 1, availableFloors: '6'},
+          '14-К': {totalApartments: 2, availableFloors: '7-8'},
         },
         'penthouse': {
-          '14-A': {},
-          '14-Б': {},
+          '14-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '15': {
         'euro2': {
-          '15-A': {},
-          '15-Б': {},
-        },
-        '3room': {
-          '15-A': {},
-          '15-Б': {},
+          '15-А': {totalApartments: 2, availableFloors: '2'},
+          '15-В': {totalApartments: 2, availableFloors: '5, 8'},
+          '15-Д': {totalApartments: 1, availableFloors: '4'},
+          '15-И': {totalApartments: 1, availableFloors: '9'},
         },
         'penthouse': {
-          '15-A': {},
-          '15-Б': {},
+          '15-A': {totalApartments: 1, availableFloors: '10'},
+          '15-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '16': {
         'euro2': {
-          '16-A': {},
-          '16-Б': {},
-        },
-        '3room': {
-          '16-A': {},
-          '16-Б': {},
-        },
-        'penthouse': {
-          '16-A': {},
-          '16-Б': {},
+          '16-В': {totalApartments: 1, availableFloors: '8'},
+          '16-Д': {totalApartments: 1, availableFloors: '9'},
+          '16-Ж': {totalApartments: 4, availableFloors: '2, 6-7'},
+          '16-И': {totalApartments: 1, availableFloors: '9'},
+          '16-К': {totalApartments: 2, availableFloors: '2, 9'},
         },
       },
 
       '17': {
         'euro2': {
-          '17-A': {},
-          '17-Б': {},
-        },
-        '3room': {
-          '17-A': {},
-          '17-Б': {},
+          '17-В': {totalApartments: 4, availableFloors: '2-3, 6-7'},
+          '17-Д': {totalApartments: 1, availableFloors: '4'},
+          '17-Е': {totalApartments: 1, availableFloors: '7'},
+          '17-Ж': {totalApartments: 1, availableFloors: '8'},
+          '17-И': {totalApartments: 2, availableFloors: '8'},
+          '17-К': {totalApartments: 6, availableFloors: '4, 6, 8-9'},
         },
         'penthouse': {
-          '17-A': {},
-          '17-Б': {},
+          '17-A': {totalApartments: 1, availableFloors: '10'},
+          '17-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '18': {
         'euro2': {
-          '18-A': {},
-          '18-Б': {},
-        },
-        '3room': {
-          '18-A': {},
-          '18-Б': {},
+          '18-А': {totalApartments: 3, availableFloors: '3-4, 6'},
+          '18-В': {totalApartments: 4, availableFloors: '2, 4, 6'},
+          '18-Г': {totalApartments: 1, availableFloors: '9'},
+          '18-Ж': {totalApartments: 2, availableFloors: '7-8'},
+          '18-И': {totalApartments: 4, availableFloors: '4, 8-9'},
+          '18-К': {totalApartments: 6, availableFloors: '6, 8-9'},
         },
         'penthouse': {
-          '18-A': {},
-          '18-Б': {},
+          '18-A': {totalApartments: 1, availableFloors: '10'},
+          '18-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '19': {
         'euro2': {
-          '19-A': {},
-          '19-Б': {},
-        },
-        '3room': {
-          '19-A': {},
-          '19-Б': {},
+          '19-В': {totalApartments: 8, availableFloors: '2-8'},
+          '19-Д': {totalApartments: 4, availableFloors: '3-5, 9'},
+          '19-Е': {totalApartments: 1, availableFloors: '2'},
+          '19-И': {totalApartments: 3, availableFloors: '6, 8-9'},
+          '19-К': {totalApartments: 2, availableFloors: '8-9'},
         },
         'penthouse': {
-          '19-A': {},
-          '19-Б': {},
+          '19-A': {totalApartments: 1, availableFloors: '10'},
+          '19-Б': {totalApartments: 1, availableFloors: '10'},
         },
       },
 
       '26': {
         'euro2': {
-          '26-A': {},
-          '26-Б': {},
-        },
-        '3room': {
-          '26-A': {},
-          '26-Б': {},
-        },
-        'penthouse': {
-          '26-A': {},
-          '26-Б': {},
+          '26-Д': {totalApartments: 1, availableFloors: '9'},
+          '26-Ж': {totalApartments: 1, availableFloors: '6'},
+          '26-И': {totalApartments: 4, availableFloors: '2, 8-9'},
+          '26-К': {totalApartments: 6, availableFloors: '4-6, 8-9'},
         },
       },
 
       '27': {
         'euro2': {
-          '27-A': {},
-          '27-Б': {},
-        },
-        '3room': {
-          '27-A': {},
-          '27-Б': {},
-        },
-        'penthouse': {
-          '27-A': {},
-          '27-Б': {},
+          '27-А': {totalApartments: 4, availableFloors: '4, 7-8'},
+          '27-Г': {totalApartments: 2, availableFloors: '9'},
+          '27-Д': {totalApartments: 3, availableFloors: '6-7'},
+          '27-Ж': {totalApartments: 3, availableFloors: '2, 6, 8'},
+          '27-И': {totalApartments: 5, availableFloors: '7-9'},
+          '27-К': {totalApartments: 5, availableFloors: '4-5, 7-9'},
         },
       },
 
       '28': {
         'euro2': {
-          '28-A': {},
-          '28-Б': {},
-        },
-        '3room': {
-          '28-A': {},
-          '28-Б': {},
-        },
-        'penthouse': {
-          '28-A': {},
-          '28-Б': {},
+          '28-В': {totalApartments: 1, availableFloors: '6'},
+          '28-Д': {totalApartments: 2, availableFloors: '7'},
+          '28-Ж': {totalApartments: 6, availableFloors: '4-6'},
+          '28-И': {totalApartments: 5, availableFloors: '4, 6, 9'},
+          '28-К': {totalApartments: 2, availableFloors: '9'},
         },
       },
     },
