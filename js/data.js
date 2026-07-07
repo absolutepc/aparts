@@ -284,13 +284,13 @@ const DEFAULT_PROPERTIES = [
         { key: '5-В', label: '1В — 53.3м²', areaMin: 53.3, areaMax: 53.3 },
         { key: '5-Ж', label: '1Ж — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
 
-        { key: '6-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '6-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '6-Г', label: '1Г — 50.6м²', areaMin: 50.6, areaMax: 50.6 },
         { key: '6-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
         { key: '6-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '6-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '7-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '7-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '7-В', label: '1В — 53.3м²', areaMin: 53.3, areaMax: 53.3 },
         { key: '7-Г', label: '1Г — 50.6м²', areaMin: 50.6, areaMax: 50.6 },
         { key: '7-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
@@ -298,17 +298,17 @@ const DEFAULT_PROPERTIES = [
         { key: '7-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '7-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '8-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '8-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '8-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
         { key: '8-Ж', label: '1Ж — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
         { key: '8-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '8-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '9-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '9-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '9-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '9-Ж', label: '1Ж — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
 
-        { key: '10-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '10-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '10-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
         { key: '10-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '10-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
@@ -321,11 +321,11 @@ const DEFAULT_PROPERTIES = [
         { key: '13-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '13-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '14-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '14-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '14-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
         { key: '14-Е', label: '1Е — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
 
-        { key: '15-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '15-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '15-В', label: '1В — 53.3м²', areaMin: 53.3, areaMax: 53.3 },
         { key: '15-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
         { key: '15-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
@@ -343,7 +343,7 @@ const DEFAULT_PROPERTIES = [
         { key: '17-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '17-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '18-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '18-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '18-В', label: '1В — 53.3м²', areaMin: 53.3, areaMax: 53.3 },
         { key: '18-Г', label: '1Г — 50.6м²', areaMin: 50.6, areaMax: 50.6 },
         { key: '18-Ж', label: '1Ж — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
@@ -361,7 +361,7 @@ const DEFAULT_PROPERTIES = [
         { key: '26-И', label: '1И — 63.5м²', areaMin: 63.5, areaMax: 63.5 },
         { key: '26-К', label: '1К — 58.9м²', areaMin: 58.9, areaMax: 58.9 },
 
-        { key: '27-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7 },
+        { key: '27-A', label: '1A — 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/Дубайский/1A.jpg' },
         { key: '27-Г', label: '1Г — 50.6м²', areaMin: 50.6, areaMax: 50.6 },
         { key: '27-Д', label: '1Д — 65м²', areaMin: 65, areaMax: 65 },
         { key: '27-Ж', label: '1Ж — 60.8м²', areaMin: 60.8, areaMax: 60.8 },
