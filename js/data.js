@@ -498,16 +498,27 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk5',
     title: 'ЖК «Ривьера»',
-    description: 'ЖК «Ривьера» — современный жилой комплекс в центре Грозного на ул. Кабардинская. Рассрочка до 5 лет, материнский капитал, сдача в 2029 году.',
+    description: 'ЖК Ривьера Грозный — это четыре монолитные башни высотой 28 этажей, возведённые на берегу реки Сунжа. Застройщик реализует квартиры класса выше среднего с потолками 3 метра и просторными лоджиями. Расположение — вблизи улицы Первомайской, рядом с будущей благоустроенной набережной.В продаже: 1- и 2-комнатные квартиры. Минимальная цена — 59 000 ₽/кв.м (верхние этажи). Доступна рассрочка без первоначального взноса на срок до 5 лет.',
     type: 'jk',
     flatType: '1room',
     totalApartments: 1,
     flatVariants: [
-      { flatType: '1room', totalApartments: 1, areaMin: 35.9, areaMax: 64.13, layouts: [
-        { key: '1-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+      { flatType: '1room', totalApartments: 200, areaMin: 35.9, areaMax: 48.95, layouts: [
+        { key: '1К-1', label: '1К-1 38.76м²', areaMin: 38.76, areaMax: 38.76 },
+        { key: '1К-2', label: '1К-2 38.76м²', areaMin: 38.76, areaMax: 38.76 },
+        { key: '1К-3', label: '1К-3 38.72м²', areaMin: 38.72, areaMax: 38.72 },
+        { key: '1К-4', label: '1К-4 38.72м²', areaMin: 38.72, areaMax: 38.72 },
+        { key: '1К-5', label: '1К-5 44.96м²', areaMin: 44.96, areaMax: 44.96 },
+        { key: '1К-6', label: '1К-6 35.90м²', areaMin: 35.90, areaMax: 35.90 },
+        { key: '1К-7', label: '1К-7 48.95м²', areaMin: 48.95, areaMax: 48.95 },
+        { key: '1К-8', label: '1К-8 42.63м²', areaMin: 42.63, areaMax: 42.63 },
+      ] },
+      { flatType: '2room', totalApartments: 100, areaMin: 63.9, areaMax: 64.13, layouts: [
+        { key: '2К-1', label: '2К-1 64.13м²', areaMin: 64.13, areaMax: 64.13 },
+        { key: '2К-2', label: '2К-2 63.90м²', areaMin: 63.90, areaMax: 63.90 },
       ] },
     ],
-    areaMin: 35.9,
+    areaMin: 35.90,
     areaMax: 64.13,
     price: 59000,
     address: 'Грозный, ул. Кабардинская',
@@ -515,8 +526,18 @@ const DEFAULT_PROPERTIES = [
     developer: 'СК Экология',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
-    img: 'img/default.svg',
-    images: ['img/default.svg'],
+    img: 'img/ривьера/rivyera.jpg',
+    images: [
+      'img/ривьера/rivyera 1.jpg',
+      'img/ривьера/rivyera 2.jpg',
+      'img/ривьера/rivyera 3.jpg',
+      'img/ривьера/rivyera 4.jpg',
+      'img/ривьера/rivyera 5.jpg',
+      'img/ривьера/rivyera 6.jpg',
+      'img/ривьера/rivyera 7.jpg',
+      'img/ривьера/rivyera 8.jpg',
+      'img/ривьера/rivyera 9.jpg',
+    ],
     published: true,
   },
   
@@ -3510,9 +3531,23 @@ const COMPLEX_PROPERTY_CONFIGS = {
   sectorOrder: ['1'],
 
   layouts: {
-    '1': {
+    '2': {
       '1room': {
-        '1-A': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+      },
+
+      '2room': {
+        '2К-1': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+
+    '2': {
+      '1room': {
+        '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+      },
+
+      '2room': {
+        '2К-1': { totalApartments: 1, availableFloors: '5-28' },
       },
     },
   },
