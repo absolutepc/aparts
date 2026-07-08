@@ -498,10 +498,10 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk5',
     title: 'ЖК «Ривьера»',
-    description: 'ЖК Ривьера Грозный — это четыре монолитные башни высотой 28 этажей, возведённые на берегу реки Сунжа. Застройщик реализует квартиры класса выше среднего с потолками 3 метра и просторными лоджиями. Расположение — вблизи улицы Первомайской, рядом с будущей благоустроенной набережной.В продаже: 1- и 2-комнатные квартиры. Минимальная цена — 59 000 ₽/кв.м (верхние этажи). Доступна рассрочка без первоначального взноса на срок до 5 лет.',
+    description: 'ЖК Ривьера Грозный — это четыре монолитные башни высотой 28 этажей, возведённые на берегу реки Сунжа. Застройщик реализует квартиры класса выше среднего с потолками 3 метра и просторными лоджиями. Расположение — вблизи улицы Первомайской, рядом с будущей благоустроенной набережной. В продаже: 1- и 2-комнатные квартиры. Минимальная цена — 59 000 ₽/кв.м (верхние этажи). Доступна рассрочка без первоначального взноса на срок до 5 лет.',
     type: 'jk',
     flatType: '1room',
-    totalApartments: 2,
+    totalApartments: 300,
     flatVariants: [
       { flatType: '1room', totalApartments: 200, areaMin: 35.9, areaMax: 48.95, layouts: [
         { key: '1К-1', label: '1К-1 38.76м²', areaMin: 38.76, areaMax: 38.76 },
@@ -3532,23 +3532,61 @@ const COMPLEX_PROPERTY_CONFIGS = {
   sectorOrder: ['1', '2', '3', '4'],
 
   layouts: {
-    '2': {
+    '1': {
       '1room': {
-        '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-1': { totalApartments: 0 },
+        '1К-2': { totalApartments: 0 },
+        '1К-3': { totalApartments: 0 },
+        '1К-4': { totalApartments: 0 },
+        '1К-5': { totalApartments: 0 },
+        '1К-6': { totalApartments: 0 },
+        '1К-7': { totalApartments: 0 },
+        '1К-8': { totalApartments: 0 },
       },
-
       '2room': {
-        '2К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '2К-1': { totalApartments: 0 },
+        '2К-2': { totalApartments: 0 },
       },
     },
 
     '2': {
       '1room': {
         '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-2': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-3': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-4': { totalApartments: 1, availableFloors: '5-28' },
       },
-
       '2room': {
         '2К-1': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+
+    '3': {
+      '1room': {
+        '1К-5': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-6': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-7': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-8': { totalApartments: 1, availableFloors: '5-28' },
+      },
+      '2room': {
+        '2К-2': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+
+    '4': {
+      '1room': {
+        '1К-1': { totalApartments: 0 },
+        '1К-2': { totalApartments: 0 },
+        '1К-3': { totalApartments: 0 },
+        '1К-4': { totalApartments: 0 },
+        '1К-5': { totalApartments: 0 },
+        '1К-6': { totalApartments: 0 },
+        '1К-7': { totalApartments: 0 },
+        '1К-8': { totalApartments: 0 },
+      },
+      '2room': {
+        '2К-1': { totalApartments: 0 },
+        '2К-2': { totalApartments: 0 },
       },
     },
   },
