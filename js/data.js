@@ -498,24 +498,24 @@ const DEFAULT_PROPERTIES = [
   {
     id: 'jk5',
     title: 'ЖК «Ривьера»',
-    description: 'ЖК Ривьера Грозный — это четыре монолитные башни высотой 28 этажей, возведённые на берегу реки Сунжа. Застройщик реализует квартиры класса выше среднего с потолками 3 метра и просторными лоджиями. Расположение — вблизи улицы Первомайской, рядом с будущей благоустроенной набережной.В продаже: 1- и 2-комнатные квартиры. Минимальная цена — 59 000 ₽/кв.м (верхние этажи). Доступна рассрочка без первоначального взноса на срок до 5 лет.',
+    description: 'ЖК Ривьера Грозный — жилой комплекс от строительной компании высокого класса: четыре монолитных 28-этажных дома у реки Сунжа. Комплекс расположен вблизи улицы Первомайской, рядом с набережной, которая будет благоустроена. Покупателям доступны 1- и 2-комнатные квартиры с потолками 3 метра и лоджиями. Предусмотрена рассрочка без первоначального взноса сроком до 5 лет. Архитектура и технические характеристики: Все четыре башни комплекса возводятся по монолитной технологии. Монолитный железобетонный каркас обеспечивает высокую несущую способность, хорошую звукоизоляцию между этажами и долгий срок эксплуатации здания.',
     type: 'jk',
     flatType: '1room',
     totalApartments: 2,
     flatVariants: [
       { flatType: '1room', totalApartments: 200, areaMin: 35.9, areaMax: 48.95, layouts: [
-        { key: '1К-1', label: '1К-1 38.76м²', areaMin: 38.76, areaMax: 38.76 },
-        { key: '1К-2', label: '1К-2 38.76м²', areaMin: 38.76, areaMax: 38.76 },
-        { key: '1К-3', label: '1К-3 38.72м²', areaMin: 38.72, areaMax: 38.72 },
-        { key: '1К-4', label: '1К-4 38.72м²', areaMin: 38.72, areaMax: 38.72 },
-        { key: '1К-5', label: '1К-5 44.96м²', areaMin: 44.96, areaMax: 44.96 },
-        { key: '1К-6', label: '1К-6 35.90м²', areaMin: 35.90, areaMax: 35.90 },
-        { key: '1К-7', label: '1К-7 48.95м²', areaMin: 48.95, areaMax: 48.95 },
-        { key: '1К-8', label: '1К-8 42.63м²', areaMin: 42.63, areaMax: 42.63 },
+        { key: '1К-1', label: '1К-1 38.76м²', areaMin: 38.76, areaMax: 38.76, planImg: 'img/ривьера/1К-1.jpg' },
+        { key: '1К-2', label: '1К-2 38.76м²', areaMin: 38.76, areaMax: 38.76, planImg: 'img/ривьера/1К-2.jpg' },
+        { key: '1К-3', label: '1К-3 38.72м²', areaMin: 38.72, areaMax: 38.72, planImg: 'img/ривьера/1К-3.jpg' },
+        { key: '1К-4', label: '1К-4 38.72м²', areaMin: 38.72, areaMax: 38.72, planImg: 'img/ривьера/1К-4.jpg' },
+        { key: '1К-5', label: '1К-5 44.96м²', areaMin: 44.96, areaMax: 44.96, planImg: 'img/ривьера/1К-5.jpg' },
+        { key: '1К-6', label: '1К-6 35.90м²', areaMin: 35.90, areaMax: 35.90, planImg: 'img/ривьера/1К-6.jpg' },
+        { key: '1К-7', label: '1К-7 48.95м²', areaMin: 48.95, areaMax: 48.95, planImg: 'img/ривьера/1К-7.jpg' },
+        { key: '1К-8', label: '1К-8 42.63м²', areaMin: 42.63, areaMax: 42.63, planImg: 'img/ривьера/1К-8.jpg' },
       ] },
       { flatType: '2room', totalApartments: 100, areaMin: 63.9, areaMax: 64.13, layouts: [
-        { key: '2К-1', label: '2К-1 64.13м²', areaMin: 64.13, areaMax: 64.13 },
-        { key: '2К-2', label: '2К-2 63.90м²', areaMin: 63.90, areaMax: 63.90 },
+        { key: '2К-1', label: '2К-1 64.13м²', areaMin: 64.13, areaMax: 64.13, planImg: 'img/ривьера/2К-1.jpg' },
+        { key: '2К-2', label: '2К-2 63.90м²', areaMin: 63.90, areaMax: 63.90, planImg: 'img/ривьера/2К-2.jpg' },
       ] },
     ],
     areaMin: 35.90,
@@ -3529,26 +3529,44 @@ const COMPLEX_PROPERTY_CONFIGS = {
   floorPriceToOffset: 3000,
   sectorHeading: 'Дом',
 
-  sectorOrder: ['1', '2', '3', '4'],
+  sectorOrder: ['2', '3'],
 
   layouts: {
     '2': {
       '1room': {
-        '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-1': { totalApartments: 22, availableFloors: '7-28' },
+        '1К-2': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+        '1К-3': { totalApartments: 23, availableFloors: '6-28' },
+        '1К-4': { totalApartments: 21, availableFloors: '6-11, 13-18, 20-28' },
+        '1К-5': { totalApartments: 18, availableFloors: '8-14, 16-18, 21-28' },
+        '1К-6': { totalApartments: 20, availableFloors: '7-17, 20-28' },
+        '1К-7': { totalApartments: 19, availableFloors: '8-11, 14-28' },
+        '1К-8': { totalApartments: 22, availableFloors: '7-28' },
       },
 
       '2room': {
-        '2К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '2К-1': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '2К-2': { totalApartments: 20, availableFloors: '9-28' },
+
       },
     },
 
-    '2': {
+    '3': {
       '1room': {
-        '1К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '1К-1': { totalApartments: 22, availableFloors: '7-22, 24-28' },
+        '1К-2': { totalApartments: 22, availableFloors: '6-18, 20-28' },
+        '1К-3': { totalApartments: 20, availableFloors: '8-22, 24-28' },
+        '1К-4': { totalApartments: 23, availableFloors: '6-28' },
+        '1К-5': { totalApartments: 20, availableFloors: '6, 8-11, 13-18, 20-28' },
+        '1К-6': { totalApartments: 19, availableFloors: '7-11, 13-18, 21-28' },
+        '1К-7': { totalApartments: 18, availableFloors: '9-12, 14-18, 20-28' },
+        '1К-8': { totalApartments: 22, availableFloors: '6-18, 20-28' },
       },
 
       '2room': {
-        '2К-1': { totalApartments: 1, availableFloors: '5-28' },
+        '2К-1': { totalApartments: 16, availableFloors: '9-12, 14, 16-19, 21, 23-28' },
+        '2К-2': { totalApartments: 14, availableFloors: '10-11, 15-18, 21-28' },
+
       },
     },
   },
