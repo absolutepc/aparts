@@ -504,10 +504,10 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 2,
     flatVariants: [
       { flatType: '1room', totalApartments: 2, areaMin: 35.9, areaMax: 64.13, layouts: [
-        { key: 'А-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
-        { key: 'Б-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
-        { key: 'В-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
-        { key: 'Г-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: '1-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: '2-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: '3-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: '4-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
       ] },
     ],
     areaMin: 35.9,
@@ -3509,31 +3509,32 @@ const COMPLEX_PROPERTY_CONFIGS = {
   ],
   floorPriceColumnLabels: { from: 'Стандарт', to: 'Видовые' },
   floorPriceToOffset: 3000,
+  sectorHeading: 'Дом',
 
-  sectorOrder: ['А', 'Б', 'В', 'Г'],
+  sectorOrder: ['1', '2', '3', '4'],
 
   layouts: {
-    'А': {
+    '1': {
       '1room': {
-        'А-A': { totalApartments: 1, availableFloors: '5-28' },
+        '1-A': { totalApartments: 0 },
       },
     },
 
-    'Б': {
+    '2': {
       '1room': {
-        'Б-A': { totalApartments: 1, availableFloors: '5-28' },
+        '2-A': { totalApartments: 1, availableFloors: '5-28' },
       },
     },
 
-    'В': {
+    '3': {
       '1room': {
-        'В-A': { totalApartments: 0 },
+        '3-A': { totalApartments: 1, availableFloors: '5-28' },
       },
     },
 
-    'Г': {
+    '4': {
       '1room': {
-        'Г-A': { totalApartments: 0 },
+        '4-A': { totalApartments: 0 },
       },
     },
   },
