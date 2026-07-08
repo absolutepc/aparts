@@ -501,7 +501,7 @@ const DEFAULT_PROPERTIES = [
     description: 'ЖК Ривьера Грозный — это четыре монолитные башни высотой 28 этажей, возведённые на берегу реки Сунжа. Застройщик реализует квартиры класса выше среднего с потолками 3 метра и просторными лоджиями. Расположение — вблизи улицы Первомайской, рядом с будущей благоустроенной набережной.В продаже: 1- и 2-комнатные квартиры. Минимальная цена — 59 000 ₽/кв.м (верхние этажи). Доступна рассрочка без первоначального взноса на срок до 5 лет.',
     type: 'jk',
     flatType: '1room',
-    totalApartments: 1,
+    totalApartments: 2,
     flatVariants: [
       { flatType: '1room', totalApartments: 200, areaMin: 35.9, areaMax: 48.95, layouts: [
         { key: '1К-1', label: '1К-1 38.76м²', areaMin: 38.76, areaMax: 38.76 },
@@ -3527,8 +3527,9 @@ const COMPLEX_PROPERTY_CONFIGS = {
   ],
   floorPriceColumnLabels: { from: 'Стандарт', to: 'Видовые' },
   floorPriceToOffset: 3000,
+  sectorHeading: 'Дом',
 
-  sectorOrder: ['1'],
+  sectorOrder: ['1', '2', '3', '4'],
 
   layouts: {
     '2': {
