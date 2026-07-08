@@ -501,10 +501,13 @@ const DEFAULT_PROPERTIES = [
     description: 'ЖК «Ривьера» — современный жилой комплекс в центре Грозного на ул. Кабардинская. Рассрочка до 5 лет, материнский капитал, сдача в 2029 году.',
     type: 'jk',
     flatType: '1room',
-    totalApartments: 1,
+    totalApartments: 2,
     flatVariants: [
-      { flatType: '1room', totalApartments: 1, areaMin: 35.9, areaMax: 64.13, layouts: [
-        { key: '1-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+      { flatType: '1room', totalApartments: 2, areaMin: 35.9, areaMax: 64.13, layouts: [
+        { key: 'А-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: 'Б-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: 'В-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+        { key: 'Г-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
       ] },
     ],
     areaMin: 35.9,
@@ -3507,12 +3510,30 @@ const COMPLEX_PROPERTY_CONFIGS = {
   floorPriceColumnLabels: { from: 'Стандарт', to: 'Видовые' },
   floorPriceToOffset: 3000,
 
-  sectorOrder: ['1'],
+  sectorOrder: ['А', 'Б', 'В', 'Г'],
 
   layouts: {
-    '1': {
+    'А': {
       '1room': {
-        '1-A': { totalApartments: 1, availableFloors: '5-28' },
+        'А-A': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+
+    'Б': {
+      '1room': {
+        'Б-A': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+
+    'В': {
+      '1room': {
+        'В-A': { totalApartments: 0 },
+      },
+    },
+
+    'Г': {
+      '1room': {
+        'Г-A': { totalApartments: 0 },
       },
     },
   },
