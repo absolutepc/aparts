@@ -522,7 +522,7 @@ const DEFAULT_PROPERTIES = [
     ],
     areaMin: 35.90,
     areaMax: 64.13,
-    price: 59000,
+    price: 88000,
     address: 'Грозный, ул. Кабардинская',
     district: 'Центр',
     developer: 'СК Экология',
