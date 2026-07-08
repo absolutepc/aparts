@@ -608,7 +608,7 @@ const DEFAULT_PROPERTIES = [
     areaMax: 110.4,
     price: 88000,
     address: 'Пешеходный бульвар, 17 сектор',
-    district: 'Новый Район',
+    district: 'Новый район',
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
