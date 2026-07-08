@@ -522,7 +522,7 @@ const DEFAULT_PROPERTIES = [
     ],
     areaMin: 35.90,
     areaMax: 64.13,
-    price: 88000,
+    price: 5000,
     address: 'Грозный, ул. Кабардинская',
     district: 'Центр',
     developer: 'СК Экология',
@@ -608,7 +608,7 @@ const DEFAULT_PROPERTIES = [
     areaMax: 110.4,
     price: 88000,
     address: 'Пешеходный бульвар, 17 сектор',
-    district: 'Новый район',
+    district: 'Новый Район',
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -2535,7 +2535,7 @@ function renderComplexStatsTags(property) {
 }
 
 function renderComplexStatsTable(property, selectedVariant, options = {}) {
-  const hideFlatTypeStats = property?.id === 'jk1' || property?.id === 'jk3';
+  const hideFlatTypeStats = property?.id === 'jk1' || property?.id === 'jk3'|| property?.id === 'jk6';
   if (selectedVariant || hideFlatTypeStats) {
     return '';
   }
@@ -2543,7 +2543,7 @@ function renderComplexStatsTable(property, selectedVariant, options = {}) {
   let variants = getComplexFlatVariants(property);
 
   if (options.overview) {
-    variants = variants.filter(variant => variant.flatType !== '1room' && variant.flatType !== '2room');
+    variants = variants.filter(variant => variant.flatType !== '1room' && variant.flatType !== '2room' && variant.flatType !== 'euro2' && variant.flatType !== '3room');
   }
 
   if (!variants.length) {
