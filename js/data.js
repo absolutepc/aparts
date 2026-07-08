@@ -513,10 +513,12 @@ const DEFAULT_PROPERTIES = [
         { key: '1К-7', label: '1К-7 48.95м²', areaMin: 48.95, areaMax: 48.95, planImg: 'img/ривьера/1К-7.jpg' },
         { key: '1К-8', label: '1К-8 42.63м²', areaMin: 42.63, areaMax: 42.63, planImg: 'img/ривьера/1К-8.jpg' },
       ] },
+
       { flatType: '2room', totalApartments: 100, areaMin: 63.9, areaMax: 64.13, layouts: [
         { key: '2К-1', label: '2К-1 64.13м²', areaMin: 64.13, areaMax: 64.13, planImg: 'img/ривьера/2К-1.jpg' },
         { key: '2К-2', label: '2К-2 63.90м²', areaMin: 63.90, areaMax: 63.90, planImg: 'img/ривьера/2К-2.jpg' },
       ] },
+      
     ],
     areaMin: 35.90,
     areaMax: 64.13,
@@ -537,6 +539,90 @@ const DEFAULT_PROPERTIES = [
       'img/ривьера/rivyera 7.jpg',
       'img/ривьера/rivyera 8.jpg',
       'img/ривьера/rivyera 9.jpg',
+    ],
+    published: true,
+  },
+
+  {
+    id: 'jk6',
+    title: 'ЖК «Блэк Рок»',
+    description: 'ЖК Блэк Рок в Грозном выполнен в стиле хай-тек, что подчеркивается элегантными линиями, высококачественными материалами и инновационными решениями в архитектуре. Комплекс состоит из семи секций, шесть из которых – это жилые дома с просторными квартирами, а одна секция отведена под современное офисное здание. Это создает уникальную синергию работы и жизни, позволяя жителям наслаждаться всеми удобствами в одном месте. Высокий уровень комфорта и безопасност. Каждый жилой дом в Black Rock в Грозном оснащен передовыми системами безопасности и автоматизации. Это включает в себя круглосуточное видеонаблюдение, системы контроля доступа и умные домофоны, обеспечивающие максимальный уровень безопасности для всех жителей. Инновационные решения в архитектуре и строительстве делают проживание в комплексе комфортным и удобным.',
+    type: 'jk',
+    flatType: '1room',
+    totalApartments: 2,
+    flatVariants: [
+      { flatType: '1room', totalApartments: 200, areaMin: 51.4, areaMax: 56.6, layouts: [
+        { key: '1-Б', label: '1Б 50м²', areaMin: 50, areaMax: 50, planImg: 'img/ривьера/1К-1.jpg' },
+        { key: '1-В', label: '1В 51.4м²', areaMin: 51.4, areaMax: 51.4, planImg: 'img/ривьера/1К-2.jpg' },
+
+        { key: '2-А', label: '1А 51.7м²', areaMin: 51.7, areaMax: 51.7, planImg: 'img/ривьера/1К-1.jpg' },
+
+        { key: '7-Б', label: '1Б 51.4м²', areaMin: 51.4, areaMax: 51.4, planImg: 'img/ривьера/1К-1.jpg' },
+      ] },
+
+      { flatType: 'euro2', totalApartments: 100, areaMin: 83, areaMax: 83, layouts: [
+        { key: '1-А', label: '2А(e) 83м²', areaMin: 83, areaMax: 83, planImg: 'img/ривьера/2К-1.jpg' },
+        { key: '1-Б', label: '2Б(e) 83м²', areaMin: 83, areaMax: 83, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '2-Г', label: '2Г(e) 84.7м²', areaMin: 84.7, areaMax: 84.7, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '2-Д', label: '2Д(e) 84.7м²', areaMin: 84.7, areaMax: 84.7, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '4-А', label: '1А(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '4-Д', label: '1Д(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '5-А', label: '1А(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '5-Д', label: '1Д(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '6-А', label: '1А(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '6-Д', label: '1Д(e) 56.6м²', areaMin: 56.6, areaMax: 56.6, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '7-А', label: '2А(e) 72.1м²', areaMin: 72.1, areaMax: 72.1, planImg: 'img/ривьера/2К-2.jpg' },
+      ] },
+
+      { flatType: '2room', totalApartments: 100, areaMin: 78.3, areaMax: 78.8, layouts: [
+        { key: '1-В', label: '2В 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-1.jpg' },
+        { key: '1-Г', label: '2Г 78.3м²', areaMin: 78.3, areaMax: 78.3, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '1-Д', label: '2Д 78.8м²', areaMin: 78.8, areaMax: 78.8, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '2-Д', label: '2Д 62.4м²', areaMin: 62.4, areaMax: 62.4, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '4-А', label: '2А 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '4-Г', label: '2Г 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '5-А', label: '2А 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '5-Г', label: '2Г 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '6-А', label: '2А 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '6-Г', label: '2Г 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+
+        { key: '7-В', label: '2В 77.9м²', areaMin: 77.9, areaMax: 77.9, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '7-Г', label: '2Г 78.3м²', areaMin: 78.3, areaMax: 78.3, planImg: 'img/ривьера/2К-2.jpg' },
+        { key: '7-Д', label: '2Д 78.8м²', areaMin: 78.8, areaMax: 78.8, planImg: 'img/ривьера/2К-2.jpg' },
+      ] },
+
+      { flatType: '3room', totalApartments: 100, areaMin: 110.4, areaMax: 110.4, layouts: [
+        { key: '7-Б', label: '3Б(e) 110.4м²', areaMin: 110.4, areaMax: 110.4, planImg: 'img/ривьера/2К-2.jpg' },
+      ] },
+    ],
+    areaMin: 51.4,
+    areaMax: 110.4,
+    price: 88000,
+    address: 'Пешеходный бульвар, 17 сектор',
+    district: 'Новый Район',
+    developer: 'Квартал 777',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
+    img: 'img/БлэкРок/BR.jpg',
+    images: [
+      'img/БлэкРок/BR 1.jpg',
+      'img/БлэкРок/BR 2.jpg',
+      'img/БлэкРок/BR 3.jpg',
+      'img/БлэкРок/BR 4.jpg',
+      'img/БлэкРок/BR 5.jpg',
+      'img/БлэкРок/BR 6.jpg',
+      'img/БлэкРок/BR 7.jpg',
+      'img/БлэкРок/BR 8.jpg',
+      'img/БлэкРок/BR 9.jpg',
     ],
     published: true,
   },
@@ -3567,6 +3653,123 @@ const COMPLEX_PROPERTY_CONFIGS = {
         '2К-1': { totalApartments: 16, availableFloors: '9-12, 14, 16-19, 21, 23-28' },
         '2К-2': { totalApartments: 14, availableFloors: '10-11, 15-18, 21-28' },
 
+      },
+    },
+  },
+
+  sectors: null,
+  },
+
+  jk6: {
+  forceOfferingFromConfig: true,
+  developer: 'Квартал 777',
+  deliveryDate: '3 квартал 2027г',
+  installmentTerm: 'до 6 лет',
+  maternityCapital: 'yes',
+  markupBasis: 'after',
+  recalculation: 'no',
+  noMarkupYears: 1,
+  mandatoryPayment: 5000,
+
+  floorPriceRanges: [
+    { floorMin: 4, floorMax: 5, price: 103000 },
+    { floorMin: 6, floorMax: 8, price: 98000 },
+    { floorMin: 9, floorMax: 11, price: 93000 },
+    { floorMin: 10, floorMax: 23, price: 88000 },
+  ],
+  floorPriceColumnLabels: { from: 'Двор', to: 'Видовые' },
+  floorPriceToOffset: 5000,
+  sectorHeading: 'Сектор',
+
+  sectorOrder: ['1', '2', '4', '5', '6', '7'],
+
+  layouts: {
+    '1': {
+      '1room': {
+        '1-Б': { totalApartments: 22, availableFloors: '7-28' },
+        '1-В': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      'euro2': {
+        '1-Б': { totalApartments: 22, availableFloors: '7-28' },
+        '1-В': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      '2room': {
+        '1-В': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '1-Г': { totalApartments: 20, availableFloors: '9-28' },
+        '1-Д': { totalApartments: 20, availableFloors: '9-28' },
+      },
+    },
+
+    '2': {
+      '1room': {
+        '2-А': { totalApartments: 22, availableFloors: '7-28' },
+      },
+
+      'euro2': {
+        '2-Г': { totalApartments: 22, availableFloors: '7-28' },
+        '2-Д': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      '2room': {
+        '2-Д': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+      },
+    },
+
+    '4': {
+      'euro2': {
+        '4-А': { totalApartments: 22, availableFloors: '7-28' },
+        '4-Д': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      '2room': {
+        '4-А': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '4-Г': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+      },
+    },
+
+    '5': {
+      'euro2': {
+        '5-А': { totalApartments: 22, availableFloors: '7-28' },
+        '5-Д': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      '2room': {
+        '5-А': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '5-Г': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+      },
+    },
+
+    '6': {
+      'euro2': {
+        '6-А': { totalApartments: 22, availableFloors: '7-28' },
+        '6-Д': { totalApartments: 20, availableFloors: '6-18, 21-28' },
+      },
+
+      '2room': {
+        '6-А': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '6-Г': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+      },
+    },
+
+    '7': {
+      '1room': {
+        '7-Б': { totalApartments: 22, availableFloors: '7-28' },
+      },
+
+      'euro2': {
+        '7-А': { totalApartments: 22, availableFloors: '7-28' },
+      },
+
+      '2room': {
+        '7-В': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
+        '7-Г': { totalApartments: 20, availableFloors: '9-28' },
+        '7-Д': { totalApartments: 20, availableFloors: '9-28' },
+      },
+
+      '3room': {
+        '7-Б': { totalApartments: 17, availableFloors: '9, 11, 13-19, 21-28' },
       },
     },
   },
