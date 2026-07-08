@@ -40,7 +40,7 @@ const MANDATORY_PAYMENT_OPTIONS = {
   12000: '12 000',
 };
 
-const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13'];
+const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13', 'СК Экология'];
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -494,6 +494,31 @@ const DEFAULT_PROPERTIES = [
     ],
     published: true,
   },
+
+  {
+    id: 'jk5',
+    title: 'ЖК «Ривьера»',
+    description: 'ЖК «Ривьера» — современный жилой комплекс в центре Грозного на ул. Кабардинская. Рассрочка до 5 лет, материнский капитал, сдача в 2029 году.',
+    type: 'jk',
+    flatType: '1room',
+    totalApartments: 1,
+    flatVariants: [
+      { flatType: '1room', totalApartments: 1, areaMin: 35.9, areaMax: 64.13, layouts: [
+        { key: '1-A', label: 'от 35.9 м²', areaMin: 35.9, areaMax: 64.13 },
+      ] },
+    ],
+    areaMin: 35.9,
+    areaMax: 64.13,
+    price: 59000,
+    address: 'Грозный, ул. Кабардинская',
+    district: 'Центр',
+    developer: 'СК Экология',
+    noMarkupYears: 1,
+    mandatoryPayment: 5000,
+    img: 'img/default.svg',
+    images: ['img/default.svg'],
+    published: true,
+  },
   
   {
     id: 'comm1',
@@ -718,10 +743,16 @@ function getApplicableFloorPrices(property, layout) {
 
 const FLOOR_PRICE_TO_OFFSET = 2000;
 
-function getFloorPriceTo(price) {
+function getFloorPriceToOffset(property) {
+  const custom = Number(property?.floorPriceToOffset);
+  if (Number.isFinite(custom) && custom >= 0) return custom;
+  return FLOOR_PRICE_TO_OFFSET;
+}
+
+function getFloorPriceTo(price, property = null) {
   const value = Number(price);
   if (!Number.isFinite(value) || value <= 0) return null;
-  return value + FLOOR_PRICE_TO_OFFSET;
+  return value + getFloorPriceToOffset(property);
 }
 
 function formatFloorPriceFromLabel(fromPrice) {
@@ -730,15 +761,15 @@ function formatFloorPriceFromLabel(fromPrice) {
   return `от ${formatPrice(from)}`;
 }
 
-function formatFloorPriceToLabel(fromPrice) {
-  const to = getFloorPriceTo(fromPrice);
+function formatFloorPriceToLabel(fromPrice, property = null) {
+  const to = getFloorPriceTo(fromPrice, property);
   if (to == null) return '';
   return `до ${formatPrice(to)}`;
 }
 
-function formatFloorPriceFromTo(fromPrice) {
+function formatFloorPriceFromTo(fromPrice, property = null) {
   const fromLabel = formatFloorPriceFromLabel(fromPrice);
-  const toLabel = formatFloorPriceToLabel(fromPrice);
+  const toLabel = formatFloorPriceToLabel(fromPrice, property);
   if (!fromLabel || !toLabel) return '';
   return `${fromLabel} ${toLabel}`;
 }
@@ -883,7 +914,7 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
               <tr>
                 <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
                 <td>${formatFloorPriceFromLabel(range.price)}</td>
-                <td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price)}</td>
+                <td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price, property)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -910,7 +941,7 @@ function renderLayoutPriceSpecs(property, layout, variant) {
   }
 
   const minPrice = Math.min(...prices);
-  const maxToPrice = getFloorPriceTo(Math.max(...prices));
+  const maxToPrice = getFloorPriceTo(Math.max(...prices), property);
   if (maxToPrice == null) {
     return '';
   }
@@ -3456,6 +3487,38 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   sectors: null,
   },
+
+  jk5: {
+  forceOfferingFromConfig: true,
+  developer: 'СК Экология',
+  deliveryDate: '2029г',
+  installmentTerm: 'до 5 лет',
+  maternityCapital: 'yes',
+  markupBasis: 'after',
+  recalculation: 'no',
+  noMarkupYears: 1,
+  mandatoryPayment: 5000,
+
+  floorPriceRanges: [
+    { floorMin: 5, floorMax: 11, price: 65000 },
+    { floorMin: 12, floorMax: 18, price: 62000 },
+    { floorMin: 19, floorMax: 28, price: 59000 },
+  ],
+  floorPriceColumnLabels: { from: 'Стандарт', to: 'Видовые' },
+  floorPriceToOffset: 3000,
+
+  sectorOrder: ['1'],
+
+  layouts: {
+    '1': {
+      '1room': {
+        '1-A': { totalApartments: 1, availableFloors: '5-28' },
+      },
+    },
+  },
+
+  sectors: null,
+  },
 };
 
 for (const complexId of Object.keys(COMPLEX_PROPERTY_CONFIGS)) {
@@ -3707,6 +3770,11 @@ function applyComplexConfigFromRegistry(property) {
       };
     } else {
       delete item.floorPriceColumnLabels;
+    }
+    if (config.floorPriceToOffset != null) {
+      item.floorPriceToOffset = Number(config.floorPriceToOffset) || 0;
+    } else {
+      delete item.floorPriceToOffset;
     }
   } else {
     const details = getComplexPropertyDetailsFromConfig(config);
