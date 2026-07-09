@@ -4226,7 +4226,7 @@ function applyComplexLayoutDetailsToSectors(sectors, config) {
 
 function getComplexPropertyDetailsFromConfig(config) {
   const details = {};
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment']) {
     const value = config?.[key];
     if (value != null && String(value).trim() !== '') {
       details[key] = value;
