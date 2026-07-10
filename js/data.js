@@ -84,69 +84,67 @@ const DEFAULT_PROPERTIES = [
     totalApartments: 120,
     flatVariants: [
       { flatType: '1room', totalApartments: 58, areaMin: 52, areaMax: 67,layouts: [
-        { key: 'Ж', label: '1И - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
+        { key: 'Ж', label: '1И - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/Ан-Нур/an-be 1i.jpg' },
 
-        { key: 'A', label: '1A - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
-        { key: 'Б', label: '1Б - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
-        { key: 'В', label: '1В - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
-        { key: 'Г', label: '1Г - 66м²', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+        { key: 'A', label: '1A - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/Ан-Нур/an-avdj 1a.jpg' },
+        { key: 'Б', label: '1Б - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/Ан-Нур/an-avdj 1b.jpg' },
+        { key: 'В', label: '1В - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/Ан-Нур/an-avdj 1v.jpg' },
+        { key: 'Г', label: '1Г - 66м²', areaMin: 66, areaMax: 66, planImg: 'img/Ан-Нур/an-avdj 1g.jpg' },
 
-        { key: 'З', label: '1Г - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
+        { key: 'З', label: '1Г - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/Ан-Нур/an-g 1g.jpg' },
 
-        { key: 'Д-A', label: '1A - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/luch/1A.jpg' },
-        { key: 'Д-Б', label: '1Б - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/luch/1B.jpg' },
-        { key: 'Д-В', label: '1В - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/luch/1V.jpg' },
-        { key: 'Д-Г', label: '1Г - 66м²', areaMin: 66, areaMax: 66, planImg: 'img/luch/1G.jpg' },
+        { key: 'Д-A', label: '1A - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/Ан-Нур/an-avdj 1a.jpg' },
+        { key: 'Д-Б', label: '1Б - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/Ан-Нур/an-avdj 1b.jpg' },
+        { key: 'Д-В', label: '1В - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/Ан-Нур/an-avdj 1v.jpg' },
+        { key: 'Д-Г', label: '1Г - 66м²', areaMin: 66, areaMax: 66, planImg: 'img/Ан-Нур/an-avdj 1g.jpg' },
 
-        { key: 'Д', label: '1Б - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/luch/1G.jpg' },
-        { key: 'Е', label: '1В - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/luch/1D.jpg' },
-        { key: 'Ё', label: '1Г - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/luch/1E.jpg' },
+        { key: 'Д', label: '1Б - 52м²', areaMin: 52, areaMax: 52, planImg: 'img/Ан-Нур/an-avdj 1b.jpg' },
+        { key: 'Е', label: '1В - 53м²', areaMin: 53, areaMax: 53, planImg: 'img/Ан-Нур/an-avdj 1v.jpg' },
+        { key: 'Ё', label: '1Г - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/Ан-Нур/an-avdj 1g.jpg' },
 
-        { key: 'И', label: '1Д - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
-        { key: 'Й', label: '1Е - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
-        { key: 'К', label: '1Ж - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/luch/1E.jpg' },
-        { key: 'Л', label: '1И - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/luch/1E.jpg' },
+        { key: 'И', label: '1Д - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/Ан-Нур/an-be 1d.jpg' },
+        { key: 'Й', label: '1Е - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/Ан-Нур/an-be 1e.jpg' },
+        { key: 'К', label: '1Ж - 59м²', areaMin: 59, areaMax: 59, planImg: 'img/Ан-Нур/an-be 1j.jpg' },
+        { key: 'Л', label: '1И - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/Ан-Нур/an-be 1i.jpg' },
 
       ]  },
 
       { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
-        { key: 'Д', label: '2В - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/luch/1G.jpg' },
-        { key: 'Е', label: '2Б - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/luch/1D.jpg' },
-        { key: 'Ё', label: '2Г - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'Ж', label: '2Д - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/luch/1G.jpg' },
-        { key: 'З', label: '2Ж - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/luch/1D.jpg' },
-        { key: 'И', label: '2К - 80м²', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
-        { key: 'Й', label: '2Л - 81м²', areaMin: 81, areaMax: 81, planImg: 'img/luch/1D.jpg' },
-        { key: 'К', label: '2Н - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
+        { key: 'Д', label: '2Б - 84м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2b.jpg' },
+        { key: 'Е', label: '2В - 82м²', areaMin: 84, areaMax: 84, planImg: 'img/Ан-Нур/an-be 2v.jpg' },
+        { key: 'Ё', label: '2Г - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2g.jpg' },
+        { key: 'Ж', label: '2Д - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/Ан-Нур/an-be 2d.jpg' },
+        { key: 'З', label: '2Ж - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/Ан-Нур/an-be 2j.jpg' },
+        { key: 'И', label: '2К - 80м²', areaMin: 80, areaMax: 80, planImg: 'img/Ан-Нур/an-be 2k.jpg' },
+        { key: 'Й', label: '2Л - 81м²', areaMin: 81, areaMax: 81, planImg: 'img/Ан-Нур/an-be 2l.jpg' },
+        { key: 'К', label: '2Н - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/Ан-Нур/an-be 2n.jpg' },
 
-        { key: 'A', label: '2A - 58м²', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: '2Б - 57м²', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+        { key: 'B', label: '2Г - 65м²', areaMin: 65, areaMax: 65, planImg: 'img/Ан-Нур/an-g 2g.jpg' },
 
-        { key: 'Д-A', label: '2A - 58м²', areaMin: 58, areaMax: 58, planImg: 'img/luch/2A.jpg' },
-        { key: 'Д-Б', label: '2Б - 57м²', areaMin: 57, areaMax: 57, planImg: 'img/luch/2B.jpg' },
+        { key: 'Д-A', label: '2A - 58м²', areaMin: 58, areaMax: 58, planImg: 'img/Ан-Нур/an-avdj 2a.jpg' },
+        { key: 'Д-Б', label: '2Б - 57м²', areaMin: 57, areaMax: 57, planImg: 'img/Ан-Нур/an-avdj 2b.jpg' },
 
-        { key: 'Л', label: '2Б - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
-        { key: 'М', label: '2В - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'Н', label: '2Г - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/luch/1E.jpg' },
-        { key: 'О', label: '2Д - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/luch/1E.jpg' },
-        { key: 'П', label: '2Ж - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
-        { key: 'Р', label: '2И - 74м²', areaMin: 74, areaMax: 74, planImg: 'img/luch/1E.jpg' },
-        { key: 'С', label: '2К - 81м²', areaMin: 81, areaMax: 81, planImg: 'img/luch/1E.jpg' },
-        { key: 'Т', label: '2Л - 80м²', areaMin: 80, areaMax: 80, planImg: 'img/luch/1E.jpg' },
-        { key: 'У', label: '2Н - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/luch/1E.jpg' },
+        { key: 'Л', label: '2Б - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/Ан-Нур/an-be 2b.jpg' },
+        { key: 'М', label: '2В - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2v.jpg' },
+        { key: 'Н', label: '2Г - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2g.jpg' },
+        { key: 'О', label: '2Д - 84м²', areaMin: 84, areaMax: 84, planImg: 'img/Ан-Нур/an-be 2d.jpg' },
+        { key: 'П', label: '2Ж - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/Ан-Нур/an-be 2j.jpg' },
+        { key: 'Р', label: '2И - 74м²', areaMin: 74, areaMax: 74, planImg: 'img/Ан-Нур/an-be 2i.jpg' },
+        { key: 'С', label: '2К - 81м²', areaMin: 81, areaMax: 81, planImg: 'img/Ан-Нур/an-be 2k.jpg' },
+        { key: 'Т', label: '2Л - 80м²', areaMin: 80, areaMax: 80, planImg: 'img/Ан-Нур/an-be 2l.jpg' },
+        { key: 'У', label: '2Н - 78м²', areaMin: 78, areaMax: 78, planImg: 'img/Ан-Нур/an-be 2n.jpg' },
 
-        { key: 'B', label: '2А - 57м²', areaMin: 57, areaMax: 57, planImg: 'img/luch/2V.jpg' },
-        { key: 'Г', label: '2Б - 58м²', areaMin: 58, areaMax: 58, planImg: 'img/luch/2G.jpg' },
+        { key: 'B', label: '2А - 58м²', areaMin: 57, areaMax: 57, planImg: 'img/Ан-Нур/an-avdj 2a.jpg' },
+        { key: 'Г', label: '2Б - 57м²', areaMin: 58, areaMax: 58, planImg: 'img/Ан-Нур/an-avdj 2b.jpg' },
       ] },
 
       { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
-        { key: 'A', label: '3A - 94м²', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
-        { key: 'Б', label: '3Б - 93м²', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+        { key: 'A', label: '3A - 94м²', areaMin: 94, areaMax: 94, planImg: 'img/Ан-Нур/an-avdj 3a.jpg' },
+        { key: 'Б', label: '3Б - 93м²', areaMin: 93, areaMax: 93, planImg: 'img/Ан-Нур/an-avdj 3b.jpg' },
 
-        { key: 'B', label: '3Б - 95м²', areaMin: 95, areaMax: 95, planImg: 'img/luch/2V.jpg' },
+        { key: 'B', label: '3Б - 95м²', areaMin: 95, areaMax: 95, planImg: 'img/Ан-Нур/an-g 3b.jpg' },
 
-        { key: 'Д-A', label: '3A - 94м²', areaMin: 94, areaMax: 94, planImg: 'img/luch/2A.jpg' },
-        { key: 'Д-Б', label: '3Б - 93м²', areaMin: 93, areaMax: 93, planImg: 'img/luch/2B.jpg' },
+        { key: 'Д-A', label: '3A - 94м²', areaMin: 94, areaMax: 94, planImg: 'img/Ан-Нур/an-avdj 3a.jpg' },
 
 
       ] },
@@ -157,7 +155,7 @@ const DEFAULT_PROPERTIES = [
     address: '​Проспект В.В. Путина, 22/4​',
     district: 'Новый район',
     developer: 'Монолит',
-    noMarkupYears: 1,
+    noMarkupYears: 2,
     mandatoryPayment: 10000,
     img: 'img/Ан-Нур/Ан-нур 1.jpg',
     images: [
@@ -3201,6 +3199,9 @@ const COMPLEX_PROPERTY_CONFIGS = {
     'Г': {
       '1room': {
         '\u0417': {},
+      },
+      '2room': {
+        Г: {},
       },
       '3room': {
         B: {},
