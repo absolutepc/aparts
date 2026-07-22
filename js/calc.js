@@ -63,29 +63,40 @@ function initCalcPage() {
 
   const area = Number(targetLayout.areaMin) || Number(targetVariant.areaMin) || 0;
 
-  // Get available prices
+  // Get available prices for cash / short installment (полная оплата)
+  // For complexes with sectorPriceGroups (like Ан-Нур), use sector-specific full price
   const prices = [];
-  const applicablePrices = getApplicableFloorPrices(property, targetLayout);
-  
-  if (applicablePrices && applicablePrices.length > 0) {
-    // Add all unique prices from floor ranges
-    const uniquePrices = new Set();
-    applicablePrices.forEach(range => {
-      const p = Number(range.price);
-      if (p > 0 && !uniquePrices.has(p)) {
-        uniquePrices.add(p);
-        prices.push({
-          value: p,
-          label: formatPrice(p)
-        });
-      }
-    });
-  } else if (targetLayout.price > 0) {
-    prices.push({ value: targetLayout.price, label: formatPrice(targetLayout.price) });
-  } else if (targetVariant.price > 0) {
-    prices.push({ value: targetVariant.price, label: formatPrice(targetVariant.price) });
-  } else if (property.price > 0) {
-    prices.push({ value: property.price, label: formatPrice(property.price) });
+  const sectorGroup = (typeof getSectorPriceGroupForSector === 'function'
+    && typeof resolveLayoutSectorTitle === 'function')
+    ? getSectorPriceGroupForSector(
+      property,
+      resolveLayoutSectorTitle(targetLayout) || targetSector?.title
+    )
+    : null;
+
+  if (sectorGroup?.full > 0) {
+    prices.push({ value: sectorGroup.full, label: formatPrice(sectorGroup.full) });
+  } else {
+    const applicablePrices = getApplicableFloorPrices(property, targetLayout);
+    if (applicablePrices && applicablePrices.length > 0) {
+      const uniquePrices = new Set();
+      applicablePrices.forEach(range => {
+        const p = Number(range.price);
+        if (p > 0 && !uniquePrices.has(p)) {
+          uniquePrices.add(p);
+          prices.push({
+            value: p,
+            label: formatPrice(p),
+          });
+        }
+      });
+    } else if (targetLayout.price > 0) {
+      prices.push({ value: targetLayout.price, label: formatPrice(targetLayout.price) });
+    } else if (targetVariant.price > 0) {
+      prices.push({ value: targetVariant.price, label: formatPrice(targetVariant.price) });
+    } else if (property.price > 0) {
+      prices.push({ value: property.price, label: formatPrice(property.price) });
+    }
   }
 
   // Sort prices ascending
