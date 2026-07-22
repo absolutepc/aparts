@@ -257,6 +257,20 @@ function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
   return base;
 }
 
+function setMandatoryPaymentTotal(rowId, valueId, mandatoryTotal) {
+  const row = document.getElementById(rowId);
+  const valueEl = document.getElementById(valueId);
+  if (!row || !valueEl) return;
+
+  if (mandatoryTotal > 0) {
+    row.style.display = '';
+    valueEl.textContent = `${formatPrice(mandatoryTotal)}`;
+  } else {
+    row.style.display = 'none';
+    valueEl.textContent = `${formatPrice(0)}`;
+  }
+}
+
 function calculateCash(area) {
   const priceSelect = document.getElementById('calcPriceSelectCash');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
@@ -289,9 +303,10 @@ function calculateInst(area, property, option) {
   const mandatoryPayment = option.useMandatoryPayment === false
     ? 0
     : (Number(property.mandatoryPayment) || 0);
+  let mandatoryTotal = 0;
 
   if (mandatoryPayment > 0) {
-    const mandatoryTotal = area * mandatoryPayment;
+    mandatoryTotal = area * mandatoryPayment;
     amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
 
     if (mandatoryBlock) {
@@ -318,6 +333,7 @@ function calculateInst(area, property, option) {
 
   document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
   document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
+  setMandatoryPaymentTotal('calcMandatoryRowInst', 'calcMandatoryPaymentInst', mandatoryTotal);
 }
 
 function calculateInstallmentNoDown(area, property, targetLayout, option) {
@@ -353,9 +369,10 @@ function calculateInstallmentNoDown(area, property, targetLayout, option) {
   const mandatoryPayment = option.useMandatoryPayment === false
     ? 0
     : (Number(property.mandatoryPayment) || 0);
+  let mandatoryTotal = 0;
 
   if (mandatoryPayment > 0) {
-    const mandatoryTotal = area * mandatoryPayment;
+    mandatoryTotal = area * mandatoryPayment;
     amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
 
     if (mandatoryBlock) {
@@ -382,6 +399,7 @@ function calculateInstallmentNoDown(area, property, targetLayout, option) {
 
   document.getElementById('calcMonthlyPayment6Y').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
   document.getElementById('calcTotalInstallment6Y').textContent = `${formatPrice(totalCost)}`;
+  setMandatoryPaymentTotal('calcMandatoryRowInst6Y', 'calcMandatoryPaymentInst6Y', mandatoryTotal);
 }
 
 function calculateInstallmentWithDown(area, property, targetLayout, option) {
@@ -415,11 +433,13 @@ function calculateInstallmentWithDown(area, property, targetLayout, option) {
   const downPayment = totalCost * (downPaymentPercent / 100);
   // При покупке со взносом обязательный платёж по умолчанию не вычитается
   let amountToDivide = totalCost - downPayment;
+  let mandatoryTotal = 0;
 
   if (option.useMandatoryPayment) {
     const mandatoryPayment = Number(property.mandatoryPayment) || 0;
     if (mandatoryPayment > 0) {
-      amountToDivide = Math.max(0, amountToDivide - area * mandatoryPayment);
+      mandatoryTotal = area * mandatoryPayment;
+      amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
     }
   }
 
@@ -440,6 +460,7 @@ function calculateInstallmentWithDown(area, property, targetLayout, option) {
   document.getElementById('calcDownPayment6Y30').textContent = `${formatPrice(downPayment)}`;
   document.getElementById('calcMonthlyPayment6Y30').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
   document.getElementById('calcTotalInstallment6Y30').textContent = `${formatPrice(totalCost)}`;
+  setMandatoryPaymentTotal('calcMandatoryRowInst6Y30', 'calcMandatoryPaymentInst6Y30', mandatoryTotal);
 }
 
 function getYearWord(years) {
