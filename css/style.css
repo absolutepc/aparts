@@ -1967,6 +1967,7 @@ body.page-transition-active > :not(#page-transition) {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
+  min-height: 38px; /* Prevents layout shift when input appears */
 }
 
 .calc-input-group {
@@ -1974,6 +1975,7 @@ body.page-transition-active > :not(#page-transition) {
   align-items: center;
   gap: 8px;
   flex-direction: row;
+  height: 38px;
 }
 
 .calc-input-sm {
