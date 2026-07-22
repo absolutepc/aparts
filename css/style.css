@@ -2066,26 +2066,52 @@ body.page-transition-active > :not(#page-transition) {
 .calc-maternity-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 12px;
+  flex-wrap: nowrap;
   min-height: 38px; /* Prevents layout shift when input appears */
 }
 
-.calc-input-group {
+.calc-maternity-row .calc-checkbox-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.calc-maternity-row .calc-input-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex: 0 1 auto;
   flex-direction: row;
   height: 38px;
+  min-width: 0;
 }
 
 .calc-input-sm {
   width: 120px;
+  max-width: 100%;
   padding: 6px 10px;
 }
 
 .calc-currency {
   color: var(--text-muted);
   font-weight: 500;
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .calc-maternity-row {
+    gap: 8px;
+  }
+
+  .calc-maternity-row .calc-checkbox-label {
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+
+  .calc-input-sm {
+    width: 108px;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+  }
 }
 
