@@ -112,6 +112,10 @@ function initCalcPage() {
 
   const priceSelectCash = document.getElementById('calcPriceSelectCash');
   const priceSelectInst = document.getElementById('calcPriceSelectInst');
+  const priceLabelCash = document.getElementById('calcFormulaCashPrice');
+  const priceLabelInst = document.getElementById('calcFormulaInstPrice');
+  // Одна цена (как у Ан-Нур по секторам) — фиксированный текст, без выпадающего меню
+  const useFixedUnitPrice = prices.length <= 1;
 
   if (prices.length > 0) {
     const optionsHtml = prices.map(p =>
@@ -139,18 +143,38 @@ function initCalcPage() {
 
     if (priceSelectCash) {
       priceSelectCash.innerHTML = optionsHtml;
-      priceSelectCash.addEventListener('change', () => {
-        syncFloorPriceSelects(priceSelectCash);
-        recalculateAfterPriceChange();
-      });
+      if (useFixedUnitPrice) {
+        priceSelectCash.style.display = 'none';
+        if (priceLabelCash) {
+          priceLabelCash.style.display = '';
+          priceLabelCash.textContent = formatPrice(prices[0].value);
+        }
+      } else {
+        priceSelectCash.style.display = '';
+        if (priceLabelCash) priceLabelCash.style.display = 'none';
+        priceSelectCash.addEventListener('change', () => {
+          syncFloorPriceSelects(priceSelectCash);
+          recalculateAfterPriceChange();
+        });
+      }
     }
 
     if (priceSelectInst) {
       priceSelectInst.innerHTML = optionsHtml;
-      priceSelectInst.addEventListener('change', () => {
-        syncFloorPriceSelects(priceSelectInst);
-        recalculateAfterPriceChange();
-      });
+      if (useFixedUnitPrice) {
+        priceSelectInst.style.display = 'none';
+        if (priceLabelInst) {
+          priceLabelInst.style.display = '';
+          priceLabelInst.textContent = formatPrice(prices[0].value);
+        }
+      } else {
+        priceSelectInst.style.display = '';
+        if (priceLabelInst) priceLabelInst.style.display = 'none';
+        priceSelectInst.addEventListener('change', () => {
+          syncFloorPriceSelects(priceSelectInst);
+          recalculateAfterPriceChange();
+        });
+      }
     }
   } else {
     const emptyOption = '<option value="0">Цена не указана</option>';
@@ -162,6 +186,8 @@ function initCalcPage() {
       priceSelectInst.innerHTML = emptyOption;
       priceSelectInst.disabled = true;
     }
+    if (priceLabelCash) priceLabelCash.style.display = 'none';
+    if (priceLabelInst) priceLabelInst.style.display = 'none';
   }
 
   const cashCard = document.getElementById('calcCashCard');
