@@ -299,6 +299,24 @@ function calculateInst6Years(area, property, targetLayout) {
   let totalCost = area * price;
   let amountToDivide = totalCost;
   
+  // Subtract mandatory payment if applicable
+  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+  const mandatoryBlock = document.getElementById('calcFormulaInst6YMandatoryBlock');
+  
+  if (mandatoryPayment > 0) {
+    const mandatoryTotal = area * mandatoryPayment;
+    amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
+    
+    if (mandatoryBlock) {
+      mandatoryBlock.style.display = 'inline-flex';
+      mandatoryBlock.style.alignItems = 'center';
+      mandatoryBlock.style.gap = '8px';
+      document.getElementById('calcFormulaInst6YMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)} ₽`;
+    }
+  } else if (mandatoryBlock) {
+    mandatoryBlock.style.display = 'none';
+  }
+  
   // Subtract maternity capital if checked
   const useMaternity = document.getElementById('calcUseMaternityInst6Y')?.checked;
   if (useMaternity) {
