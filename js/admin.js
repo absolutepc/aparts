@@ -908,6 +908,15 @@ function renderPropertiesAdmin() {
               </select>
             </div>
             <div class="form-group">
+              <label>Скидки СВО / Социальные</label>
+              <select name="discounts">
+                <option value="">—</option>
+                ${Object.entries(DISCOUNT_OPTIONS).map(([value, label]) => `
+                  <option value="${value}">${escapeHtml(label)}</option>
+                `).join('')}
+              </select>
+            </div>
+            <div class="form-group">
               <label>Без наценки</label>
               <select name="noMarkupYears" required>
                 ${Object.entries(NO_MARKUP_YEARS).map(([value]) => `
@@ -1238,6 +1247,7 @@ function bindPropertiesAdmin() {
       installmentTerm: formData.get('installmentTerm')?.toString().trim() || '',
       deliveryDate: formData.get('deliveryDate')?.toString().trim() || '',
       maternityCapital: formData.get('maternityCapital')?.toString() || '',
+      discounts: formData.get('discounts')?.toString() || '',
       markupBasis: formData.get('markupBasis')?.toString() || '',
       recalculation: formData.get('recalculation')?.toString() || '',
       noMarkupYears,
@@ -1339,6 +1349,7 @@ function bindPropertiesAdmin() {
       form.installmentTerm.value = property.installmentTerm || '';
       form.deliveryDate.value = property.deliveryDate || '';
       form.maternityCapital.value = property.maternityCapital || '';
+      form.discounts.value = property.discounts || '';
       form.markupBasis.value = property.markupBasis || '';
       form.recalculation.value = property.recalculation || '';
       form.noMarkupYears.value = property.noMarkupYears ?? 1;

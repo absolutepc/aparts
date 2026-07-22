@@ -48,6 +48,13 @@ const MATERNITY_CAPITAL_OPTIONS = {
   no: 'Нет',
 };
 
+const DISCOUNT_OPTIONS = {
+  '5-10/3': '5-10% / 3%',
+  '5-10/no': '5-10% / нет',
+  'no/3': 'нет / 3%',
+  'no/no': 'нет / нет',
+};
+
 const MARKUP_BASIS_OPTIONS = {
   after: 'После вычета',
   before: 'До вычета',
@@ -253,6 +260,7 @@ const DEFAULT_PROPERTIES = [
     deliveryDate: '2027г',
     installmentTerm: 'до 6 лет',
     maternityCapital: 'no',
+  discounts: 'no/no',
     markupBasis: 'after',
     recalculation: 'no',
     noMarkupYears: 1,
@@ -1365,6 +1373,12 @@ function normalizePropertyOffering(property) {
     delete item.maternityCapital;
   }
 
+  if (DISCOUNT_OPTIONS[item.discounts]) {
+    item.discounts = item.discounts;
+  } else {
+    delete item.discounts;
+  }
+
   if (MARKUP_BASIS_OPTIONS[item.markupBasis]) {
     item.markupBasis = item.markupBasis;
   } else {
@@ -1390,6 +1404,10 @@ function normalizePropertyOffering(property) {
   }
 
   return item;
+}
+
+function getDiscountLabel(value) {
+  return DISCOUNT_OPTIONS[value] || '';
 }
 
 function propertyMatchesOfferingFilters(property, filters = {}) {
@@ -1440,6 +1458,7 @@ function renderPropertyOfferingSpecs(property) {
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
     renderPropertySpecRow('Перерасчет', getRecalculationLabel(property.recalculation)),
     renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
+    renderPropertySpecRow('Скидки СВО / Социальные', getDiscountLabel(property.discounts)),
     renderPropertySpecRow('Обязательный платёж', paymentLabel),
     renderPropertySpecRow('Район', property.district),
     renderPropertySpecRow('Адрес', property.address),
@@ -2330,7 +2349,7 @@ function mergePropertyDetails(property, defaults) {
   if (!defaults) return property;
 
   const item = { ...property };
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'discounts', 'markupBasis', 'recalculation']) {
     const saved = item[key];
     const fallback = defaults[key];
     if ((saved == null || String(saved).trim() === '') && fallback != null && String(fallback).trim() !== '') {
@@ -3148,6 +3167,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'yes',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'yes',
 
@@ -3263,6 +3283,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'no',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
 
@@ -3460,6 +3481,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
     deliveryDate: '2027г',
     installmentTerm: 'до 6 лет',
     maternityCapital: 'no',
+  discounts: 'no/no',
     markupBasis: 'after',
     recalculation: 'no',
 
@@ -3665,6 +3687,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '3 квартал 2028г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'yes',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
   noMarkupYears: 2,
@@ -3746,6 +3769,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '2029г',
   installmentTerm: 'до 5 лет',
   maternityCapital: 'yes',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
   noMarkupYears: 1,
@@ -3811,6 +3835,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '3 квартал 2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'yes',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'yes',
   noMarkupYears: 2,
@@ -3928,6 +3953,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'yes',
+  discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
   noMarkupYears: 1,
@@ -4222,7 +4248,7 @@ function applyComplexLayoutDetailsToSectors(sectors, config) {
 
 function getComplexPropertyDetailsFromConfig(config) {
   const details = {};
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'discounts', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment']) {
     const value = config?.[key];
     if (value != null && String(value).trim() !== '') {
       details[key] = value;
