@@ -410,25 +410,8 @@ function calculateInst6Years30(area, property, targetLayout) {
 
   let totalCost = area * price;
   const downPayment = totalCost * 0.3; // 30% down payment
+  // При покупке со взносом обязательный платёж не вычитается
   let amountToDivide = totalCost - downPayment;
-  
-  // Subtract mandatory payment if applicable
-  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
-  const mandatoryBlock = document.getElementById('calcFormulaInst6Y30MandatoryBlock');
-  
-  if (mandatoryPayment > 0) {
-    const mandatoryTotal = area * mandatoryPayment;
-    amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
-    
-    if (mandatoryBlock) {
-      mandatoryBlock.style.display = 'inline-flex';
-      mandatoryBlock.style.alignItems = 'center';
-      mandatoryBlock.style.gap = '8px';
-      document.getElementById('calcFormulaInst6Y30MandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
-    }
-  } else if (mandatoryBlock) {
-    mandatoryBlock.style.display = 'none';
-  }
   
   // Subtract maternity capital if checked
   const useMaternity = document.getElementById('calcUseMaternityInst6Y30')?.checked;
