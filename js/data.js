@@ -3714,7 +3714,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
     { floorMin: 3, floorMax: 5, price: 80000 },
     { floorMin: 6, floorMax: 8, price: 75000 },
     { floorMin: 9, floorMax: 11, price: 70000 },
-    { floorMin: 12, floorMax: 18, price: 65000 },
+    { floorMin: 12, floorMax: 19, price: 65000 },
   ],
   floorPriceColumnLabels: { from: 'Двор', to: 'Видовые' },
 
