@@ -1891,11 +1891,6 @@ body.page-transition-active > :not(#page-transition) {
   50% { opacity: 0.25; }
 }
 
-@keyframes calc-caret {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-
 .calc-result-card.is-animating .calc-options,
 .calc-result-card.is-animating .calc-formula-select {
   pointer-events: none;
@@ -1905,26 +1900,6 @@ body.page-transition-active > :not(#page-transition) {
 .calc-formula-part-hidden {
   opacity: 0;
   visibility: hidden;
-}
-
-.calc-formula-part-typing,
-.calc-total-value.is-typing,
-.calc-formula-item.is-typing {
-  position: relative;
-}
-
-.calc-total-value.is-typing::after,
-.calc-formula-item.is-typing::after {
-  content: '';
-  display: inline-block;
-  width: 0.45em;
-  height: 0.45em;
-  margin-left: 6px;
-  border-radius: 50%;
-  vertical-align: 0.05em;
-  background: #f5c518;
-  box-shadow: 0 0 5px rgba(245, 197, 24, 0.5);
-  animation: calc-status-blink 0.9s ease-in-out infinite;
 }
 
 .calc-total-value.is-roulette {
