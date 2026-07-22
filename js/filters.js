@@ -12,6 +12,9 @@ function initPropertyCatalog(options) {
   const flatTypeFilterGroup = document.getElementById('flatTypeFilterGroup');
   const noMarkupFiltersEl = document.getElementById('noMarkupFilters');
   const mandatoryPaymentFiltersEl = document.getElementById('mandatoryPaymentFilters');
+  const maternityCapitalFiltersEl = document.getElementById('maternityCapitalFilters');
+  const discountsFiltersEl = document.getElementById('discountsFilters');
+  const deliveryDateFiltersEl = document.getElementById('deliveryDateFilters');
   const districtFiltersEl = document.getElementById('districtFilters');
   const resultsCountEl = document.getElementById('resultsCount');
   const sortSelect = document.getElementById('sortSelect');
@@ -71,6 +74,31 @@ function initPropertyCatalog(options) {
   );
 
   renderCheckboxGroup(
+    maternityCapitalFiltersEl,
+    Object.entries(MATERNITY_CAPITAL_OPTIONS).map(([value, label]) => ({
+      value,
+      label: getMaternityCapitalLabel(value),
+    })),
+    'maternity-capital-filter'
+  );
+
+  renderCheckboxGroup(
+    discountsFiltersEl,
+    Object.entries(DISCOUNT_OPTIONS).map(([value, label]) => ({
+      value,
+      label: getDiscountLabel(value),
+    })),
+    'discounts-filter'
+  );
+
+  const uniqueDeliveryDates = [...new Set(allProperties.map(p => p.deliveryDate).filter(Boolean))].sort();
+  renderCheckboxGroup(
+    deliveryDateFiltersEl,
+    uniqueDeliveryDates.map(value => ({ value, label: value })),
+    'delivery-date-filter'
+  );
+
+  renderCheckboxGroup(
     districtFiltersEl,
     getUniqueDistricts(allProperties).map(value => ({ value, label: value })),
     'district-filter'
@@ -92,6 +120,9 @@ function initPropertyCatalog(options) {
       flatTypes: isComplexCatalog ? getCheckedValues('.flat-type-filter') : [],
       noMarkupYears: getCheckedValues('.no-markup-filter'),
       mandatoryPayments: getCheckedValues('.mandatory-payment-filter'),
+      maternityCapitals: getCheckedValues('.maternity-capital-filter'),
+      discounts: getCheckedValues('.discounts-filter'),
+      deliveryDates: getCheckedValues('.delivery-date-filter'),
       districts: getCheckedValues('.district-filter'),
       sort: sortSelect?.value || 'default',
     };
@@ -106,6 +137,9 @@ function initPropertyCatalog(options) {
           maxValue: state.maxValue,
           noMarkupYears: state.noMarkupYears,
           mandatoryPayments: state.mandatoryPayments,
+          maternityCapitals: state.maternityCapitals,
+          discounts: state.discounts,
+          deliveryDates: state.deliveryDates,
           districts: state.districts,
         });
       }
@@ -125,6 +159,9 @@ function initPropertyCatalog(options) {
       return propertyMatchesOfferingFilters(property, {
         noMarkupYears: state.noMarkupYears,
         mandatoryPayments: state.mandatoryPayments,
+        maternityCapitals: state.maternityCapitals,
+        discounts: state.discounts,
+        deliveryDates: state.deliveryDates,
       });
     });
   }

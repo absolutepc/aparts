@@ -1413,11 +1413,23 @@ function getDiscountLabel(value) {
 function propertyMatchesOfferingFilters(property, filters = {}) {
   const noMarkupYears = Array.isArray(filters.noMarkupYears) ? filters.noMarkupYears : [];
   const mandatoryPayments = Array.isArray(filters.mandatoryPayments) ? filters.mandatoryPayments : [];
+  const maternityCapitals = Array.isArray(filters.maternityCapitals) ? filters.maternityCapitals : [];
+  const discounts = Array.isArray(filters.discounts) ? filters.discounts : [];
+  const deliveryDates = Array.isArray(filters.deliveryDates) ? filters.deliveryDates : [];
 
   if (noMarkupYears.length && !noMarkupYears.includes(String(property.noMarkupYears))) {
     return false;
   }
   if (mandatoryPayments.length && !mandatoryPayments.includes(String(property.mandatoryPayment))) {
+    return false;
+  }
+  if (maternityCapitals.length && !maternityCapitals.includes(String(property.maternityCapital))) {
+    return false;
+  }
+  if (discounts.length && !discounts.includes(String(property.discounts))) {
+    return false;
+  }
+  if (deliveryDates.length && !deliveryDates.includes(String(property.deliveryDate))) {
     return false;
   }
   return true;
