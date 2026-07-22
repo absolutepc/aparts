@@ -1737,3 +1737,138 @@ body.page-transition-active > :not(#page-transition) {
     transition-duration: 0.2s;
   }
 }
+
+/* Calculator */
+.calc-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+@media (min-width: 768px) {
+  .calc-container {
+    grid-template-columns: 350px 1fr;
+  }
+}
+
+.calc-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.calc-property-info {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.calc-property-info h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.25rem;
+}
+
+.calc-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  outline: none;
+}
+
+.calc-select:focus {
+  border-color: var(--primary-color);
+}
+
+.calc-image {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calc-image img {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.calc-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.calc-result-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+}
+
+.calc-result-card h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.calc-formula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 16px 24px;
+  background: var(--bg-body);
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.calc-formula-item {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.calc-formula-op {
+  color: var(--text-muted);
+}
+
+.calc-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.calc-total-secondary {
+  margin-top: 16px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.calc-total-label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.calc-total-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Калькулятор стоимости — Aparts</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main>
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">Главная</a> /
+        <a href="complexes.html">ЖК и МФК</a> /
+        <a href="#" id="calcPropertyLink">Объект</a> /
+        <span>Калькулятор стоимости</span>
+      </div>
+
+      <div class="section-header">
+        <h1 id="calcTitle">Калькулятор стоимости</h1>
+        <p id="calcSubtitle">Загрузка данных...</p>
+      </div>
+
+      <div id="calcContent" class="calc-container" style="display: none;">
+        <div class="calc-sidebar">
+          <div class="calc-property-info">
+            <h3 id="calcLayoutName">Планировка</h3>
+            <div class="property-spec-row">
+              <span class="property-spec-label">Площадь</span>
+              <span class="property-spec-value" id="calcArea">0 м²</span>
+            </div>
+            <div class="property-spec-row">
+              <span class="property-spec-label">Цена за м²</span>
+              <select id="calcPriceSelect" class="calc-select"></select>
+            </div>
+            <div class="property-spec-row">
+              <span class="property-spec-label">Срок рассрочки</span>
+              <span class="property-spec-value" id="calcInstallmentTerm">0 мес.</span>
+            </div>
+          </div>
+          <div class="calc-image" id="calcImage"></div>
+        </div>
+
+        <div class="calc-results">
+          <div class="calc-result-card">
+            <h3>За наличный расчет</h3>
+            <div class="calc-formula">
+              <span class="calc-formula-item" id="calcFormulaCashArea">0 м²</span>
+              <span class="calc-formula-op">×</span>
+              <span class="calc-formula-item" id="calcFormulaCashPrice">0 ₽</span>
+            </div>
+            <div class="calc-total">
+              <span class="calc-total-label">Итого:</span>
+              <span class="calc-total-value" id="calcTotalCash">0 ₽</span>
+            </div>
+          </div>
+
+          <div class="calc-result-card" id="calcInstallmentCard">
+            <h3 id="calcInstallmentTitle">Рассрочка</h3>
+            <div class="calc-formula">
+              <span class="calc-formula-item" id="calcFormulaInstArea">0 м²</span>
+              <span class="calc-formula-op">×</span>
+              <span class="calc-formula-item" id="calcFormulaInstPrice">0 ₽</span>
+              <span class="calc-formula-op">÷</span>
+              <span class="calc-formula-item" id="calcFormulaInstMonths">0 мес.</span>
+            </div>
+            <div class="calc-total">
+              <span class="calc-total-label">Ежемесячный платеж:</span>
+              <span class="calc-total-value" id="calcMonthlyPayment">0 ₽</span>
+            </div>
+            <div class="calc-total calc-total-secondary">
+              <span class="calc-total-label">Итоговая стоимость:</span>
+              <span class="calc-total-value" id="calcTotalInstallment">0 ₽</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="calcError" class="empty-state" style="display: none;">
+        <h2>Ошибка</h2>
+        <p>Не удалось загрузить данные для расчета. Возможно, неверная ссылка.</p>
+        <a href="complexes.html" class="btn btn-primary">В каталог</a>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="js/data.js?v=44"></script>
+  <script src="js/app.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/calc.js"></script>
+  <script>
+    initLayout('');
+    initCalcPage();
+  </script>
+</body>
+</html>

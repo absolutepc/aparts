@@ -2856,6 +2856,9 @@ function renderPropertyFloorPlansBlock(property, selectedFlatType, selectedSecto
               ${priceSpecsHtml}
             </li>` : ''}
             ${layoutDescriptionHtml}
+            <li class="floor-plan-spec-calc">
+              <a href="calc.html?id=${encodeURIComponent(property.id)}&sector=${encodeURIComponent(activeSectorId || '')}&flatType=${encodeURIComponent(variant.flatType)}&layout=${encodeURIComponent(layout.key)}" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 10px;">Рассчитать стоимость</a>
+            </li>
           </ul>
         </div>
       `;
