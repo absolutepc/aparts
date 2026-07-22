@@ -1858,19 +1858,37 @@ body.page-transition-active > :not(#page-transition) {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-.calc-status.is-thinking::after {
+.calc-status.is-thinking::after,
+.calc-status.is-done::after {
   content: '';
   display: inline-block;
   width: 0.55em;
-  height: 1.05em;
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  background: currentColor;
-  animation: calc-caret 0.9s steps(1) infinite;
+  height: 0.55em;
+  margin-left: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.calc-status.is-thinking::after {
+  background: #f5c518;
+  box-shadow: 0 0 6px rgba(245, 197, 24, 0.55);
+  animation: calc-status-blink 0.9s ease-in-out infinite;
 }
 
 .calc-status.is-done {
-  color: var(--primary-color);
+  color: #22c55e;
+}
+
+.calc-status.is-done::after {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.45);
+  animation: none;
+  opacity: 1;
+}
+
+@keyframes calc-status-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
 }
 
 @keyframes calc-caret {
@@ -1900,11 +1918,27 @@ body.page-transition-active > :not(#page-transition) {
   content: '';
   display: inline-block;
   width: 0.45em;
-  height: 1em;
-  margin-left: 2px;
-  vertical-align: -0.1em;
-  background: currentColor;
-  animation: calc-caret 0.9s steps(1) infinite;
+  height: 0.45em;
+  margin-left: 6px;
+  border-radius: 50%;
+  vertical-align: 0.05em;
+  background: #f5c518;
+  box-shadow: 0 0 5px rgba(245, 197, 24, 0.5);
+  animation: calc-status-blink 0.9s ease-in-out infinite;
+}
+
+.calc-total-value.is-roulette {
+  display: inline-block;
+  min-width: 7ch;
+  text-align: right;
+  filter: blur(0.35px);
+  animation: calc-roulette-tick 0.07s linear infinite;
+}
+
+@keyframes calc-roulette-tick {
+  0% { transform: translateY(-2px); }
+  50% { transform: translateY(2px); }
+  100% { transform: translateY(-2px); }
 }
 
 .calc-total.is-total-hidden {
@@ -1918,9 +1952,15 @@ body.page-transition-active > :not(#page-transition) {
   }
 
   .calc-status.is-thinking::after,
-  .calc-total-value.is-typing::after {
+  .calc-total-value.is-typing::after,
+  .calc-formula-item.is-typing::after {
     animation: none;
     opacity: 1;
+  }
+
+  .calc-total-value.is-roulette {
+    filter: none;
+    animation: none;
   }
 }
 

@@ -118,14 +118,39 @@ function initCalcPage() {
       `<option value="${p.value}">${escapeHtml(p.label)}</option>`
     ).join('');
 
+    const syncFloorPriceSelects = (sourceSelect) => {
+      const value = sourceSelect?.value;
+      if (value == null) return;
+      if (priceSelectCash && priceSelectCash !== sourceSelect) priceSelectCash.value = value;
+      if (priceSelectInst && priceSelectInst !== sourceSelect) priceSelectInst.value = value;
+    };
+
+    const recalculateAfterPriceChange = () => {
+      const animate = true;
+      if (cashOption) calculateCash(area, { animate });
+      if (noMarkupOption) calculateInst(area, property, noMarkupOption, { animate });
+      if (installmentNoDownOption) {
+        calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption, { animate });
+      }
+      if (installmentWithDownOption) {
+        calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption, { animate });
+      }
+    };
+
     if (priceSelectCash) {
       priceSelectCash.innerHTML = optionsHtml;
-      priceSelectCash.addEventListener('change', () => calculateCash(area));
+      priceSelectCash.addEventListener('change', () => {
+        syncFloorPriceSelects(priceSelectCash);
+        recalculateAfterPriceChange();
+      });
     }
 
     if (priceSelectInst) {
       priceSelectInst.innerHTML = optionsHtml;
-      priceSelectInst.addEventListener('change', () => calculateInst(area, property, noMarkupOption));
+      priceSelectInst.addEventListener('change', () => {
+        syncFloorPriceSelects(priceSelectInst);
+        recalculateAfterPriceChange();
+      });
     }
   } else {
     const emptyOption = '<option value="0">Цена не указана</option>';
@@ -179,9 +204,11 @@ function initCalcPage() {
   if (useMaternityCash && maternityInputGroupCash && maternityAmountCash) {
     useMaternityCash.addEventListener('change', (e) => {
       maternityInputGroupCash.style.display = e.target.checked ? '' : 'none';
-      calculateCash(area);
+      calculateCash(area, { animate: true });
     });
-    maternityAmountCash.addEventListener('input', () => calculateCash(area));
+    maternityAmountCash.addEventListener('input', debounceCalc(() => {
+      calculateCash(area, { animate: true });
+    }, 280));
   }
 
   const useMaternityInst = document.getElementById('calcUseMaternityInst');
@@ -191,9 +218,11 @@ function initCalcPage() {
   if (useMaternityInst && maternityInputGroupInst && maternityAmountInst) {
     useMaternityInst.addEventListener('change', (e) => {
       maternityInputGroupInst.style.display = e.target.checked ? '' : 'none';
-      calculateInst(area, property, noMarkupOption);
+      calculateInst(area, property, noMarkupOption, { animate: true });
     });
-    maternityAmountInst.addEventListener('input', () => calculateInst(area, property, noMarkupOption));
+    maternityAmountInst.addEventListener('input', debounceCalc(() => {
+      calculateInst(area, property, noMarkupOption, { animate: true });
+    }, 280));
   }
 
   const useMaternityInst6Y = document.getElementById('calcUseMaternityInst6Y');
@@ -203,11 +232,11 @@ function initCalcPage() {
   if (useMaternityInst6Y && maternityInputGroupInst6Y && maternityAmountInst6Y) {
     useMaternityInst6Y.addEventListener('change', (e) => {
       maternityInputGroupInst6Y.style.display = e.target.checked ? '' : 'none';
-      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
+      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption, { animate: true });
     });
-    maternityAmountInst6Y.addEventListener('input', () => {
-      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
-    });
+    maternityAmountInst6Y.addEventListener('input', debounceCalc(() => {
+      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption, { animate: true });
+    }, 280));
   }
 
   const useMaternityInst6Y30 = document.getElementById('calcUseMaternityInst6Y30');
@@ -217,11 +246,11 @@ function initCalcPage() {
   if (useMaternityInst6Y30 && maternityInputGroupInst6Y30 && maternityAmountInst6Y30) {
     useMaternityInst6Y30.addEventListener('change', (e) => {
       maternityInputGroupInst6Y30.style.display = e.target.checked ? '' : 'none';
-      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
+      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption, { animate: true });
     });
-    maternityAmountInst6Y30.addEventListener('input', () => {
-      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
-    });
+    maternityAmountInst6Y30.addEventListener('input', debounceCalc(() => {
+      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption, { animate: true });
+    }, 280));
   }
 
   contentEl.style.display = '';
@@ -283,11 +312,105 @@ function initCalcPage() {
 }
 
 const CALC_CARD_DURATION_MS = 10000;
+const CALC_ROULETTE_DURATION_MS = 1600;
 let calcRevealToken = 0;
 let calcRevealComplete = false;
+const calcRouletteStates = new WeakMap();
 
 function prefersCalcReducedMotion() {
   return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function shouldAnimateCalcTotals() {
+  return calcRevealComplete && !prefersCalcReducedMotion();
+}
+
+function parseCalcPriceNumber(text) {
+  const digits = String(text || '').replace(/[^\d]/g, '');
+  return digits ? Number(digits) : 0;
+}
+
+function stopCalcRoulette(el) {
+  const state = calcRouletteStates.get(el);
+  if (!state) return;
+  if (state.raf) cancelAnimationFrame(state.raf);
+  calcRouletteStates.delete(el);
+  el.classList.remove('is-roulette');
+}
+
+function animateRouletteValue(el, targetText, durationMs = CALC_ROULETTE_DURATION_MS) {
+  if (!el) return;
+
+  const finalText = String(targetText ?? '');
+  if (!shouldAnimateCalcTotals()) {
+    stopCalcRoulette(el);
+    el.textContent = finalText;
+    return;
+  }
+
+  const from = parseCalcPriceNumber(el.textContent);
+  const to = parseCalcPriceNumber(finalText);
+  if (from === to && el.textContent === finalText) return;
+
+  stopCalcRoulette(el);
+  el.classList.add('is-roulette');
+
+  const start = performance.now();
+  const state = { raf: 0 };
+  calcRouletteStates.set(el, state);
+
+  const span = Math.max(Math.abs(to - from), Math.abs(to) * 0.2, 50000);
+
+  function frame(now) {
+    const t = Math.min(1, (now - start) / durationMs);
+    const ease = 1 - Math.pow(1 - t, 3);
+    let value;
+
+    if (t < 0.82) {
+      const center = from + (to - from) * ease;
+      const jitter = (Math.random() - 0.5) * span * (1 - t) * (1 - t);
+      value = Math.max(0, Math.round(center + jitter));
+      if (t < 0.55) {
+        value = Math.round(value / 1000) * 1000;
+      } else if (t < 0.72) {
+        value = Math.round(value / 100) * 100;
+      }
+    } else {
+      value = Math.round(from + (to - from) * ease);
+    }
+
+    el.textContent = formatPrice(value);
+
+    if (t < 1) {
+      state.raf = requestAnimationFrame(frame);
+    } else {
+      el.textContent = finalText;
+      el.classList.remove('is-roulette');
+      calcRouletteStates.delete(el);
+    }
+  }
+
+  state.raf = requestAnimationFrame(frame);
+}
+
+function setCalcValueText(elOrId, text, animate = false) {
+  const el = typeof elOrId === 'string' ? document.getElementById(elOrId) : elOrId;
+  if (!el) return;
+  const finalText = String(text ?? '');
+  if (animate && shouldAnimateCalcTotals()) {
+    animateRouletteValue(el, finalText);
+  } else {
+    stopCalcRoulette(el);
+    el.textContent = finalText;
+  }
+}
+
+function debounceCalc(fn, waitMs) {
+  let timer = 0;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), waitMs);
+  };
 }
 
 function setCalcControlsLocked(locked) {
@@ -555,21 +678,23 @@ function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
   return base;
 }
 
-function setMandatoryPaymentTotal(rowId, valueId, mandatoryTotal) {
+function setMandatoryPaymentTotal(rowId, valueId, mandatoryTotal, animate = false) {
   const row = document.getElementById(rowId);
   const valueEl = document.getElementById(valueId);
   if (!row || !valueEl) return;
 
   if (mandatoryTotal > 0) {
     row.style.display = '';
-    valueEl.textContent = `${formatPrice(mandatoryTotal)}`;
+    setCalcValueText(valueEl, `${formatPrice(mandatoryTotal)}`, animate);
   } else {
     row.style.display = 'none';
+    stopCalcRoulette(valueEl);
     valueEl.textContent = `${formatPrice(0)}`;
   }
 }
 
-function calculateCash(area) {
+function calculateCash(area, options = {}) {
+  const animate = Boolean(options.animate);
   const priceSelect = document.getElementById('calcPriceSelectCash');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
 
@@ -582,11 +707,12 @@ function calculateCash(area) {
   }
 
   document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
-  document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
+  setCalcValueText('calcTotalCash', `${formatPrice(totalCash)}`, animate);
 }
 
-function calculateInst(area, property, option) {
+function calculateInst(area, property, option, options = {}) {
   if (!option) return;
+  const animate = Boolean(options.animate);
 
   const priceSelect = document.getElementById('calcPriceSelectInst');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
@@ -629,14 +755,15 @@ function calculateInst(area, property, option) {
   document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
   document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
 
-  document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-  document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
-  setMandatoryPaymentTotal('calcMandatoryRowInst', 'calcMandatoryPaymentInst', mandatoryTotal);
+  setCalcValueText('calcMonthlyPayment', `${formatPrice(Math.round(monthlyPayment))}`, animate);
+  setCalcValueText('calcTotalInstallment', `${formatPrice(totalCost)}`, animate);
+  setMandatoryPaymentTotal('calcMandatoryRowInst', 'calcMandatoryPaymentInst', mandatoryTotal, animate);
 }
 
-function calculateInstallmentNoDown(area, property, targetLayout, option) {
+function calculateInstallmentNoDown(area, property, targetLayout, option, options = {}) {
   const card = document.getElementById('calcInstallment6YearsCard');
   if (!card) return;
+  const animate = Boolean(options.animate);
 
   if (!option) {
     card.style.display = 'none';
@@ -695,14 +822,15 @@ function calculateInstallmentNoDown(area, property, targetLayout, option) {
   document.getElementById('calcFormulaInst6YArea').textContent = `${formatArea(area)} м²`;
   document.getElementById('calcFormulaInst6YPrice').textContent = `${formatPrice(price)}`;
 
-  document.getElementById('calcMonthlyPayment6Y').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-  document.getElementById('calcTotalInstallment6Y').textContent = `${formatPrice(totalCost)}`;
-  setMandatoryPaymentTotal('calcMandatoryRowInst6Y', 'calcMandatoryPaymentInst6Y', mandatoryTotal);
+  setCalcValueText('calcMonthlyPayment6Y', `${formatPrice(Math.round(monthlyPayment))}`, animate);
+  setCalcValueText('calcTotalInstallment6Y', `${formatPrice(totalCost)}`, animate);
+  setMandatoryPaymentTotal('calcMandatoryRowInst6Y', 'calcMandatoryPaymentInst6Y', mandatoryTotal, animate);
 }
 
-function calculateInstallmentWithDown(area, property, targetLayout, option) {
+function calculateInstallmentWithDown(area, property, targetLayout, option, options = {}) {
   const card = document.getElementById('calcInstallment6Years30Card');
   if (!card) return;
+  const animate = Boolean(options.animate);
 
   if (!option) {
     card.style.display = 'none';
@@ -755,10 +883,10 @@ function calculateInstallmentWithDown(area, property, targetLayout, option) {
   document.getElementById('calcFormulaInst6Y30DownPayment').textContent =
     `${formatPrice(downPayment)} (${downPaymentPercent}%)`;
 
-  document.getElementById('calcDownPayment6Y30').textContent = `${formatPrice(downPayment)}`;
-  document.getElementById('calcMonthlyPayment6Y30').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-  document.getElementById('calcTotalInstallment6Y30').textContent = `${formatPrice(totalCost)}`;
-  setMandatoryPaymentTotal('calcMandatoryRowInst6Y30', 'calcMandatoryPaymentInst6Y30', mandatoryTotal);
+  setCalcValueText('calcDownPayment6Y30', `${formatPrice(downPayment)}`, animate);
+  setCalcValueText('calcMonthlyPayment6Y30', `${formatPrice(Math.round(monthlyPayment))}`, animate);
+  setCalcValueText('calcTotalInstallment6Y30', `${formatPrice(totalCost)}`, animate);
+  setMandatoryPaymentTotal('calcMandatoryRowInst6Y30', 'calcMandatoryPaymentInst6Y30', mandatoryTotal, animate);
 }
 
 function getYearWord(years) {
