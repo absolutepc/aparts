@@ -282,7 +282,7 @@ function initCalcPage() {
   });
 }
 
-const CALC_CARD_DURATION_MS = 15000;
+const CALC_CARD_DURATION_MS = 10000;
 let calcRevealToken = 0;
 let calcRevealComplete = false;
 
