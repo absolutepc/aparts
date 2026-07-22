@@ -61,16 +61,7 @@ function initCalcPage() {
     subtitleEl.textContent = `${sectorText}${getFlatTypeLabel(flatType)}`;
   }
 
-  const layoutNameEl = document.getElementById('calcLayoutName');
-  if (layoutNameEl) {
-    layoutNameEl.style.display = 'none';
-  }
-
   const area = Number(targetLayout.areaMin) || Number(targetVariant.areaMin) || 0;
-  const areaEl = document.getElementById('calcArea');
-  if (areaEl) {
-    areaEl.textContent = `${formatArea(area)} м²`;
-  }
 
   const imageEl = document.getElementById('calcImage');
   if (imageEl) {
@@ -106,28 +97,38 @@ function initCalcPage() {
   // Sort prices ascending
   prices.sort((a, b) => a.value - b.value);
 
-  const priceSelect = document.getElementById('calcPriceSelect');
-  if (priceSelect) {
-    if (prices.length > 0) {
-      priceSelect.innerHTML = prices.map(p => 
-        `<option value="${p.value}">${escapeHtml(p.label)}</option>`
-      ).join('');
-      
-      priceSelect.addEventListener('change', () => calculate(area, property));
-    } else {
-      priceSelect.innerHTML = '<option value="0">Цена не указана</option>';
-      priceSelect.disabled = true;
+  const priceSelectCash = document.getElementById('calcPriceSelectCash');
+  const priceSelectInst = document.getElementById('calcPriceSelectInst');
+  
+  if (prices.length > 0) {
+    const optionsHtml = prices.map(p => 
+      `<option value="${p.value}">${escapeHtml(p.label)}</option>`
+    ).join('');
+    
+    if (priceSelectCash) {
+      priceSelectCash.innerHTML = optionsHtml;
+      priceSelectCash.addEventListener('change', () => calculateCash(area));
+    }
+    
+    if (priceSelectInst) {
+      priceSelectInst.innerHTML = optionsHtml;
+      priceSelectInst.addEventListener('change', () => calculateInst(area, property));
+    }
+  } else {
+    const emptyOption = '<option value="0">Цена не указана</option>';
+    if (priceSelectCash) {
+      priceSelectCash.innerHTML = emptyOption;
+      priceSelectCash.disabled = true;
+    }
+    if (priceSelectInst) {
+      priceSelectInst.innerHTML = emptyOption;
+      priceSelectInst.disabled = true;
     }
   }
 
   // Installment term
   const noMarkupYears = Number(property.noMarkupYears) || 0;
   const installmentMonths = noMarkupYears * 12;
-  
-  const termEl = document.getElementById('calcInstallmentTerm');
-  if (termEl) {
-    termEl.textContent = installmentMonths > 0 ? `${installmentMonths} мес.` : 'Нет рассрочки без наценки';
-  }
 
   const instCard = document.getElementById('calcInstallmentCard');
   if (instCard) {
@@ -145,29 +146,32 @@ function initCalcPage() {
   errorEl.style.display = 'none';
 
   // Initial calculation
-  calculate(area, property, installmentMonths);
+  calculateCash(area);
+  calculateInst(area, property);
 }
 
-function calculate(area, property) {
-  const priceSelect = document.getElementById('calcPriceSelect');
+function calculateCash(area) {
+  const priceSelect = document.getElementById('calcPriceSelectCash');
+  const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  
+  const totalCash = area * price;
+  
+  document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
+  document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
+}
+
+function calculateInst(area, property) {
+  const priceSelect = document.getElementById('calcPriceSelectInst');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
   
   const noMarkupYears = Number(property.noMarkupYears) || 0;
   const installmentMonths = noMarkupYears * 12;
 
-  // Cash calculation
-  const totalCash = area * price;
-  
-  document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
-  document.getElementById('calcFormulaCashPrice').textContent = `${formatPrice(price)}`;
-  document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
-
-  // Installment calculation
   if (installmentMonths > 0) {
+    const totalCash = area * price;
     const monthlyPayment = totalCash / installmentMonths;
     
     document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
-    document.getElementById('calcFormulaInstPrice').textContent = `${formatPrice(price)}`;
     document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
     
     document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
