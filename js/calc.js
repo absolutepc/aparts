@@ -76,7 +76,7 @@ function initCalcPage() {
         uniquePrices.add(p);
         prices.push({
           value: p,
-          label: `${formatPrice(p)} (от ${range.floorMin} этажа)`
+          label: formatPrice(p)
         });
       }
     });
