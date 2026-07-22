@@ -32,6 +32,18 @@
               <span class="calc-formula-op">×</span>
               <select id="calcPriceSelectCash" class="calc-select calc-formula-select"></select>
             </div>
+            
+            <div class="calc-options" id="calcOptionsCash" style="display: none; margin-bottom: 24px;">
+              <label class="calc-checkbox-label">
+                <input type="checkbox" id="calcUseMaternityCash">
+                Использовать материнский капитал
+              </label>
+              <div class="calc-input-group" id="calcMaternityInputGroupCash" style="display: none; margin-top: 12px;">
+                <label>Сумма материнского капитала, ₽</label>
+                <input type="number" id="calcMaternityAmountCash" class="calc-input" value="833024" min="0" step="1000">
+              </div>
+            </div>
+
             <div class="calc-total">
               <span class="calc-total-label">Итого:</span>
               <span class="calc-total-value" id="calcTotalCash">0 ₽</span>
@@ -44,9 +56,31 @@
               <span class="calc-formula-item" id="calcFormulaInstArea">0 м²</span>
               <span class="calc-formula-op">×</span>
               <select id="calcPriceSelectInst" class="calc-select calc-formula-select"></select>
-              <span class="calc-formula-op">÷</span>
+              <span class="calc-formula-op" id="calcFormulaInstDivOp">÷</span>
               <span class="calc-formula-item" id="calcFormulaInstMonths">0 мес.</span>
             </div>
+
+            <div class="calc-options" id="calcOptionsInst" style="margin-bottom: 24px;">
+              <div id="calcMaternityOptionInst" style="display: none; margin-bottom: 12px;">
+                <label class="calc-checkbox-label">
+                  <input type="checkbox" id="calcUseMaternityInst">
+                  Использовать материнский капитал
+                </label>
+                <div class="calc-input-group" id="calcMaternityInputGroupInst" style="display: none; margin-top: 12px;">
+                  <label>Сумма материнского капитала, ₽</label>
+                  <input type="number" id="calcMaternityAmountInst" class="calc-input" value="833024" min="0" step="1000">
+                </div>
+              </div>
+              
+              <div id="calcMandatoryPaymentBlock" style="display: none;">
+                <div class="calc-info-row">
+                  <span class="calc-info-label">Обязательный платеж (<span id="calcMandatoryPaymentRate">0</span> ₽/м²):</span>
+                  <span class="calc-info-value" id="calcMandatoryPaymentTotal">0 ₽</span>
+                </div>
+                <p class="calc-hint">Обязательный платеж вычитается из общей стоимости перед расчетом рассрочки.</p>
+              </div>
+            </div>
+
             <div class="calc-total">
               <span class="calc-total-label">Итоговая стоимость:</span>
               <span class="calc-total-value" id="calcTotalInstallment">0 ₽</span>

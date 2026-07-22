@@ -136,6 +136,55 @@ function initCalcPage() {
     }
   }
 
+  // Setup Maternity Capital options
+  const hasMaternityCapital = property.maternityCapital === 'yes';
+  
+  const cashOptions = document.getElementById('calcOptionsCash');
+  const instMaternityOption = document.getElementById('calcMaternityOptionInst');
+  
+  if (hasMaternityCapital) {
+    if (cashOptions) cashOptions.style.display = '';
+    if (instMaternityOption) instMaternityOption.style.display = '';
+  }
+
+  const useMaternityCash = document.getElementById('calcUseMaternityCash');
+  const maternityInputGroupCash = document.getElementById('calcMaternityInputGroupCash');
+  const maternityAmountCash = document.getElementById('calcMaternityAmountCash');
+
+  if (useMaternityCash && maternityInputGroupCash && maternityAmountCash) {
+    useMaternityCash.addEventListener('change', (e) => {
+      maternityInputGroupCash.style.display = e.target.checked ? '' : 'none';
+      calculateCash(area);
+    });
+    maternityAmountCash.addEventListener('input', () => calculateCash(area));
+  }
+
+  const useMaternityInst = document.getElementById('calcUseMaternityInst');
+  const maternityInputGroupInst = document.getElementById('calcMaternityInputGroupInst');
+  const maternityAmountInst = document.getElementById('calcMaternityAmountInst');
+
+  if (useMaternityInst && maternityInputGroupInst && maternityAmountInst) {
+    useMaternityInst.addEventListener('change', (e) => {
+      maternityInputGroupInst.style.display = e.target.checked ? '' : 'none';
+      calculateInst(area, property);
+    });
+    maternityAmountInst.addEventListener('input', () => calculateInst(area, property));
+  }
+
+  // Setup Mandatory Payment
+  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+  const mandatoryPaymentBlock = document.getElementById('calcMandatoryPaymentBlock');
+  
+  if (mandatoryPayment > 0 && mandatoryPaymentBlock) {
+    mandatoryPaymentBlock.style.display = '';
+    
+    const rateEl = document.getElementById('calcMandatoryPaymentRate');
+    if (rateEl) rateEl.textContent = formatPrice(mandatoryPayment);
+    
+    const totalEl = document.getElementById('calcMandatoryPaymentTotal');
+    if (totalEl) totalEl.textContent = `${formatPrice(area * mandatoryPayment)} ₽`;
+  }
+
   contentEl.style.display = '';
   errorEl.style.display = 'none';
 
@@ -148,7 +197,13 @@ function calculateCash(area) {
   const priceSelect = document.getElementById('calcPriceSelectCash');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
   
-  const totalCash = area * price;
+  let totalCash = area * price;
+  
+  const useMaternity = document.getElementById('calcUseMaternityCash')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(document.getElementById('calcMaternityAmountCash')?.value) || 0;
+    totalCash = Math.max(0, totalCash - maternityAmount);
+  }
   
   document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
   document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
@@ -162,14 +217,31 @@ function calculateInst(area, property) {
   const installmentMonths = noMarkupYears * 12;
 
   if (installmentMonths > 0) {
-    const totalCash = area * price;
-    const monthlyPayment = totalCash / installmentMonths;
+    let totalCost = area * price;
+    let amountToDivide = totalCost;
+    
+    // Subtract mandatory payment if applicable
+    const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+    if (mandatoryPayment > 0) {
+      const mandatoryTotal = area * mandatoryPayment;
+      amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
+    }
+    
+    // Subtract maternity capital if checked
+    const useMaternity = document.getElementById('calcUseMaternityInst')?.checked;
+    if (useMaternity) {
+      const maternityAmount = Number(document.getElementById('calcMaternityAmountInst')?.value) || 0;
+      amountToDivide = Math.max(0, amountToDivide - maternityAmount);
+      totalCost = Math.max(0, totalCost - maternityAmount); // Reduce total cost by maternity capital too
+    }
+    
+    const monthlyPayment = amountToDivide / installmentMonths;
     
     document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
     document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
     
     document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-    document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCash)}`;
+    document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
   }
 }
 
