@@ -379,7 +379,6 @@ async function animateCalcCard(card, statusId, durationMs, signal) {
   const statusEl = statusId ? document.getElementById(statusId) : null;
   const formulaParts = collectFormulaParts(card);
   const totalRows = collectTotalRows(card);
-  const startedAt = performance.now();
 
   card.classList.remove('is-pending', 'is-done');
   card.classList.add('is-animating');
@@ -466,13 +465,6 @@ async function animateCalcCard(card, statusId, durationMs, signal) {
       signal
     );
     await calcSleep(Math.max(180, perTotal * 0.15), signal);
-  }
-
-  const elapsed = performance.now() - startedAt;
-  const remain = durationMs - elapsed;
-  if (remain > 0 && !signal?.aborted) {
-    if (statusEl) statusEl.textContent = 'Проверяю цифры';
-    await calcSleep(remain, signal);
   }
 
   // Restore final values in case animation was interrupted mid-type
