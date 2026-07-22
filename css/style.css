@@ -1926,9 +1926,7 @@ body.page-transition-active > :not(#page-transition) {
     animation: none;
   }
 
-  .calc-status.is-thinking::after,
-  .calc-total-value.is-typing::after,
-  .calc-formula-item.is-typing::after {
+  .calc-status.is-thinking::after {
     animation: none;
     opacity: 1;
   }
