@@ -141,10 +141,12 @@ function initCalcPage() {
   
   const cashOptions = document.getElementById('calcOptionsCash');
   const instOptions = document.getElementById('calcOptionsInst');
+  const inst6YOptions = document.getElementById('calcOptionsInst6Y');
   
   if (hasMaternityCapital) {
     if (cashOptions) cashOptions.style.display = '';
     if (instOptions) instOptions.style.display = '';
+    if (inst6YOptions) inst6YOptions.style.display = '';
   }
 
   const useMaternityCash = document.getElementById('calcUseMaternityCash');
@@ -171,6 +173,18 @@ function initCalcPage() {
     maternityAmountInst.addEventListener('input', () => calculateInst(area, property));
   }
 
+  const useMaternityInst6Y = document.getElementById('calcUseMaternityInst6Y');
+  const maternityInputGroupInst6Y = document.getElementById('calcMaternityInputGroupInst6Y');
+  const maternityAmountInst6Y = document.getElementById('calcMaternityAmountInst6Y');
+
+  if (useMaternityInst6Y && maternityInputGroupInst6Y && maternityAmountInst6Y) {
+    useMaternityInst6Y.addEventListener('change', (e) => {
+      maternityInputGroupInst6Y.style.display = e.target.checked ? '' : 'none';
+      calculateInst6Years(area, property, targetLayout);
+    });
+    maternityAmountInst6Y.addEventListener('input', () => calculateInst6Years(area, property, targetLayout));
+  }
+
   // Setup Mandatory Payment
   const mandatoryPayment = Number(property.mandatoryPayment) || 0;
 
@@ -180,6 +194,7 @@ function initCalcPage() {
   // Initial calculation
   calculateCash(area);
   calculateInst(area, property);
+  calculateInst6Years(area, property, targetLayout);
 }
 
 function calculateCash(area) {
@@ -243,6 +258,62 @@ function calculateInst(area, property) {
     document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
     document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
   }
+}
+
+function calculateInst6Years(area, property, targetLayout) {
+  const card = document.getElementById('calcInstallment6YearsCard');
+  if (!card) return;
+
+  // We only show this if there's a 6-year installment term configured for the property
+  const installmentTerm = property.installmentTerm || '';
+  if (!installmentTerm.includes('6')) {
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = '';
+
+  // For 6 years installment, we use the specific price logic:
+  // We need to find the price for 6 years from sectorPriceGroups if available, 
+  // or fallback to the standard calculation logic.
+  // The user requested "Рассрочка на 6 лет без взноса", which corresponds to "noDownPayment" in sectorPriceGroups.
+  
+  let price = 0;
+  
+  // Try to get price from sectorPriceGroups -> noDownPayment
+  if (typeof getSectorPriceGroupForSector === 'function' && typeof resolveLayoutSectorTitle === 'function') {
+    const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(targetLayout));
+    if (sectorGroup && sectorGroup.noDownPayment) {
+      price = sectorGroup.noDownPayment;
+    }
+  }
+
+  // If we couldn't find a specific noDownPayment price, try to get the base price
+  if (price === 0) {
+    const priceSelect = document.getElementById('calcPriceSelectInst');
+    price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  }
+
+  const installmentMonths = 72; // 6 years * 12 months
+
+  let totalCost = area * price;
+  let amountToDivide = totalCost;
+  
+  // Subtract maternity capital if checked
+  const useMaternity = document.getElementById('calcUseMaternityInst6Y')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(document.getElementById('calcMaternityAmountInst6Y')?.value) || 0;
+    amountToDivide = Math.max(0, amountToDivide - maternityAmount);
+    totalCost = Math.max(0, totalCost - maternityAmount);
+  }
+  
+  const monthlyPayment = amountToDivide / installmentMonths;
+  
+  document.getElementById('calcFormulaInst6YArea').textContent = `${formatArea(area)} м²`;
+  document.getElementById('calcFormulaInst6YPrice').textContent = `${formatPrice(price)}`;
+  
+  document.getElementById('calcMonthlyPayment6Y').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
+  document.getElementById('calcTotalInstallment6Y').textContent = `${formatPrice(totalCost)}`;
 }
 
 function getYearWord(years) {
