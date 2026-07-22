@@ -3185,6 +3185,8 @@ const COMPLEX_PROPERTY_CONFIGS = {
   discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'yes',
+  noMarkupYears: 2,
+  mandatoryPayment: 10000,
 
   // Сектор → полная оплата / рассрочка 30% / без взноса
   sectorPriceGroups: [
