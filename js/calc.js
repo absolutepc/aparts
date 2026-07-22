@@ -63,7 +63,7 @@ function initCalcPage() {
 
   const layoutNameEl = document.getElementById('calcLayoutName');
   if (layoutNameEl) {
-    layoutNameEl.textContent = getLayoutDisplayLabel(targetLayout.label);
+    layoutNameEl.style.display = 'none';
   }
 
   const area = Number(targetLayout.areaMin) || Number(targetVariant.areaMin) || 0;
@@ -159,19 +159,19 @@ function calculate(area, property) {
   const totalCash = area * price;
   
   document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
-  document.getElementById('calcFormulaCashPrice').textContent = `${formatPrice(price)} ₽`;
-  document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)} ₽`;
+  document.getElementById('calcFormulaCashPrice').textContent = `${formatPrice(price)}`;
+  document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
 
   // Installment calculation
   if (installmentMonths > 0) {
     const monthlyPayment = totalCash / installmentMonths;
     
     document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
-    document.getElementById('calcFormulaInstPrice').textContent = `${formatPrice(price)} ₽`;
+    document.getElementById('calcFormulaInstPrice').textContent = `${formatPrice(price)}`;
     document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
     
-    document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))} ₽`;
-    document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCash)} ₽`;
+    document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
+    document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCash)}`;
   }
 }
 
