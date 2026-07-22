@@ -140,11 +140,11 @@ function initCalcPage() {
   const hasMaternityCapital = property.maternityCapital === 'yes';
   
   const cashOptions = document.getElementById('calcOptionsCash');
-  const instMaternityOption = document.getElementById('calcMaternityOptionInst');
+  const instOptions = document.getElementById('calcOptionsInst');
   
   if (hasMaternityCapital) {
     if (cashOptions) cashOptions.style.display = '';
-    if (instMaternityOption) instMaternityOption.style.display = '';
+    if (instOptions) instOptions.style.display = '';
   }
 
   const useMaternityCash = document.getElementById('calcUseMaternityCash');
@@ -173,11 +173,6 @@ function initCalcPage() {
 
   // Setup Mandatory Payment
   const mandatoryPayment = Number(property.mandatoryPayment) || 0;
-  const mandatoryPaymentBlock = document.getElementById('calcMandatoryPaymentBlock');
-  
-  if (mandatoryPayment > 0 && mandatoryPaymentBlock) {
-    mandatoryPaymentBlock.style.display = '';
-  }
 
   contentEl.style.display = '';
   errorEl.style.display = 'none';
