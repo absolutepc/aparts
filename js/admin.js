@@ -197,8 +197,11 @@ function renderAdminFlatVariantRow(flatType, sectorIndex = 0) {
   const label = getFlatTypeLabel(flatType);
   const prefix = `sector_${sectorIndex}_variant_${flatType}`;
   return `
-    <fieldset class="admin-flat-variant-row" data-flat-type="${escapeHtml(flatType)}" data-sector-index="${sectorIndex}">
-      <legend>${escapeHtml(label)}</legend>
+    <fieldset class="admin-flat-variant-row" data-flat-type="${escapeHtml(flatType)}" data-sector-index="${sectorIndex}" style="display: none;">
+      <legend>
+        ${escapeHtml(label)}
+        <button type="button" class="btn btn-danger btn-sm admin-remove-flat-variant-btn" style="float: right;">Скрыть</button>
+      </legend>
       <div class="admin-form-grid">
         <div class="form-group">
           <label>Количество квартир</label>
@@ -236,7 +239,12 @@ function renderAdminSectorPanel(sector = {}, sectorIndex = 0) {
         <button type="button" class="btn btn-danger btn-sm admin-remove-sector-btn">Удалить сектор</button>
       </div>
       <div class="admin-variant-editor">
-        <p class="form-hint">Заполните параметры для каждого типа. Пустое количество — тип не будет показан в этом секторе. Количество можно указать для типа целиком или отдельно для каждой планировки.</p>
+        <div class="admin-flat-variant-selector" style="margin-bottom: 15px;">
+          <select class="admin-add-flat-variant-select" data-sector-index="${sectorIndex}">
+            <option value="">+ Добавить тип квартир</option>
+            ${FLAT_TYPE_KEYS.map(flatType => `<option value="${flatType}">${escapeHtml(getFlatTypeLabel(flatType))}</option>`).join('')}
+          </select>
+        </div>
         <div class="admin-sector-flat-variants">
           ${FLAT_TYPE_KEYS.map(flatType => renderAdminFlatVariantRow(flatType, sectorIndex)).join('')}
         </div>
@@ -480,6 +488,11 @@ function collectFlatVariantsFromSectorForm(form, sectorIndex, propertyId = '') {
   const variants = [];
 
   for (const flatType of FLAT_TYPE_KEYS) {
+    const rowEl = form.querySelector(`.admin-flat-variant-row[data-flat-type="${flatType}"][data-sector-index="${sectorIndex}"]`);
+    if (rowEl && rowEl.style.display === 'none') {
+      continue;
+    }
+
     const prefix = `sector_${sectorIndex}_variant_${flatType}`;
     const totalRaw = form.querySelector(`[name="${prefix}_totalApartments"]`)?.value;
     const totalApartments = Number(totalRaw);
@@ -557,9 +570,8 @@ function collectSectorsFromForm(form, propertyId = '') {
     const variantResult = collectFlatVariantsFromSectorForm(form, Number(sectorIndex), propertyId);
     if (variantResult.error) return variantResult;
 
-    if (!variantResult.variants.length) {
-      return { error: `В секторе «${title}» укажите хотя бы один тип квартир с количеством` };
-    }
+    // We no longer require at least one variant to be present, to allow editing when there's only one variant type
+    // and we want to remove it or temporarily hide it. But if we want to save, we'll just save empty variants if none.
 
     sectors.push({
       id,
@@ -568,9 +580,10 @@ function collectSectorsFromForm(form, propertyId = '') {
     });
   }
 
-  if (!sectors.length) {
-    return { error: 'Добавьте хотя бы один сектор с типами квартир' };
-  }
+  // Allow empty sectors for flexibility during editing
+  // if (!sectors.length) {
+  //   return { error: 'Добавьте хотя бы один сектор с типами квартир' };
+  // }
 
   return { sectors: sortSectorsByPreferredOrder(sectors, COMPLEX_PROPERTY_CONFIGS[propertyId]?.sectorOrder) };
 }
@@ -722,6 +735,12 @@ function fillSectorFormPanel(form, sector, sectorIndex, propertyId = '') {
         : (layout.key || getLayoutKey(index)),
     }));
     setAdminFlatVariantLayouts(form, flatType, layouts, sectorIndex);
+
+    // Show the row if it has data
+    const rowEl = form.querySelector(`.admin-flat-variant-row[data-flat-type="${flatType}"][data-sector-index="${sectorIndex}"]`);
+    if (rowEl && variant) {
+      rowEl.style.display = '';
+    }
   }
 }
 
@@ -791,17 +810,50 @@ function bindAdminSectorRows(form) {
     }
 
     const removeBtn = event.target.closest('.admin-remove-sector-btn');
-    if (!removeBtn || !form.contains(removeBtn)) return;
+    if (removeBtn && form.contains(removeBtn)) {
+      const sectorRows = form.querySelector('#sectorRows');
+      const panels = sectorRows?.querySelectorAll('.admin-sector-panel') || [];
+      if (panels.length <= 1) {
+        showToast('Нужен хотя бы один сектор', 'error');
+        return;
+      }
 
-    const sectorRows = form.querySelector('#sectorRows');
-    const panels = sectorRows?.querySelectorAll('.admin-sector-panel') || [];
-    if (panels.length <= 1) {
-      showToast('Нужен хотя бы один сектор', 'error');
+      removeBtn.closest('.admin-sector-panel')?.remove();
+      reindexAdminSectorPanels(form, form.querySelector('[name="editId"]')?.value || '');
       return;
     }
 
-    removeBtn.closest('.admin-sector-panel')?.remove();
-    reindexAdminSectorPanels(form, form.querySelector('[name="editId"]')?.value || '');
+    const removeFlatVariantBtn = event.target.closest('.admin-remove-flat-variant-btn');
+    if (removeFlatVariantBtn && form.contains(removeFlatVariantBtn)) {
+      const row = removeFlatVariantBtn.closest('.admin-flat-variant-row');
+      if (row) {
+        row.style.display = 'none';
+        
+        // Clear all inputs in this variant row to effectively remove it from the data
+        row.querySelectorAll('input').forEach(input => {
+          input.value = '';
+        });
+      }
+      return;
+    }
+  });
+
+  form.addEventListener('change', (event) => {
+    if (event.target.classList.contains('admin-add-flat-variant-select')) {
+      const select = event.target;
+      const flatType = select.value;
+      if (!flatType) return;
+      
+      const sectorIndex = select.dataset.sectorIndex;
+      const row = form.querySelector(`.admin-flat-variant-row[data-flat-type="${flatType}"][data-sector-index="${sectorIndex}"]`);
+      
+      if (row) {
+        row.style.display = '';
+      }
+      
+      // Reset select
+      select.value = '';
+    }
   });
 }
 
