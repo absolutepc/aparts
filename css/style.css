@@ -1906,12 +1906,12 @@ body.page-transition-active > :not(#page-transition) {
   display: inline-block;
   min-width: 7ch;
   text-align: right;
-  animation: calc-roulette-spin 0.7s ease-out;
+  animation: calc-roulette-spin 0.5s ease-out;
 }
 
 @keyframes calc-roulette-spin {
-  0% { transform: translateY(-6px); opacity: 0.65; }
-  55% { transform: translateY(2px); opacity: 1; }
+  0% { transform: translateY(-4px); opacity: 0.7; }
+  60% { transform: translateY(1px); opacity: 1; }
   100% { transform: translateY(0); opacity: 1; }
 }
 

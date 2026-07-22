@@ -312,7 +312,8 @@ function initCalcPage() {
 }
 
 const CALC_CARD_DURATION_MS = 10000;
-const CALC_ROULETTE_DURATION_MS = 700;
+const CALC_ROULETTE_DURATION_MS = 500;
+const CALC_ROULETTE_STEPS = 5;
 let calcRevealToken = 0;
 let calcRevealComplete = false;
 const calcRouletteStates = new WeakMap();
@@ -334,6 +335,7 @@ function stopCalcRoulette(el) {
   const state = calcRouletteStates.get(el);
   if (!state) return;
   if (state.raf) cancelAnimationFrame(state.raf);
+  if (state.timer) clearTimeout(state.timer);
   calcRouletteStates.delete(el);
   el.classList.remove('is-roulette');
 }
@@ -355,27 +357,29 @@ function animateRouletteValue(el, targetText, durationMs = CALC_ROULETTE_DURATIO
   stopCalcRoulette(el);
   el.classList.add('is-roulette');
 
-  const start = performance.now();
-  const state = { raf: 0 };
+  const steps = CALC_ROULETTE_STEPS;
+  const stepMs = durationMs / steps;
+  const state = { timer: 0, raf: 0 };
   calcRouletteStates.set(el, state);
 
-  function frame(now) {
-    const t = Math.min(1, (now - start) / durationMs);
-    // One smooth reel spin that decelerates into the final value
-    const ease = 1 - Math.pow(1 - t, 2.4);
-    const value = Math.max(0, Math.round(from + (to - from) * ease));
-    el.textContent = formatPrice(value);
-
-    if (t < 1) {
-      state.raf = requestAnimationFrame(frame);
-    } else {
+  let step = 0;
+  function tick() {
+    step += 1;
+    if (step >= steps) {
       el.textContent = finalText;
       el.classList.remove('is-roulette');
       calcRouletteStates.delete(el);
+      return;
     }
+
+    const t = step / steps;
+    const ease = 1 - Math.pow(1 - t, 2);
+    const value = Math.max(0, Math.round(from + (to - from) * ease));
+    el.textContent = formatPrice(value);
+    state.timer = setTimeout(tick, stepMs);
   }
 
-  state.raf = requestAnimationFrame(frame);
+  state.timer = setTimeout(tick, stepMs);
 }
 
 function setCalcValueText(elOrId, text, animate = false) {
