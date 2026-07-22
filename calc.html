@@ -34,13 +34,15 @@
             </div>
             
             <div class="calc-options" id="calcOptionsCash" style="display: none; margin-bottom: 24px;">
-              <label class="calc-checkbox-label">
-                <input type="checkbox" id="calcUseMaternityCash">
-                Использовать материнский капитал
-              </label>
-              <div class="calc-input-group" id="calcMaternityInputGroupCash" style="display: none; margin-top: 12px;">
-                <label>Сумма материнского капитала, ₽</label>
-                <input type="number" id="calcMaternityAmountCash" class="calc-input" value="833024" min="0" step="1000">
+              <div class="calc-maternity-row">
+                <label class="calc-checkbox-label">
+                  <input type="checkbox" id="calcUseMaternityCash">
+                  Мат. капитал
+                </label>
+                <div class="calc-input-group" id="calcMaternityInputGroupCash" style="display: none;">
+                  <input type="number" id="calcMaternityAmountCash" class="calc-input calc-input-sm" value="833024" min="0" step="1000">
+                  <span class="calc-currency">₽</span>
+                </div>
               </div>
             </div>
 
@@ -65,14 +67,16 @@
             </div>
 
             <div class="calc-options" id="calcOptionsInst" style="margin-bottom: 24px;">
-              <div id="calcMaternityOptionInst" style="display: none; margin-bottom: 12px;">
-                <label class="calc-checkbox-label">
-                  <input type="checkbox" id="calcUseMaternityInst">
-                  Использовать материнский капитал
-                </label>
-                <div class="calc-input-group" id="calcMaternityInputGroupInst" style="display: none; margin-top: 12px;">
-                  <label>Сумма материнского капитала, ₽</label>
-                  <input type="number" id="calcMaternityAmountInst" class="calc-input" value="833024" min="0" step="1000">
+              <div id="calcMaternityOptionInst" style="display: none;">
+                <div class="calc-maternity-row">
+                  <label class="calc-checkbox-label">
+                    <input type="checkbox" id="calcUseMaternityInst">
+                    Мат. капитал
+                  </label>
+                  <div class="calc-input-group" id="calcMaternityInputGroupInst" style="display: none;">
+                    <input type="number" id="calcMaternityAmountInst" class="calc-input calc-input-sm" value="833024" min="0" step="1000">
+                    <span class="calc-currency">₽</span>
+                  </div>
                 </div>
               </div>
               
