@@ -1466,6 +1466,12 @@ main { flex: 1; }
   aspect-ratio: auto;
 }
 
+@media (max-width: 768px) {
+  .property-gallery-thumbs .property-gallery-thumb:nth-child(n + 9) {
+    display: none;
+  }
+}
+
 .admin-item-sub { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
 .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .empty-cell { text-align: center; color: var(--text-muted); }
