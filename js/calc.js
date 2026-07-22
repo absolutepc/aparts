@@ -236,7 +236,7 @@ function calculateInst(area, property) {
         mandatoryBlock.style.display = 'inline-flex';
         mandatoryBlock.style.alignItems = 'center';
         mandatoryBlock.style.gap = '8px';
-        document.getElementById('calcFormulaInstMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)} ₽`;
+        document.getElementById('calcFormulaInstMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
       }
     } else if (mandatoryBlock) {
       mandatoryBlock.style.display = 'none';
@@ -311,7 +311,7 @@ function calculateInst6Years(area, property, targetLayout) {
       mandatoryBlock.style.display = 'inline-flex';
       mandatoryBlock.style.alignItems = 'center';
       mandatoryBlock.style.gap = '8px';
-      document.getElementById('calcFormulaInst6YMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)} ₽`;
+      document.getElementById('calcFormulaInst6YMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
     }
   } else if (mandatoryBlock) {
     mandatoryBlock.style.display = 'none';
