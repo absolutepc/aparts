@@ -513,6 +513,19 @@ function collectTotalRows(card) {
   });
 }
 
+function focusActiveCalcCard(card) {
+  if (!card) return;
+  const behavior = prefersCalcReducedMotion() ? 'auto' : 'smooth';
+  // Keep the currently calculating card in the center of the viewport
+  requestAnimationFrame(() => {
+    card.scrollIntoView({
+      block: 'center',
+      inline: 'nearest',
+      behavior,
+    });
+  });
+}
+
 async function animateCalcCard(card, statusId, durationMs, signal) {
   const statusEl = statusId ? document.getElementById(statusId) : null;
   const formulaParts = collectFormulaParts(card);
@@ -521,6 +534,7 @@ async function animateCalcCard(card, statusId, durationMs, signal) {
   card.classList.remove('is-pending', 'is-done');
   card.classList.add('is-animating');
   card.style.display = '';
+  focusActiveCalcCard(card);
 
   if (statusEl) {
     statusEl.textContent = 'Считаю вариант';

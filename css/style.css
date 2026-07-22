@@ -1833,6 +1833,10 @@ body.page-transition-active > :not(#page-transition) {
 
 .calc-result-card.is-animating {
   animation: calc-card-enter 0.7s ease-out both;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, transparent),
+    0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .calc-result-card.is-done {
