@@ -63,12 +63,6 @@ function initCalcPage() {
 
   const area = Number(targetLayout.areaMin) || Number(targetVariant.areaMin) || 0;
 
-  const imageEl = document.getElementById('calcImage');
-  if (imageEl) {
-    const planImg = targetLayout.planImg || targetVariant.planImg || property.img;
-    imageEl.innerHTML = renderPropertyImg(planImg, `Планировка ${targetLayout.label}`);
-  }
-
   // Get available prices
   const prices = [];
   const applicablePrices = getApplicableFloorPrices(property, targetLayout);

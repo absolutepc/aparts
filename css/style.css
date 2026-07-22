@@ -1740,16 +1740,8 @@ body.page-transition-active > :not(#page-transition) {
 
 /* Calculator */
 .calc-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  display: block;
   margin-top: 24px;
-}
-
-@media (min-width: 768px) {
-  .calc-container {
-    grid-template-columns: 350px 1fr;
-  }
 }
 
 .calc-sidebar {
