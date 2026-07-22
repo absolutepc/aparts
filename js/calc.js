@@ -18,7 +18,6 @@ function initCalcPage() {
     return;
   }
 
-  // Find the variant and layout
   let targetVariant = null;
   let targetLayout = null;
   let targetSector = null;
@@ -41,9 +40,8 @@ function initCalcPage() {
     return;
   }
 
-  // Set up the page
   document.title = `Калькулятор: ${property.title} — Aparts`;
-  
+
   const linkEl = document.getElementById('calcPropertyLink');
   if (linkEl) {
     linkEl.href = `property.html?id=${encodeURIComponent(property.id)}`;
@@ -62,9 +60,20 @@ function initCalcPage() {
   }
 
   const area = Number(targetLayout.areaMin) || Number(targetVariant.areaMin) || 0;
+  const paymentOptions = typeof getPropertyPaymentOptions === 'function'
+    ? getPropertyPaymentOptions(property)
+    : [{ type: 'cash' }];
 
-  // Get available prices for cash / short installment (полная оплата)
-  // For complexes with sectorPriceGroups (like Ан-Нур), use sector-specific full price
+  const cashOption = paymentOptions.find(opt => opt.type === 'cash') || null;
+  const noMarkupOption = paymentOptions.find(opt => opt.type === 'noMarkup') || null;
+  const installmentNoDownOption = paymentOptions.find(
+    opt => opt.type === 'installment' && !(Number(opt.downPaymentPercent) > 0)
+  ) || null;
+  const installmentWithDownOption = paymentOptions.find(
+    opt => opt.type === 'installment' && Number(opt.downPaymentPercent) > 0
+  ) || null;
+
+  // Prices for cash / short installment (полная оплата)
   const prices = [];
   const sectorGroup = (typeof getSectorPriceGroupForSector === 'function'
     && typeof resolveLayoutSectorTitle === 'function')
@@ -99,25 +108,24 @@ function initCalcPage() {
     }
   }
 
-  // Sort prices ascending
   prices.sort((a, b) => a.value - b.value);
 
   const priceSelectCash = document.getElementById('calcPriceSelectCash');
   const priceSelectInst = document.getElementById('calcPriceSelectInst');
-  
+
   if (prices.length > 0) {
-    const optionsHtml = prices.map(p => 
+    const optionsHtml = prices.map(p =>
       `<option value="${p.value}">${escapeHtml(p.label)}</option>`
     ).join('');
-    
+
     if (priceSelectCash) {
       priceSelectCash.innerHTML = optionsHtml;
       priceSelectCash.addEventListener('change', () => calculateCash(area));
     }
-    
+
     if (priceSelectInst) {
       priceSelectInst.innerHTML = optionsHtml;
-      priceSelectInst.addEventListener('change', () => calculateInst(area, property));
+      priceSelectInst.addEventListener('change', () => calculateInst(area, property, noMarkupOption));
     }
   } else {
     const emptyOption = '<option value="0">Цена не указана</option>';
@@ -131,35 +139,37 @@ function initCalcPage() {
     }
   }
 
-  // Installment term
-  const noMarkupYears = Number(property.noMarkupYears) || 0;
-  const installmentMonths = noMarkupYears * 12;
+  const cashCard = document.getElementById('calcCashCard');
+  if (cashCard) {
+    cashCard.style.display = cashOption ? '' : 'none';
+  }
 
   const instCard = document.getElementById('calcInstallmentCard');
   if (instCard) {
-    if (installmentMonths <= 0) {
+    if (!noMarkupOption) {
       instCard.style.display = 'none';
     } else {
+      instCard.style.display = '';
       const instTitle = document.getElementById('calcInstallmentTitle');
       if (instTitle) {
-        instTitle.textContent = `Рассрочка на ${noMarkupYears} ${getYearWord(noMarkupYears)} без наценки`;
+        instTitle.textContent = noMarkupOption.title
+          || `Рассрочка на ${noMarkupOption.years} ${getYearWord(noMarkupOption.years)} без наценки`;
       }
     }
   }
 
-  // Setup Maternity Capital options
   const hasMaternityCapital = property.maternityCapital === 'yes';
-  
+
   const cashOptions = document.getElementById('calcOptionsCash');
   const instOptions = document.getElementById('calcOptionsInst');
-  const inst6YOptions = document.getElementById('calcOptionsInst6Y');
-  const inst6Y30Options = document.getElementById('calcOptionsInst6Y30');
-  
+  const instNoDownOptions = document.getElementById('calcOptionsInst6Y');
+  const instWithDownOptions = document.getElementById('calcOptionsInst6Y30');
+
   if (hasMaternityCapital) {
-    if (cashOptions) cashOptions.style.display = '';
-    if (instOptions) instOptions.style.display = '';
-    if (inst6YOptions) inst6YOptions.style.display = '';
-    if (inst6Y30Options) inst6Y30Options.style.display = '';
+    if (cashOptions && cashOption) cashOptions.style.display = '';
+    if (instOptions && noMarkupOption) instOptions.style.display = '';
+    if (instNoDownOptions && installmentNoDownOption) instNoDownOptions.style.display = '';
+    if (instWithDownOptions && installmentWithDownOption) instWithDownOptions.style.display = '';
   }
 
   const useMaternityCash = document.getElementById('calcUseMaternityCash');
@@ -181,9 +191,9 @@ function initCalcPage() {
   if (useMaternityInst && maternityInputGroupInst && maternityAmountInst) {
     useMaternityInst.addEventListener('change', (e) => {
       maternityInputGroupInst.style.display = e.target.checked ? '' : 'none';
-      calculateInst(area, property);
+      calculateInst(area, property, noMarkupOption);
     });
-    maternityAmountInst.addEventListener('input', () => calculateInst(area, property));
+    maternityAmountInst.addEventListener('input', () => calculateInst(area, property, noMarkupOption));
   }
 
   const useMaternityInst6Y = document.getElementById('calcUseMaternityInst6Y');
@@ -193,9 +203,11 @@ function initCalcPage() {
   if (useMaternityInst6Y && maternityInputGroupInst6Y && maternityAmountInst6Y) {
     useMaternityInst6Y.addEventListener('change', (e) => {
       maternityInputGroupInst6Y.style.display = e.target.checked ? '' : 'none';
-      calculateInst6Years(area, property, targetLayout);
+      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
     });
-    maternityAmountInst6Y.addEventListener('input', () => calculateInst6Years(area, property, targetLayout));
+    maternityAmountInst6Y.addEventListener('input', () => {
+      calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
+    });
   }
 
   const useMaternityInst6Y30 = document.getElementById('calcUseMaternityInst6Y30');
@@ -205,134 +217,147 @@ function initCalcPage() {
   if (useMaternityInst6Y30 && maternityInputGroupInst6Y30 && maternityAmountInst6Y30) {
     useMaternityInst6Y30.addEventListener('change', (e) => {
       maternityInputGroupInst6Y30.style.display = e.target.checked ? '' : 'none';
-      calculateInst6Years30(area, property, targetLayout);
+      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
     });
-    maternityAmountInst6Y30.addEventListener('input', () => calculateInst6Years30(area, property, targetLayout));
+    maternityAmountInst6Y30.addEventListener('input', () => {
+      calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
+    });
   }
-
-  // Setup Mandatory Payment
-  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
 
   contentEl.style.display = '';
   errorEl.style.display = 'none';
 
-  // Initial calculation
-  calculateCash(area);
-  calculateInst(area, property);
-  calculateInst6Years(area, property, targetLayout);
-  calculateInst6Years30(area, property, targetLayout);
+  if (cashOption) calculateCash(area);
+  if (noMarkupOption) calculateInst(area, property, noMarkupOption);
+  calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
+  calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
+}
+
+function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
+  const key = String(priceKey || '').trim();
+  let sectorGroup = null;
+
+  if (typeof getSectorPriceGroupForSector === 'function' && typeof resolveLayoutSectorTitle === 'function') {
+    sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(targetLayout));
+  }
+
+  if (sectorGroup && key && Number(sectorGroup[key]) > 0) {
+    return Number(sectorGroup[key]);
+  }
+
+  const priceSelect = document.getElementById('calcPriceSelectInst')
+    || document.getElementById('calcPriceSelectCash');
+  const base = priceSelect ? Number(priceSelect.value) || 0 : 0;
+
+  if (key === 'floorTo') {
+    const offset = Number(property.floorPriceToOffset) || 0;
+    return base + offset;
+  }
+
+  return base;
 }
 
 function calculateCash(area) {
   const priceSelect = document.getElementById('calcPriceSelectCash');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
-  
+
   let totalCash = area * price;
-  
+
   const useMaternity = document.getElementById('calcUseMaternityCash')?.checked;
   if (useMaternity) {
     const maternityAmount = Number(document.getElementById('calcMaternityAmountCash')?.value) || 0;
     totalCash = Math.max(0, totalCash - maternityAmount);
   }
-  
+
   document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
   document.getElementById('calcTotalCash').textContent = `${formatPrice(totalCash)}`;
 }
 
-function calculateInst(area, property) {
+function calculateInst(area, property, option) {
+  if (!option) return;
+
   const priceSelect = document.getElementById('calcPriceSelectInst');
   const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
-  
-  const noMarkupYears = Number(property.noMarkupYears) || 0;
-  const installmentMonths = noMarkupYears * 12;
+  const years = Number(option.years) || Number(property.noMarkupYears) || 0;
+  const installmentMonths = years * 12;
+  if (installmentMonths <= 0) return;
 
-  if (installmentMonths > 0) {
-    let totalCost = area * price;
-    let amountToDivide = totalCost;
-    
-    // Subtract mandatory payment if applicable
-    const mandatoryPayment = Number(property.mandatoryPayment) || 0;
-    const mandatoryBlock = document.getElementById('calcFormulaInstMandatoryBlock');
-    
-    if (mandatoryPayment > 0) {
-      const mandatoryTotal = area * mandatoryPayment;
-      amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
-      
-      if (mandatoryBlock) {
-        mandatoryBlock.style.display = 'inline-flex';
-        mandatoryBlock.style.alignItems = 'center';
-        mandatoryBlock.style.gap = '8px';
-        document.getElementById('calcFormulaInstMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
-      }
-    } else if (mandatoryBlock) {
-      mandatoryBlock.style.display = 'none';
+  let totalCost = area * price;
+  let amountToDivide = totalCost;
+
+  const mandatoryBlock = document.getElementById('calcFormulaInstMandatoryBlock');
+  const mandatoryPayment = option.useMandatoryPayment === false
+    ? 0
+    : (Number(property.mandatoryPayment) || 0);
+
+  if (mandatoryPayment > 0) {
+    const mandatoryTotal = area * mandatoryPayment;
+    amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
+
+    if (mandatoryBlock) {
+      mandatoryBlock.style.display = 'inline-flex';
+      mandatoryBlock.style.alignItems = 'center';
+      mandatoryBlock.style.gap = '8px';
+      document.getElementById('calcFormulaInstMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
     }
-    
-    // Subtract maternity capital if checked
-    const useMaternity = document.getElementById('calcUseMaternityInst')?.checked;
-    if (useMaternity) {
-      const maternityAmount = Number(document.getElementById('calcMaternityAmountInst')?.value) || 0;
-      amountToDivide = Math.max(0, amountToDivide - maternityAmount);
-      totalCost = Math.max(0, totalCost - maternityAmount); // Reduce total cost by maternity capital too
-    }
-    
-    const monthlyPayment = amountToDivide / installmentMonths;
-    
-    document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
-    document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
-    
-    document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-    document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
+  } else if (mandatoryBlock) {
+    mandatoryBlock.style.display = 'none';
   }
+
+  const useMaternity = document.getElementById('calcUseMaternityInst')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(document.getElementById('calcMaternityAmountInst')?.value) || 0;
+    amountToDivide = Math.max(0, amountToDivide - maternityAmount);
+    totalCost = Math.max(0, totalCost - maternityAmount);
+  }
+
+  const monthlyPayment = amountToDivide / installmentMonths;
+
+  document.getElementById('calcFormulaInstArea').textContent = `${formatArea(area)} м²`;
+  document.getElementById('calcFormulaInstMonths').textContent = `${installmentMonths} мес.`;
+
+  document.getElementById('calcMonthlyPayment').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
+  document.getElementById('calcTotalInstallment').textContent = `${formatPrice(totalCost)}`;
 }
 
-function calculateInst6Years(area, property, targetLayout) {
+function calculateInstallmentNoDown(area, property, targetLayout, option) {
   const card = document.getElementById('calcInstallment6YearsCard');
   if (!card) return;
 
-  // We only show this if there's a 6-year installment term configured for the property
-  const installmentTerm = property.installmentTerm || '';
-  if (!installmentTerm.includes('6')) {
+  if (!option) {
     card.style.display = 'none';
     return;
   }
 
   card.style.display = '';
 
-  // For 6 years installment, we use the specific price logic:
-  // We need to find the price for 6 years from sectorPriceGroups if available, 
-  // or fallback to the standard calculation logic.
-  // The user requested "Рассрочка на 6 лет без взноса", which corresponds to "noDownPayment" in sectorPriceGroups.
-  
-  let price = 0;
-  
-  // Try to get price from sectorPriceGroups -> noDownPayment
-  if (typeof getSectorPriceGroupForSector === 'function' && typeof resolveLayoutSectorTitle === 'function') {
-    const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(targetLayout));
-    if (sectorGroup && sectorGroup.noDownPayment) {
-      price = sectorGroup.noDownPayment;
-    }
+  const years = Number(option.years) || 0;
+  const installmentMonths = years * 12;
+  const price = resolveInstallmentUnitPrice(property, targetLayout, option.priceKey);
+
+  const titleEl = document.getElementById('calcInstallment6YearsTitle');
+  if (titleEl) {
+    titleEl.textContent = option.title
+      || `Рассрочка на ${years} ${getYearWord(years)} без взноса`;
   }
 
-  // If we couldn't find a specific noDownPayment price, try to get the base price
-  if (price === 0) {
-    const priceSelect = document.getElementById('calcPriceSelectInst');
-    price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  const monthsEl = document.getElementById('calcFormulaInst6YMonths');
+  if (monthsEl) {
+    monthsEl.textContent = `${installmentMonths} мес.`;
   }
-
-  const installmentMonths = 72; // 6 years * 12 months
 
   let totalCost = area * price;
   let amountToDivide = totalCost;
-  
-  // Subtract mandatory payment if applicable
-  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+
   const mandatoryBlock = document.getElementById('calcFormulaInst6YMandatoryBlock');
-  
+  const mandatoryPayment = option.useMandatoryPayment === false
+    ? 0
+    : (Number(property.mandatoryPayment) || 0);
+
   if (mandatoryPayment > 0) {
     const mandatoryTotal = area * mandatoryPayment;
     amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
-    
+
     if (mandatoryBlock) {
       mandatoryBlock.style.display = 'inline-flex';
       mandatoryBlock.style.alignItems = 'center';
@@ -342,22 +367,79 @@ function calculateInst6Years(area, property, targetLayout) {
   } else if (mandatoryBlock) {
     mandatoryBlock.style.display = 'none';
   }
-  
-  // Subtract maternity capital if checked
+
   const useMaternity = document.getElementById('calcUseMaternityInst6Y')?.checked;
   if (useMaternity) {
     const maternityAmount = Number(document.getElementById('calcMaternityAmountInst6Y')?.value) || 0;
     amountToDivide = Math.max(0, amountToDivide - maternityAmount);
     totalCost = Math.max(0, totalCost - maternityAmount);
   }
-  
-  const monthlyPayment = amountToDivide / installmentMonths;
-  
+
+  const monthlyPayment = installmentMonths > 0 ? amountToDivide / installmentMonths : 0;
+
   document.getElementById('calcFormulaInst6YArea').textContent = `${formatArea(area)} м²`;
   document.getElementById('calcFormulaInst6YPrice').textContent = `${formatPrice(price)}`;
-  
+
   document.getElementById('calcMonthlyPayment6Y').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
   document.getElementById('calcTotalInstallment6Y').textContent = `${formatPrice(totalCost)}`;
+}
+
+function calculateInstallmentWithDown(area, property, targetLayout, option) {
+  const card = document.getElementById('calcInstallment6Years30Card');
+  if (!card) return;
+
+  if (!option) {
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = '';
+
+  const years = Number(option.years) || 0;
+  const installmentMonths = years * 12;
+  const downPaymentPercent = Number(option.downPaymentPercent) || 0;
+  const price = resolveInstallmentUnitPrice(property, targetLayout, option.priceKey);
+
+  const titleEl = document.getElementById('calcInstallment6Years30Title');
+  if (titleEl) {
+    titleEl.textContent = option.title
+      || `Рассрочка на ${years} ${getYearWord(years)} (взнос ${downPaymentPercent}%)`;
+  }
+
+  const monthsEl = document.getElementById('calcFormulaInst6Y30Months');
+  if (monthsEl) {
+    monthsEl.textContent = `${installmentMonths} мес.`;
+  }
+
+  let totalCost = area * price;
+  const downPayment = totalCost * (downPaymentPercent / 100);
+  // При покупке со взносом обязательный платёж по умолчанию не вычитается
+  let amountToDivide = totalCost - downPayment;
+
+  if (option.useMandatoryPayment) {
+    const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+    if (mandatoryPayment > 0) {
+      amountToDivide = Math.max(0, amountToDivide - area * mandatoryPayment);
+    }
+  }
+
+  const useMaternity = document.getElementById('calcUseMaternityInst6Y30')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(document.getElementById('calcMaternityAmountInst6Y30')?.value) || 0;
+    amountToDivide = Math.max(0, amountToDivide - maternityAmount);
+    totalCost = Math.max(0, totalCost - maternityAmount);
+  }
+
+  const monthlyPayment = installmentMonths > 0 ? amountToDivide / installmentMonths : 0;
+
+  document.getElementById('calcFormulaInst6Y30Area').textContent = `${formatArea(area)} м²`;
+  document.getElementById('calcFormulaInst6Y30Price').textContent = `${formatPrice(price)}`;
+  document.getElementById('calcFormulaInst6Y30DownPayment').textContent =
+    `${formatPrice(downPayment)} (${downPaymentPercent}%)`;
+
+  document.getElementById('calcDownPayment6Y30').textContent = `${formatPrice(downPayment)}`;
+  document.getElementById('calcMonthlyPayment6Y30').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
+  document.getElementById('calcTotalInstallment6Y30').textContent = `${formatPrice(totalCost)}`;
 }
 
 function getYearWord(years) {
@@ -372,63 +454,3 @@ function showError() {
   if (errorEl) errorEl.style.display = '';
   if (contentEl) contentEl.style.display = 'none';
 }
-function calculateInst6Years30(area, property, targetLayout) {
-  const card = document.getElementById('calcInstallment6Years30Card');
-  if (!card) return;
-
-  // We only show this if there's a 6-year installment term configured for the property
-  const installmentTerm = property.installmentTerm || '';
-  if (!installmentTerm.includes('6')) {
-    card.style.display = 'none';
-    return;
-  }
-
-  card.style.display = '';
-
-  // For 6 years installment with 30% down payment, we use the specific price logic:
-  // We need to find the price for 6 years from sectorPriceGroups if available, 
-  // or fallback to the standard calculation logic.
-  // The user requested "Рассрочка на 6 лет (взнос 30%)", which corresponds to "installment30" in sectorPriceGroups.
-  
-  let price = 0;
-  
-  // Try to get price from sectorPriceGroups -> installment30
-  if (typeof getSectorPriceGroupForSector === 'function' && typeof resolveLayoutSectorTitle === 'function') {
-    const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(targetLayout));
-    if (sectorGroup && sectorGroup.installment30) {
-      price = sectorGroup.installment30;
-    }
-  }
-
-  // If we couldn't find a specific installment30 price, try to get the base price
-  if (price === 0) {
-    const priceSelect = document.getElementById('calcPriceSelectInst');
-    price = priceSelect ? Number(priceSelect.value) || 0 : 0;
-  }
-
-  const installmentMonths = 72; // 6 years * 12 months
-
-  let totalCost = area * price;
-  const downPayment = totalCost * 0.3; // 30% down payment
-  // При покупке со взносом обязательный платёж не вычитается
-  let amountToDivide = totalCost - downPayment;
-  
-  // Subtract maternity capital if checked
-  const useMaternity = document.getElementById('calcUseMaternityInst6Y30')?.checked;
-  if (useMaternity) {
-    const maternityAmount = Number(document.getElementById('calcMaternityAmountInst6Y30')?.value) || 0;
-    amountToDivide = Math.max(0, amountToDivide - maternityAmount);
-    totalCost = Math.max(0, totalCost - maternityAmount);
-  }
-  
-  const monthlyPayment = amountToDivide / installmentMonths;
-  
-  document.getElementById('calcFormulaInst6Y30Area').textContent = `${formatArea(area)} м²`;
-  document.getElementById('calcFormulaInst6Y30Price').textContent = `${formatPrice(price)}`;
-  document.getElementById('calcFormulaInst6Y30DownPayment').textContent = `${formatPrice(downPayment)} (30%)`;
-  
-  document.getElementById('calcDownPayment6Y30').textContent = `${formatPrice(downPayment)}`;
-  document.getElementById('calcMonthlyPayment6Y30').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
-  document.getElementById('calcTotalInstallment6Y30').textContent = `${formatPrice(totalCost)}`;
-}
-

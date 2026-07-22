@@ -1342,6 +1342,91 @@ function getRecalculationLabel(value) {
   return RECALCULATION_OPTIONS[value] || '';
 }
 
+/**
+ * Явные варианты покупки для калькулятора.
+ * type: 'cash' | 'noMarkup' | 'installment'
+ * installment: years, downPaymentPercent, priceKey ('full'|'noDownPayment'|'installment30'|'floorTo'),
+ *              useMandatoryPayment, title (optional)
+ */
+function normalizePaymentOptions(options, property = null) {
+  if (!Array.isArray(options)) return [];
+
+  return options.map((opt) => {
+    if (!opt || typeof opt !== 'object') return null;
+    const type = String(opt.type || '').trim();
+
+    if (type === 'cash') {
+      return { type: 'cash' };
+    }
+
+    if (type === 'noMarkup') {
+      const years = Number(opt.years) || Number(property?.noMarkupYears) || 0;
+      if (years <= 0) return null;
+      return {
+        type: 'noMarkup',
+        years,
+        useMandatoryPayment: opt.useMandatoryPayment !== false,
+      };
+    }
+
+    if (type === 'installment') {
+      const years = Number(opt.years) || 0;
+      if (years <= 0) return null;
+      const downPaymentPercent = Math.max(0, Number(opt.downPaymentPercent) || 0);
+      const priceKey = String(
+        opt.priceKey
+          || (downPaymentPercent > 0 ? 'installment30' : 'noDownPayment')
+      ).trim();
+      const useMandatoryPayment = opt.useMandatoryPayment != null
+        ? Boolean(opt.useMandatoryPayment)
+        : downPaymentPercent === 0;
+      const title = String(opt.title || '').trim();
+      return {
+        type: 'installment',
+        years,
+        downPaymentPercent,
+        priceKey,
+        useMandatoryPayment,
+        ...(title ? { title } : {}),
+      };
+    }
+
+    return null;
+  }).filter(Boolean);
+}
+
+function getLegacyPaymentOptions(property) {
+  const options = [{ type: 'cash' }];
+  const years = Number(property?.noMarkupYears) || 0;
+  if (years > 0) {
+    options.push({ type: 'noMarkup', years, useMandatoryPayment: true });
+  }
+  if (String(property?.installmentTerm || '').includes('6')) {
+    options.push({
+      type: 'installment',
+      years: 6,
+      downPaymentPercent: 0,
+      priceKey: 'noDownPayment',
+      useMandatoryPayment: true,
+    });
+    options.push({
+      type: 'installment',
+      years: 6,
+      downPaymentPercent: 30,
+      priceKey: 'installment30',
+      useMandatoryPayment: false,
+    });
+  }
+  return options;
+}
+
+function getPropertyPaymentOptions(property) {
+  if (Array.isArray(property?.paymentOptions) && property.paymentOptions.length) {
+    return normalizePaymentOptions(property.paymentOptions, property);
+  }
+  return getLegacyPaymentOptions(property);
+}
+
 function normalizePropertyOffering(property) {
   const item = { ...property };
   const years = Number(item.noMarkupYears);
@@ -1391,6 +1476,13 @@ function normalizePropertyOffering(property) {
     item.recalculation = item.recalculation;
   } else {
     delete item.recalculation;
+  }
+
+  if (Array.isArray(item.paymentOptions)) {
+    item.paymentOptions = normalizePaymentOptions(item.paymentOptions, item);
+    if (!item.paymentOptions.length) delete item.paymentOptions;
+  } else {
+    delete item.paymentOptions;
   }
 
   if (isComplex(item)) {
@@ -3160,6 +3252,7 @@ function logoutUser() {
 // forceOfferingFromConfig — принудительно брать характеристики из конфига (jk2)
 // floorPriceRanges — цены по диапазонам этажей
 // sectorPriceGroups — цены по секторам (полная оплата / рассрочка 30% / без взноса)
+// paymentOptions — явные варианты покупки для калькулятора (см. normalizePaymentOptions)
 // layouts — количество квартир, этажи и подпись для каждой планировки в секторе
 // sectors — полная структура секторов (если заполнить — layouts игнорируется)
 // =============================================================================
@@ -3187,6 +3280,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
   recalculation: 'yes',
   noMarkupYears: 2,
   mandatoryPayment: 10000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 2 },
+    { type: 'installment', years: 6, downPaymentPercent: 0, priceKey: 'noDownPayment' },
+    { type: 'installment', years: 6, downPaymentPercent: 30, priceKey: 'installment30', useMandatoryPayment: false },
+  ],
 
   // Сектор → полная оплата / рассрочка 30% / без взноса
   sectorPriceGroups: [
@@ -3303,6 +3402,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
   discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
+  noMarkupYears: 1,
+  mandatoryPayment: 3000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 1 },
+  ],
 
   floorPriceRanges: [
     { floorMin: 3, floorMax: 5, price: 85000 },
@@ -3501,6 +3606,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   discounts: 'no/no',
     markupBasis: 'after',
     recalculation: 'no',
+    paymentOptions: [
+      { type: 'cash' },
+      { type: 'noMarkup', years: 1 },
+    ],
 
     // Порядок домов на странице объекта
     sectorOrder: ['5', '6', '7', '8', '9', '10', '12', '13', '14', '15', '16', '17', '18', '19', '26', '27', '28'],
@@ -3709,6 +3818,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   recalculation: 'no',
   noMarkupYears: 2,
   mandatoryPayment: 4000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 2 },
+  ],
 
   floorPriceRanges: [
     { floorMin: 3, floorMax: 5, price: 80000 },
@@ -3791,6 +3904,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   recalculation: 'no',
   noMarkupYears: 1,
   mandatoryPayment: 5000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 1 },
+  ],
 
   floorPriceRanges: [
     { floorMin: 5, floorMax: 11, price: 65000 },
@@ -3857,6 +3974,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   recalculation: 'yes',
   noMarkupYears: 2,
   mandatoryPayment: 5000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 2 },
+  ],
 
   floorPriceRanges: [
     { floorMin: 4, floorMax: 5, price: 103000 },
@@ -3975,6 +4096,11 @@ const COMPLEX_PROPERTY_CONFIGS = {
   recalculation: 'no',
   noMarkupYears: 1,
   mandatoryPayment: 3000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 1 },
+    { type: 'installment', years: 6, downPaymentPercent: 0, priceKey: 'floorTo' },
+  ],
 
   floorPriceRanges: [
     { floorMin: 3, floorMax: 7, price: 86000 },
@@ -4343,6 +4469,11 @@ function applyComplexConfigFromRegistry(property) {
     if (config.mandatoryPayment != null && item.mandatoryPayment == null) {
       item.mandatoryPayment = config.mandatoryPayment;
     }
+  }
+
+  if (Array.isArray(config.paymentOptions)) {
+    item.paymentOptions = normalizePaymentOptions(config.paymentOptions, item);
+    if (!item.paymentOptions.length) delete item.paymentOptions;
   }
 
   const images = repairPropertyImages({

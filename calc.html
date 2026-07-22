@@ -25,7 +25,7 @@
 
       <div id="calcContent" class="calc-container" style="display: none; width: 100%; max-width: 100%;">
         <div class="calc-results">
-          <div class="calc-result-card">
+          <div class="calc-result-card" id="calcCashCard">
             <h3>За наличный расчет</h3>
             <div class="calc-formula">
               <span class="calc-formula-item" id="calcFormulaCashArea">0 м²</span>
@@ -92,7 +92,7 @@
           </div>
 
           <div class="calc-result-card" id="calcInstallment6YearsCard" style="display: none;">
-            <h3>Рассрочка на 6 лет без взноса</h3>
+            <h3 id="calcInstallment6YearsTitle">Рассрочка без взноса</h3>
             <div class="calc-formula">
               <span class="calc-formula-item" id="calcFormulaInst6YArea">0 м²</span>
               <span class="calc-formula-op">×</span>
@@ -102,7 +102,7 @@
                 <span class="calc-formula-item" id="calcFormulaInst6YMandatoryTotal">0</span>
               </span>
               <span class="calc-formula-op">÷</span>
-              <span class="calc-formula-item">72 мес.</span>
+              <span class="calc-formula-item" id="calcFormulaInst6YMonths">0 мес.</span>
             </div>
 
             <div class="calc-options" id="calcOptionsInst6Y" style="margin-bottom: 24px; display: none;">
@@ -131,15 +131,15 @@
           </div>
 
           <div class="calc-result-card" id="calcInstallment6Years30Card" style="display: none;">
-            <h3>Рассрочка на 6 лет (взнос 30%)</h3>
+            <h3 id="calcInstallment6Years30Title">Рассрочка со взносом</h3>
             <div class="calc-formula">
               <span class="calc-formula-item" id="calcFormulaInst6Y30Area">0 м²</span>
               <span class="calc-formula-op">×</span>
               <span class="calc-formula-item" id="calcFormulaInst6Y30Price">0</span>
               <span class="calc-formula-op">−</span>
-              <span class="calc-formula-item" id="calcFormulaInst6Y30DownPayment">0 ₽ (30%)</span>
+              <span class="calc-formula-item" id="calcFormulaInst6Y30DownPayment">0 ₽ (0%)</span>
               <span class="calc-formula-op">÷</span>
-              <span class="calc-formula-item">72 мес.</span>
+              <span class="calc-formula-item" id="calcFormulaInst6Y30Months">0 мес.</span>
             </div>
 
             <div class="calc-options" id="calcOptionsInst6Y30" style="margin-bottom: 24px; display: none;">
@@ -183,10 +183,10 @@
 
   <div id="site-footer"></div>
 
-  <script src="js/data.js?v=47"></script>
+  <script src="js/data.js?v=49"></script>
   <script src="js/app.js"></script>
   <script src="js/layout.js"></script>
-  <script src="js/calc.js?v=48"></script>
+  <script src="js/calc.js?v=49"></script>
   <script>
     initLayout('');
     initCalcPage();
