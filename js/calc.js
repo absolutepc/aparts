@@ -312,7 +312,7 @@ function initCalcPage() {
 }
 
 const CALC_CARD_DURATION_MS = 10000;
-const CALC_ROULETTE_DURATION_MS = 1600;
+const CALC_ROULETTE_DURATION_MS = 700;
 let calcRevealToken = 0;
 let calcRevealComplete = false;
 const calcRouletteStates = new WeakMap();
@@ -359,26 +359,11 @@ function animateRouletteValue(el, targetText, durationMs = CALC_ROULETTE_DURATIO
   const state = { raf: 0 };
   calcRouletteStates.set(el, state);
 
-  const span = Math.max(Math.abs(to - from), Math.abs(to) * 0.2, 50000);
-
   function frame(now) {
     const t = Math.min(1, (now - start) / durationMs);
-    const ease = 1 - Math.pow(1 - t, 3);
-    let value;
-
-    if (t < 0.82) {
-      const center = from + (to - from) * ease;
-      const jitter = (Math.random() - 0.5) * span * (1 - t) * (1 - t);
-      value = Math.max(0, Math.round(center + jitter));
-      if (t < 0.55) {
-        value = Math.round(value / 1000) * 1000;
-      } else if (t < 0.72) {
-        value = Math.round(value / 100) * 100;
-      }
-    } else {
-      value = Math.round(from + (to - from) * ease);
-    }
-
+    // One smooth reel spin that decelerates into the final value
+    const ease = 1 - Math.pow(1 - t, 2.4);
+    const value = Math.max(0, Math.round(from + (to - from) * ease));
     el.textContent = formatPrice(value);
 
     if (t < 1) {
