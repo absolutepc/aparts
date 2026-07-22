@@ -76,12 +76,6 @@ function renderFooter() {
 
       <div class="container footer-bottom">
         <p>&copy; 2026 ${SITE_NAME}. Все права защищены.</p>
-        <div class="footer-payments">
-          <span>Ипотека</span>
-          <span>Аренда</span>
-          <span>Продажа</span>
-          <span>Коммерция</span>
-        </div>
       </div>
     </footer>
   `;
