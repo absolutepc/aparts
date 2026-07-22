@@ -227,10 +227,316 @@ function initCalcPage() {
   contentEl.style.display = '';
   errorEl.style.display = 'none';
 
-  if (cashOption) calculateCash(area);
-  if (noMarkupOption) calculateInst(area, property, noMarkupOption);
-  calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption);
-  calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption);
+  const animationQueue = [];
+  if (cashOption && cashCard) {
+    animationQueue.push({
+      card: cashCard,
+      statusId: 'calcStatusCash',
+      compute: () => calculateCash(area),
+    });
+  }
+  if (noMarkupOption && instCard) {
+    animationQueue.push({
+      card: instCard,
+      statusId: 'calcStatusInst',
+      compute: () => calculateInst(area, property, noMarkupOption),
+    });
+  }
+  if (installmentNoDownOption) {
+    const card = document.getElementById('calcInstallment6YearsCard');
+    if (card) {
+      animationQueue.push({
+        card,
+        statusId: 'calcStatusInst6Y',
+        compute: () => calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption),
+      });
+    }
+  }
+  if (installmentWithDownOption) {
+    const card = document.getElementById('calcInstallment6Years30Card');
+    if (card) {
+      animationQueue.push({
+        card,
+        statusId: 'calcStatusInst6Y30',
+        compute: () => calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption),
+      });
+    }
+  }
+
+  // Hide enabled cards until their turn; keep disabled cards hidden
+  [cashCard, instCard,
+    document.getElementById('calcInstallment6YearsCard'),
+    document.getElementById('calcInstallment6Years30Card'),
+  ].forEach((card) => {
+    if (!card) return;
+    const inQueue = animationQueue.some(item => item.card === card);
+    if (inQueue) {
+      card.classList.add('is-pending');
+      card.style.display = '';
+    }
+  });
+
+  setCalcControlsLocked(true);
+  runCalcRevealSequence(animationQueue).finally(() => {
+    setCalcControlsLocked(false);
+  });
+}
+
+const CALC_CARD_DURATION_MS = 15000;
+let calcRevealToken = 0;
+let calcRevealComplete = false;
+
+function prefersCalcReducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function setCalcControlsLocked(locked) {
+  document.querySelectorAll(
+    '#calcContent input, #calcContent select, #calcContent button'
+  ).forEach((el) => {
+    if (locked) {
+      el.dataset.calcWasDisabled = el.disabled ? '1' : '0';
+      el.disabled = true;
+    } else if (el.dataset.calcWasDisabled != null) {
+      el.disabled = el.dataset.calcWasDisabled === '1';
+      delete el.dataset.calcWasDisabled;
+    }
+  });
+}
+
+function calcSleep(ms, signal) {
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(timer);
+      resolve();
+    }, { once: true });
+  });
+}
+
+function calcTypeText(el, text, durationMs, signal) {
+  return new Promise((resolve) => {
+    if (!el) {
+      resolve();
+      return;
+    }
+    const full = String(text ?? '');
+    if (!durationMs || prefersCalcReducedMotion() || signal?.aborted) {
+      el.textContent = full;
+      el.classList.remove('is-typing');
+      resolve();
+      return;
+    }
+
+    el.textContent = '';
+    el.classList.add('is-typing');
+    const start = performance.now();
+
+    function frame(now) {
+      if (signal?.aborted) {
+        el.textContent = full;
+        el.classList.remove('is-typing');
+        resolve();
+        return;
+      }
+      const progress = Math.min(1, (now - start) / durationMs);
+      const count = Math.floor(full.length * progress);
+      el.textContent = full.slice(0, count);
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        el.textContent = full;
+        el.classList.remove('is-typing');
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  });
+}
+
+function collectFormulaParts(card) {
+  const formula = card.querySelector('.calc-formula');
+  if (!formula) return [];
+  return Array.from(formula.children).filter((el) => {
+    if (el.style.display === 'none') return false;
+    return getComputedStyle(el).display !== 'none';
+  });
+}
+
+function collectTotalRows(card) {
+  return Array.from(card.querySelectorAll('.calc-total')).filter((row) => {
+    if (row.style.display === 'none') return false;
+    return getComputedStyle(row).display !== 'none';
+  });
+}
+
+async function animateCalcCard(card, statusId, durationMs, signal) {
+  const statusEl = statusId ? document.getElementById(statusId) : null;
+  const formulaParts = collectFormulaParts(card);
+  const totalRows = collectTotalRows(card);
+  const startedAt = performance.now();
+
+  card.classList.remove('is-pending', 'is-done');
+  card.classList.add('is-animating');
+  card.style.display = '';
+
+  if (statusEl) {
+    statusEl.textContent = 'Считаю вариант';
+    statusEl.classList.add('is-thinking');
+    statusEl.classList.remove('is-done');
+  }
+
+  const formulaSnapshots = formulaParts.map((el) => {
+    if (el.tagName === 'SELECT') {
+      return { el, kind: 'select' };
+    }
+    if (el.classList.contains('calc-formula-op') && !el.querySelector('.calc-formula-item')) {
+      return { el, kind: 'op', text: el.textContent };
+    }
+    const item = el.classList.contains('calc-formula-item')
+      ? el
+      : el.querySelector('.calc-formula-item');
+    if (item) {
+      return { el, kind: 'text', item, text: item.textContent };
+    }
+    return { el, kind: 'op', text: el.textContent };
+  });
+
+  const totalSnapshots = totalRows.map((row) => {
+    const valueEl = row.querySelector('.calc-total-value');
+    return {
+      row,
+      valueEl,
+      text: valueEl ? valueEl.textContent : '',
+    };
+  });
+
+  formulaSnapshots.forEach((part) => {
+    part.el.classList.add('calc-formula-part-hidden');
+    if (part.kind === 'text' && part.item) part.item.textContent = '';
+  });
+  totalSnapshots.forEach((total) => {
+    total.row.classList.add('is-total-hidden');
+    if (total.valueEl) total.valueEl.textContent = '';
+  });
+
+  await calcSleep(700, signal);
+
+  const formulaBudget = durationMs * 0.52;
+  const perFormula = formulaSnapshots.length
+    ? formulaBudget / formulaSnapshots.length
+    : 0;
+
+  for (const part of formulaSnapshots) {
+    if (signal?.aborted) break;
+    part.el.classList.remove('calc-formula-part-hidden');
+    part.el.classList.add('calc-formula-part-typing');
+
+    if (part.kind === 'text' && part.item) {
+      await calcTypeText(part.item, part.text, Math.max(450, perFormula * 0.75), signal);
+    } else if (part.kind === 'select') {
+      await calcSleep(Math.max(350, perFormula * 0.55), signal);
+    } else {
+      await calcSleep(Math.max(220, perFormula * 0.35), signal);
+    }
+
+    part.el.classList.remove('calc-formula-part-typing');
+    await calcSleep(Math.max(120, perFormula * 0.15), signal);
+  }
+
+  if (statusEl && !signal?.aborted) {
+    statusEl.textContent = 'Считаю итог';
+  }
+
+  const totalsBudget = durationMs * 0.28;
+  const perTotal = totalSnapshots.length ? totalsBudget / totalSnapshots.length : 0;
+
+  for (const total of totalSnapshots) {
+    if (signal?.aborted) break;
+    total.row.classList.remove('is-total-hidden');
+    await calcTypeText(
+      total.valueEl,
+      total.text,
+      Math.max(700, perTotal * 0.8),
+      signal
+    );
+    await calcSleep(Math.max(180, perTotal * 0.15), signal);
+  }
+
+  const elapsed = performance.now() - startedAt;
+  const remain = durationMs - elapsed;
+  if (remain > 0 && !signal?.aborted) {
+    if (statusEl) statusEl.textContent = 'Проверяю цифры';
+    await calcSleep(remain, signal);
+  }
+
+  // Restore final values in case animation was interrupted mid-type
+  formulaSnapshots.forEach((part) => {
+    part.el.classList.remove('calc-formula-part-hidden', 'calc-formula-part-typing');
+    if (part.kind === 'text' && part.item) part.item.textContent = part.text;
+  });
+  totalSnapshots.forEach((total) => {
+    total.row.classList.remove('is-total-hidden');
+    if (total.valueEl) {
+      total.valueEl.classList.remove('is-typing');
+      total.valueEl.textContent = total.text;
+    }
+  });
+
+  if (statusEl) {
+    statusEl.textContent = 'Готово';
+    statusEl.classList.remove('is-thinking');
+    statusEl.classList.add('is-done');
+  }
+
+  card.classList.remove('is-animating');
+  card.classList.add('is-done');
+}
+
+async function runCalcRevealSequence(queue) {
+  const token = ++calcRevealToken;
+  const controller = new AbortController();
+  calcRevealComplete = false;
+
+  if (!queue.length) {
+    calcRevealComplete = true;
+    return;
+  }
+
+  if (prefersCalcReducedMotion()) {
+    queue.forEach((item) => {
+      item.card.classList.remove('is-pending');
+      item.card.style.display = '';
+      item.compute();
+      const statusEl = document.getElementById(item.statusId);
+      if (statusEl) {
+        statusEl.textContent = 'Готово';
+        statusEl.classList.add('is-done');
+      }
+      item.card.classList.add('is-done');
+    });
+    calcRevealComplete = true;
+    return;
+  }
+
+  for (const item of queue) {
+    if (token !== calcRevealToken) {
+      controller.abort();
+      return;
+    }
+    item.card.classList.remove('is-pending');
+    item.compute();
+    await animateCalcCard(item.card, item.statusId, CALC_CARD_DURATION_MS, controller.signal);
+  }
+
+  if (token === calcRevealToken) {
+    calcRevealComplete = true;
+  }
 }
 
 function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
