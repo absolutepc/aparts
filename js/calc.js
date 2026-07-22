@@ -142,11 +142,13 @@ function initCalcPage() {
   const cashOptions = document.getElementById('calcOptionsCash');
   const instOptions = document.getElementById('calcOptionsInst');
   const inst6YOptions = document.getElementById('calcOptionsInst6Y');
+  const inst6Y30Options = document.getElementById('calcOptionsInst6Y30');
   
   if (hasMaternityCapital) {
     if (cashOptions) cashOptions.style.display = '';
     if (instOptions) instOptions.style.display = '';
     if (inst6YOptions) inst6YOptions.style.display = '';
+    if (inst6Y30Options) inst6Y30Options.style.display = '';
   }
 
   const useMaternityCash = document.getElementById('calcUseMaternityCash');
@@ -185,6 +187,18 @@ function initCalcPage() {
     maternityAmountInst6Y.addEventListener('input', () => calculateInst6Years(area, property, targetLayout));
   }
 
+  const useMaternityInst6Y30 = document.getElementById('calcUseMaternityInst6Y30');
+  const maternityInputGroupInst6Y30 = document.getElementById('calcMaternityInputGroupInst6Y30');
+  const maternityAmountInst6Y30 = document.getElementById('calcMaternityAmountInst6Y30');
+
+  if (useMaternityInst6Y30 && maternityInputGroupInst6Y30 && maternityAmountInst6Y30) {
+    useMaternityInst6Y30.addEventListener('change', (e) => {
+      maternityInputGroupInst6Y30.style.display = e.target.checked ? '' : 'none';
+      calculateInst6Years30(area, property, targetLayout);
+    });
+    maternityAmountInst6Y30.addEventListener('input', () => calculateInst6Years30(area, property, targetLayout));
+  }
+
   // Setup Mandatory Payment
   const mandatoryPayment = Number(property.mandatoryPayment) || 0;
 
@@ -195,6 +209,7 @@ function initCalcPage() {
   calculateCash(area);
   calculateInst(area, property);
   calculateInst6Years(area, property, targetLayout);
+  calculateInst6Years30(area, property, targetLayout);
 }
 
 function calculateCash(area) {
@@ -346,3 +361,80 @@ function showError() {
   if (errorEl) errorEl.style.display = '';
   if (contentEl) contentEl.style.display = 'none';
 }
+function calculateInst6Years30(area, property, targetLayout) {
+  const card = document.getElementById('calcInstallment6Years30Card');
+  if (!card) return;
+
+  // We only show this if there's a 6-year installment term configured for the property
+  const installmentTerm = property.installmentTerm || '';
+  if (!installmentTerm.includes('6')) {
+    card.style.display = 'none';
+    return;
+  }
+
+  card.style.display = '';
+
+  // For 6 years installment with 30% down payment, we use the specific price logic:
+  // We need to find the price for 6 years from sectorPriceGroups if available, 
+  // or fallback to the standard calculation logic.
+  // The user requested "Рассрочка на 6 лет (взнос 30%)", which corresponds to "installment30" in sectorPriceGroups.
+  
+  let price = 0;
+  
+  // Try to get price from sectorPriceGroups -> installment30
+  if (typeof getSectorPriceGroupForSector === 'function' && typeof resolveLayoutSectorTitle === 'function') {
+    const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(targetLayout));
+    if (sectorGroup && sectorGroup.installment30) {
+      price = sectorGroup.installment30;
+    }
+  }
+
+  // If we couldn't find a specific installment30 price, try to get the base price
+  if (price === 0) {
+    const priceSelect = document.getElementById('calcPriceSelectInst');
+    price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  }
+
+  const installmentMonths = 72; // 6 years * 12 months
+
+  let totalCost = area * price;
+  const downPayment = totalCost * 0.3; // 30% down payment
+  let amountToDivide = totalCost - downPayment;
+  
+  // Subtract mandatory payment if applicable
+  const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+  const mandatoryBlock = document.getElementById('calcFormulaInst6Y30MandatoryBlock');
+  
+  if (mandatoryPayment > 0) {
+    const mandatoryTotal = area * mandatoryPayment;
+    amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
+    
+    if (mandatoryBlock) {
+      mandatoryBlock.style.display = 'inline-flex';
+      mandatoryBlock.style.alignItems = 'center';
+      mandatoryBlock.style.gap = '8px';
+      document.getElementById('calcFormulaInst6Y30MandatoryTotal').textContent = `${formatPrice(mandatoryTotal)}`;
+    }
+  } else if (mandatoryBlock) {
+    mandatoryBlock.style.display = 'none';
+  }
+  
+  // Subtract maternity capital if checked
+  const useMaternity = document.getElementById('calcUseMaternityInst6Y30')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(document.getElementById('calcMaternityAmountInst6Y30')?.value) || 0;
+    amountToDivide = Math.max(0, amountToDivide - maternityAmount);
+    totalCost = Math.max(0, totalCost - maternityAmount);
+  }
+  
+  const monthlyPayment = amountToDivide / installmentMonths;
+  
+  document.getElementById('calcFormulaInst6Y30Area').textContent = `${formatArea(area)} м²`;
+  document.getElementById('calcFormulaInst6Y30Price').textContent = `${formatPrice(price)}`;
+  document.getElementById('calcFormulaInst6Y30DownPayment').textContent = `${formatPrice(downPayment)} (30%)`;
+  
+  document.getElementById('calcDownPayment6Y30').textContent = `${formatPrice(downPayment)}`;
+  document.getElementById('calcMonthlyPayment6Y30').textContent = `${formatPrice(Math.round(monthlyPayment))}`;
+  document.getElementById('calcTotalInstallment6Y30').textContent = `${formatPrice(totalCost)}`;
+}
+

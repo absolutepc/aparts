@@ -129,6 +129,51 @@
               <span class="calc-total-value" id="calcMonthlyPayment6Y">0 ₽</span>
             </div>
           </div>
+
+          <div class="calc-result-card" id="calcInstallment6Years30Card" style="display: none;">
+            <h3>Рассрочка на 6 лет (взнос 30%)</h3>
+            <div class="calc-formula">
+              <span class="calc-formula-item" id="calcFormulaInst6Y30Area">0 м²</span>
+              <span class="calc-formula-op">×</span>
+              <span class="calc-formula-item" id="calcFormulaInst6Y30Price">0</span>
+              <span class="calc-formula-op">−</span>
+              <span class="calc-formula-item" id="calcFormulaInst6Y30DownPayment">0 ₽ (30%)</span>
+              <span id="calcFormulaInst6Y30MandatoryBlock" style="display: none;">
+                <span class="calc-formula-op">−</span>
+                <span class="calc-formula-item" id="calcFormulaInst6Y30MandatoryTotal">0</span>
+              </span>
+              <span class="calc-formula-op">÷</span>
+              <span class="calc-formula-item">72 мес.</span>
+            </div>
+
+            <div class="calc-options" id="calcOptionsInst6Y30" style="margin-bottom: 24px; display: none;">
+              <div id="calcMaternityOptionInst6Y30">
+                <div class="calc-maternity-row">
+                  <label class="calc-checkbox-label">
+                    <input type="checkbox" id="calcUseMaternityInst6Y30">
+                    Мат. капитал
+                  </label>
+                  <div class="calc-input-group" id="calcMaternityInputGroupInst6Y30" style="display: none;">
+                    <input type="number" id="calcMaternityAmountInst6Y30" class="calc-input calc-input-sm" value="833024" min="0" step="1000">
+                    <span class="calc-currency">₽</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="calc-total">
+              <span class="calc-total-label">Итоговая стоимость:</span>
+              <span class="calc-total-value" id="calcTotalInstallment6Y30">0 ₽</span>
+            </div>
+            <div class="calc-total">
+              <span class="calc-total-label">Первоначальный взнос:</span>
+              <span class="calc-total-value" id="calcDownPayment6Y30">0 ₽</span>
+            </div>
+            <div class="calc-total">
+              <span class="calc-total-label">Ежемесячный платеж:</span>
+              <span class="calc-total-value" id="calcMonthlyPayment6Y30">0 ₽</span>
+            </div>
+          </div>
         </div>
       </div>
 
