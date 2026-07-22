@@ -1901,6 +1901,20 @@ body.page-transition-active > :not(#page-transition) {
   animation: calc-caret 0.9s steps(1) infinite;
 }
 
+.calc-total-value.is-roulette {
+  display: inline-block;
+  min-width: 7ch;
+  text-align: right;
+  filter: blur(0.35px);
+  animation: calc-roulette-tick 0.07s linear infinite;
+}
+
+@keyframes calc-roulette-tick {
+  0% { transform: translateY(-2px); }
+  50% { transform: translateY(2px); }
+  100% { transform: translateY(-2px); }
+}
+
 .calc-total.is-total-hidden {
   opacity: 0;
   visibility: hidden;
@@ -1912,9 +1926,15 @@ body.page-transition-active > :not(#page-transition) {
   }
 
   .calc-status.is-thinking::after,
-  .calc-total-value.is-typing::after {
+  .calc-total-value.is-typing::after,
+  .calc-formula-item.is-typing::after {
     animation: none;
     opacity: 1;
+  }
+
+  .calc-total-value.is-roulette {
+    filter: none;
+    animation: none;
   }
 }
 
