@@ -126,7 +126,7 @@ function initCalcPage() {
   
   const termEl = document.getElementById('calcInstallmentTerm');
   if (termEl) {
-    termEl.textContent = installmentMonths > 0 ? `${installmentMonths} мес. (${noMarkupYears} ${getYearWord(noMarkupYears)})` : 'Нет рассрочки без наценки';
+    termEl.textContent = installmentMonths > 0 ? `${installmentMonths} мес.` : 'Нет рассрочки без наценки';
   }
 
   const instCard = document.getElementById('calcInstallmentCard');
