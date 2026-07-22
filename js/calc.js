@@ -177,12 +177,6 @@ function initCalcPage() {
   
   if (mandatoryPayment > 0 && mandatoryPaymentBlock) {
     mandatoryPaymentBlock.style.display = '';
-    
-    const rateEl = document.getElementById('calcMandatoryPaymentRate');
-    if (rateEl) rateEl.textContent = formatPrice(mandatoryPayment);
-    
-    const totalEl = document.getElementById('calcMandatoryPaymentTotal');
-    if (totalEl) totalEl.textContent = `${formatPrice(area * mandatoryPayment)} ₽`;
   }
 
   contentEl.style.display = '';
@@ -222,9 +216,20 @@ function calculateInst(area, property) {
     
     // Subtract mandatory payment if applicable
     const mandatoryPayment = Number(property.mandatoryPayment) || 0;
+    const mandatoryBlock = document.getElementById('calcFormulaInstMandatoryBlock');
+    
     if (mandatoryPayment > 0) {
       const mandatoryTotal = area * mandatoryPayment;
       amountToDivide = Math.max(0, amountToDivide - mandatoryTotal);
+      
+      if (mandatoryBlock) {
+        mandatoryBlock.style.display = 'inline-flex';
+        mandatoryBlock.style.alignItems = 'center';
+        mandatoryBlock.style.gap = '8px';
+        document.getElementById('calcFormulaInstMandatoryTotal').textContent = `${formatPrice(mandatoryTotal)} ₽`;
+      }
+    } else if (mandatoryBlock) {
+      mandatoryBlock.style.display = 'none';
     }
     
     // Subtract maternity capital if checked

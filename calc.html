@@ -56,6 +56,10 @@
               <span class="calc-formula-item" id="calcFormulaInstArea">0 м²</span>
               <span class="calc-formula-op">×</span>
               <select id="calcPriceSelectInst" class="calc-select calc-formula-select"></select>
+              <span id="calcFormulaInstMandatoryBlock" style="display: none;">
+                <span class="calc-formula-op">−</span>
+                <span class="calc-formula-item" id="calcFormulaInstMandatoryTotal">0 ₽</span>
+              </span>
               <span class="calc-formula-op" id="calcFormulaInstDivOp">÷</span>
               <span class="calc-formula-item" id="calcFormulaInstMonths">0 мес.</span>
             </div>
@@ -73,11 +77,6 @@
               </div>
               
               <div id="calcMandatoryPaymentBlock" style="display: none;">
-                <div class="calc-info-row">
-                  <span class="calc-info-label">Обязательный платеж (<span id="calcMandatoryPaymentRate">0</span> ₽/м²):</span>
-                  <span class="calc-info-value" id="calcMandatoryPaymentTotal">0 ₽</span>
-                </div>
-                <p class="calc-hint">Обязательный платеж вычитается из общей стоимости перед расчетом рассрочки.</p>
               </div>
             </div>
 
