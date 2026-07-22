@@ -1803,6 +1803,7 @@ body.page-transition-active > :not(#page-transition) {
   display: grid;
   grid-template-columns: 1fr;
   gap: 32px;
+  margin-bottom: 20px;
 }
 
 @media (min-width: 992px) {
