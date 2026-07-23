@@ -16,16 +16,21 @@
     // sessionStorage недоступен
   }
 
+  const forceHide = () => {
+    document.body.classList.remove('page-transition-active');
+    overlay.classList.remove('page-transition--visible', 'page-transition--animate', 'page-transition--ready');
+    overlay.classList.add('page-transition--hide');
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden', 'true');
+  };
+
   if (isNavEnter) {
     overlay.dataset.transitionMode = 'nav';
     const labelEl = overlay.querySelector('.page-transition__label');
     if (labelEl && navLabel) {
       labelEl.textContent = navLabel;
     }
-    document.body.classList.remove('page-transition-active');
-    overlay.classList.add('page-transition--hide');
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden', 'true');
+    forceHide();
     return;
   }
 
@@ -33,4 +38,12 @@
   overlay.classList.add('page-transition--visible');
   overlay.setAttribute('aria-hidden', 'false');
   overlay.classList.add('page-transition--animate');
+
+  // Если основные скрипты не отработали — не оставляем экран «Загрузка» навсегда
+  window.setTimeout(() => {
+    if (!document.body.classList.contains('page-transition-active')) return;
+    if (overlay.classList.contains('page-transition--hide')) return;
+    if (overlay.dataset.transitionMode === 'outgoing') return;
+    forceHide();
+  }, 5000);
 })();
