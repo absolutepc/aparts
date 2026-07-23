@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v18';
-const DATA_JS_VERSION = '18';
+const STORE_KEY = 'aparts_data_v19';
+const DATA_JS_VERSION = '19';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -2503,7 +2503,12 @@ function mergePropertyDetails(property, defaults) {
 function preservePropertyContentFields(target, source) {
   if (!target || !source) return target;
 
-  for (const key of ['title', 'description', 'address', 'district', 'price', 'published']) {
+  const forceCatalogPrice = Boolean(COMPLEX_PROPERTY_CONFIGS[target.id]?.forceOfferingFromConfig);
+  const keys = forceCatalogPrice
+    ? ['title', 'description', 'address', 'district', 'published']
+    : ['title', 'description', 'address', 'district', 'price', 'published'];
+
+  for (const key of keys) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
       target[key] = source[key];
     }
@@ -3048,6 +3053,9 @@ function mergeStoredPropertiesWithDefaults(stored) {
       ...saved,
       type: defaults.type,
       published: saved.published ?? defaults.published,
+      price: COMPLEX_PROPERTY_CONFIGS[defaults.id]
+        ? defaults.price
+        : (saved.price ?? defaults.price),
       developer: defaults.developer != null && String(defaults.developer).trim() !== ''
         ? defaults.developer
         : saved.developer,
@@ -3084,7 +3092,7 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const recentKeys = ['aparts_data_v17'];
+  const recentKeys = ['aparts_data_v18', 'aparts_data_v17'];
   for (const key of recentKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -4489,6 +4497,12 @@ function applyComplexConfigFromRegistry(property) {
     } else if (config.floorPriceRanges) {
       item.floorPriceRanges = normalizeFloorPriceRanges(config.floorPriceRanges);
       delete item.sectorPriceGroups;
+      const floorPrices = item.floorPriceRanges
+        .map((range) => Number(range.price))
+        .filter((price) => Number.isFinite(price) && price > 0);
+      if (floorPrices.length) {
+        item.price = Math.min(...floorPrices);
+      }
     }
     if (config.floorPriceColumnLabels) {
       item.floorPriceColumnLabels = {
