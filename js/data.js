@@ -3865,7 +3865,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   installmentTerm: 'до 6 лет',
   maternityCapital: 'yes',
   discounts: 'no/no',
-  markupBasis: 'after',
+  markupBasis: 'before',
   recalculation: 'no',
   noMarkupYears: 2,
   mandatoryPayment: 4000,

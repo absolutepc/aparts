@@ -766,6 +766,8 @@ function renderMarkupInstallmentCards(options, context = {}) {
   const area = context.area;
   const property = context.property;
 
+  const markupBeforeMandatory = String(property?.markupBasis || '') === 'before';
+
   return options.map((option, index) => {
     const years = Number(option.years) || 0;
     const months = years * 12;
@@ -791,12 +793,27 @@ function renderMarkupInstallmentCards(options, context = {}) {
       </div>
     ` : '';
 
+    const mandatoryBlockHtml = `
+        <span data-role="mandatory-block" style="display: none;">
+          <span class="calc-formula-op">−</span>
+          <span class="calc-formula-item" data-role="mandatory">0</span>
+        </span>`;
+    const markupBlockHtml = `
+        <span class="calc-formula-op">+</span>
+        <span class="calc-formula-item" data-role="markup">${markupPercent}%</span>`;
+    // before: сначала наценка, затем вычет обязательного платежа
+    // after: сначала вычет, затем наценка
+    const formulaMiddleHtml = markupBeforeMandatory
+      ? `${markupBlockHtml}${mandatoryBlockHtml}`
+      : `${mandatoryBlockHtml}${markupBlockHtml}`;
+
     const card = document.createElement('div');
     card.className = 'calc-result-card calc-markup-card';
     card.id = cardId;
     card.dataset.markupIndex = String(index);
     card.dataset.years = String(years);
     card.dataset.markupPercent = String(markupPercent);
+    card.dataset.markupBasis = markupBeforeMandatory ? 'before' : 'after';
     card.innerHTML = `
       <h3 id="calcMarkupTitle-${id}">${escapeHtml(title)}</h3>
       <p class="calc-status" id="${statusId}" aria-live="polite"></p>
@@ -804,12 +821,7 @@ function renderMarkupInstallmentCards(options, context = {}) {
         <span class="calc-formula-item" data-role="area">0 м²</span>
         <span class="calc-formula-op">×</span>
         <span class="calc-formula-item" data-role="price">0</span>
-        <span data-role="mandatory-block" style="display: none;">
-          <span class="calc-formula-op">−</span>
-          <span class="calc-formula-item" data-role="mandatory">0</span>
-        </span>
-        <span class="calc-formula-op">+</span>
-        <span class="calc-formula-item" data-role="markup">${markupPercent}%</span>
+        ${formulaMiddleHtml}
         <span class="calc-formula-op">÷</span>
         <span class="calc-formula-item" data-role="months">${months} мес.</span>
       </div>
@@ -890,8 +902,14 @@ function calculateMarkupInstallment(area, property, option, options = {}) {
     ? 0
     : (Number(property.mandatoryPayment) || 0);
   const mandatoryTotal = mandatoryPayment > 0 ? area * mandatoryPayment : 0;
-  const base = Math.max(0, area * price - mandatoryTotal);
-  let totalCost = base * (1 + markupPercent / 100);
+  const markupBeforeMandatory = String(property?.markupBasis || '') === 'before'
+    || targetCard.dataset.markupBasis === 'before';
+  const subtotal = area * price;
+  // before (До вычета): наценка на полную стоимость, затем вычет обязательного платежа
+  // after (После вычета): сначала вычет, затем наценка
+  let totalCost = markupBeforeMandatory
+    ? Math.max(0, subtotal * (1 + markupPercent / 100) - mandatoryTotal)
+    : Math.max(0, subtotal - mandatoryTotal) * (1 + markupPercent / 100);
 
   const useMaternity = targetCard.querySelector('[data-role="use-maternity"]')?.checked;
   if (useMaternity) {
