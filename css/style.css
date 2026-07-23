@@ -1999,6 +1999,7 @@ body.page-transition-active > :not(#page-transition) {
 .calc-formula-select {
   width: auto;
   min-width: 100px;
+  max-width: min(100%, 280px);
   font-family: monospace;
   font-size: 0.95rem;
   font-weight: 600;

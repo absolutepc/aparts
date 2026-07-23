@@ -1009,6 +1009,69 @@ function getApplicableFloorPrices(property, layout) {
   );
 }
 
+/** Варианты цены м² для калькулятора по таблице «Цены по этажам». */
+function getCalcFloorPriceOptions(property, layout = null) {
+  const ranges = getPropertyFloorPriceRanges(property);
+  if (!ranges.length) return [];
+
+  const columnLabels = getFloorPriceColumnLabels(property);
+  const options = [];
+
+  ranges.forEach((range) => {
+    const floorLabel = formatFloorRangeCompactLabel(range);
+    if (!floorLabel) return;
+
+    const fromPrice = Number(range.price);
+    if (!(fromPrice > 0)) return;
+
+    options.push({
+      value: fromPrice,
+      optionValue: `${fromPrice}__${range.floorMin}_${range.floorMax}_from`,
+      label: `${floorLabel} эт. · ${columnLabels.from}: ${formatPrice(fromPrice)}`,
+      floorMin: range.floorMin,
+      floorMax: range.floorMax,
+      priceKind: 'from',
+    });
+
+    const toPrice = getFloorPriceTo(fromPrice, property);
+    if (toPrice != null && toPrice > 0 && toPrice !== fromPrice) {
+      options.push({
+        value: toPrice,
+        optionValue: `${toPrice}__${range.floorMin}_${range.floorMax}_to`,
+        label: `${floorLabel} эт. · ${columnLabels.to}: ${formatPrice(toPrice)}`,
+        floorMin: range.floorMin,
+        floorMax: range.floorMax,
+        priceKind: 'to',
+      });
+    }
+  });
+
+  options.sort((a, b) => b.value - a.value || a.floorMin - b.floorMin);
+
+  if (layout) {
+    const applicable = getApplicableFloorPrices(property, layout);
+    if (applicable.length) {
+      const preferred = Number(applicable[0].price);
+      const preferredIndex = options.findIndex((opt) => (
+        opt.value === preferred && opt.priceKind === 'from'
+      ));
+      if (preferredIndex > 0) {
+        const [preferredOption] = options.splice(preferredIndex, 1);
+        options.unshift(preferredOption);
+      }
+    }
+  }
+
+  return options;
+}
+
+function parseCalcUnitPriceValue(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return 0;
+  const price = Number(text.split('__')[0]);
+  return Number.isFinite(price) && price > 0 ? price : 0;
+}
+
 const FLOOR_PRICE_TO_OFFSET = 2000;
 
 function getFloorPriceToOffset(property) {
