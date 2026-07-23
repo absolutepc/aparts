@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v19';
-const DATA_JS_VERSION = '19';
+const STORE_KEY = 'aparts_data_v20';
+const DATA_JS_VERSION = '20';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -3085,14 +3085,18 @@ function mergeStoredPropertiesWithDefaults(stored) {
 function initStore() {
   migrateStore();
   if (!localStorage.getItem(STORE_KEY)) {
-    localStorage.setItem(STORE_KEY, JSON.stringify({ properties: DEFAULT_PROPERTIES }));
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({ properties: DEFAULT_PROPERTIES }));
+    } catch (error) {
+      console.warn(`${SITE_NAME}: не удалось записать каталог в localStorage`, error);
+    }
   }
 }
 
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const recentKeys = ['aparts_data_v18', 'aparts_data_v17'];
+  const recentKeys = ['aparts_data_v19', 'aparts_data_v18', 'aparts_data_v17'];
   for (const key of recentKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -3208,7 +3212,11 @@ function saveProperties(properties) {
     delete item.imageUrl;
     return item;
   });
-  localStorage.setItem(STORE_KEY, JSON.stringify({ properties: normalized }));
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ properties: normalized }));
+  } catch (error) {
+    console.warn(`${SITE_NAME}: не удалось сохранить каталог`, error);
+  }
 }
 
 function getPropertyById(id) {
