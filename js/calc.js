@@ -90,8 +90,21 @@ function initCalcPage() {
 
   if (sectorGroup?.full > 0) {
     prices.push({ value: sectorGroup.full, label: formatPrice(sectorGroup.full) });
-  } else {
-    const applicablePrices = getApplicableFloorPrices(property, targetLayout);
+  } else if (typeof getCalcFloorPriceOptions === 'function') {
+    const floorPriceOptions = getCalcFloorPriceOptions(property, targetLayout);
+    floorPriceOptions.forEach((option) => {
+      prices.push({
+        value: option.value,
+        optionValue: option.optionValue || String(option.value),
+        label: option.label,
+      });
+    });
+  }
+
+  if (!prices.length) {
+    const applicablePrices = typeof getApplicableFloorPrices === 'function'
+      ? getApplicableFloorPrices(property, targetLayout)
+      : [];
     if (applicablePrices && applicablePrices.length > 0) {
       const uniquePrices = new Set();
       applicablePrices.forEach(range => {
@@ -113,7 +126,11 @@ function initCalcPage() {
     }
   }
 
-  prices.sort((a, b) => a.value - b.value);
+  // Для этажных тарифов порядок уже задан (дороже → дешевле); иначе по возрастанию
+  const hasFloorPriceLabels = prices.some((item) => String(item.label || '').includes(' эт. · '));
+  if (!hasFloorPriceLabels) {
+    prices.sort((a, b) => a.value - b.value);
+  }
 
   const priceSelectCash = document.getElementById('calcPriceSelectCash');
   const priceSelectInst = document.getElementById('calcPriceSelectInst');
@@ -123,9 +140,10 @@ function initCalcPage() {
   const useFixedUnitPrice = prices.length <= 1;
 
   if (prices.length > 0) {
-    const optionsHtml = prices.map(p =>
-      `<option value="${p.value}">${escapeHtml(p.label)}</option>`
-    ).join('');
+    const optionsHtml = prices.map(p => {
+      const optionValue = p.optionValue != null ? p.optionValue : String(p.value);
+      return `<option value="${escapeAttr(optionValue)}" data-price="${escapeAttr(String(p.value))}">${escapeHtml(p.label)}</option>`;
+    }).join('');
 
     const syncFloorPriceSelects = (sourceSelect) => {
       const value = sourceSelect?.value;
@@ -752,7 +770,18 @@ function applyCalcSvoDiscount(amount) {
 function getCalcBaseUnitPrice() {
   const priceSelect = document.getElementById('calcPriceSelectCash')
     || document.getElementById('calcPriceSelectInst');
-  return priceSelect ? Number(priceSelect.value) || 0 : 0;
+  return readCalcPriceSelect(priceSelect);
+}
+
+function readCalcPriceSelect(priceSelect) {
+  if (!priceSelect) return 0;
+  const selected = priceSelect.selectedOptions?.[0];
+  const fromData = Number(selected?.dataset?.price);
+  if (Number.isFinite(fromData) && fromData > 0) return fromData;
+  if (typeof parseCalcUnitPriceValue === 'function') {
+    return parseCalcUnitPriceValue(priceSelect.value);
+  }
+  return Number(priceSelect.value) || 0;
 }
 
 function renderMarkupInstallmentCards(options, context = {}) {
@@ -966,7 +995,7 @@ function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
 
   const priceSelect = document.getElementById('calcPriceSelectInst')
     || document.getElementById('calcPriceSelectCash');
-  const base = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  const base = readCalcPriceSelect(priceSelect);
 
   if (key === 'floorTo') {
     const offset = Number(property.floorPriceToOffset) || 0;
@@ -993,8 +1022,7 @@ function setMandatoryPaymentTotal(rowId, valueId, mandatoryTotal, animate = fals
 
 function calculateCash(area, options = {}) {
   const animate = Boolean(options.animate);
-  const priceSelect = document.getElementById('calcPriceSelectCash');
-  const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  const price = readCalcPriceSelect(document.getElementById('calcPriceSelectCash'));
 
   let totalCash = area * price;
 
@@ -1013,8 +1041,7 @@ function calculateInst(area, property, option, options = {}) {
   if (!option) return;
   const animate = Boolean(options.animate);
 
-  const priceSelect = document.getElementById('calcPriceSelectInst');
-  const price = priceSelect ? Number(priceSelect.value) || 0 : 0;
+  const price = readCalcPriceSelect(document.getElementById('calcPriceSelectInst'));
   const years = Number(option.years) || Number(property.noMarkupYears) || 0;
   const installmentMonths = years * 12;
   if (installmentMonths <= 0) return;
