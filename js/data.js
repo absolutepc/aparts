@@ -693,7 +693,7 @@ const DEFAULT_PROPERTIES = [
     address: 'Пешеходный бульвар, 17 сектор',
     district: 'Новый район',
     developer: 'Квартал 777',
-    noMarkupYears: 1,
+    noMarkupYears: 2,
     mandatoryPayment: 3000,
     img: 'img/Лэвел/lvl 5.jpg',
     images: [
