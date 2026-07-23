@@ -248,7 +248,11 @@ function initCalcPage() {
     });
   }
 
-  const markupCards = renderMarkupInstallmentCards(markupInstallmentOptions);
+  const markupCards = renderMarkupInstallmentCards(markupInstallmentOptions, {
+    hasMaternity: hasMaternityCapital,
+    area,
+    property,
+  });
 
   const cashOptions = document.getElementById('calcOptionsCash');
   const instOptions = document.getElementById('calcOptionsInst');
@@ -751,12 +755,16 @@ function getCalcBaseUnitPrice() {
   return priceSelect ? Number(priceSelect.value) || 0 : 0;
 }
 
-function renderMarkupInstallmentCards(options) {
+function renderMarkupInstallmentCards(options, context = {}) {
   const results = document.getElementById('calcResults');
   if (!results) return [];
 
   results.querySelectorAll('.calc-markup-card').forEach(card => card.remove());
   if (!Array.isArray(options) || !options.length) return [];
+
+  const hasMaternity = Boolean(context.hasMaternity);
+  const area = context.area;
+  const property = context.property;
 
   return options.map((option, index) => {
     const years = Number(option.years) || 0;
@@ -767,6 +775,21 @@ function renderMarkupInstallmentCards(options) {
     const statusId = `calcStatusMarkup-${id}`;
     const title = option.title
       || `Рассрочка на ${years} ${getYearWord(years)} с наценкой ${markupPercent}%`;
+
+    const maternityHtml = hasMaternity ? `
+      <div class="calc-options" data-role="maternity-options" style="margin-bottom: 24px;">
+        <div class="calc-maternity-row">
+          <label class="calc-checkbox-label">
+            <input type="checkbox" data-role="use-maternity">
+            Мат. капитал
+          </label>
+          <div class="calc-input-group" data-role="maternity-input-group" style="display: none;">
+            <input type="number" class="calc-input calc-input-sm" data-role="maternity-amount" value="833024" min="0" step="1000">
+            <span class="calc-currency">₽</span>
+          </div>
+        </div>
+      </div>
+    ` : '';
 
     const card = document.createElement('div');
     card.className = 'calc-result-card calc-markup-card';
@@ -790,6 +813,7 @@ function renderMarkupInstallmentCards(options) {
         <span class="calc-formula-op">÷</span>
         <span class="calc-formula-item" data-role="months">${months} мес.</span>
       </div>
+      ${maternityHtml}
       <div class="calc-total">
         <span class="calc-total-label">Итоговая стоимость:</span>
         <span class="calc-total-value" data-role="total">0 ₽</span>
@@ -804,6 +828,22 @@ function renderMarkupInstallmentCards(options) {
       </div>
     `;
     results.appendChild(card);
+
+    if (hasMaternity) {
+      const useMaternity = card.querySelector('[data-role="use-maternity"]');
+      const maternityGroup = card.querySelector('[data-role="maternity-input-group"]');
+      const maternityAmount = card.querySelector('[data-role="maternity-amount"]');
+      if (useMaternity && maternityGroup && maternityAmount) {
+        useMaternity.addEventListener('change', (e) => {
+          maternityGroup.style.display = e.target.checked ? '' : 'none';
+          calculateMarkupInstallment(area, property, option, { animate: true });
+        });
+        maternityAmount.addEventListener('input', debounceCalc(() => {
+          calculateMarkupInstallment(area, property, option, { animate: true });
+        }, 280));
+      }
+    }
+
     return { card, statusId, option, index };
   });
 }
@@ -852,6 +892,15 @@ function calculateMarkupInstallment(area, property, option, options = {}) {
   const mandatoryTotal = mandatoryPayment > 0 ? area * mandatoryPayment : 0;
   const base = Math.max(0, area * price - mandatoryTotal);
   let totalCost = base * (1 + markupPercent / 100);
+
+  const useMaternity = targetCard.querySelector('[data-role="use-maternity"]')?.checked;
+  if (useMaternity) {
+    const maternityAmount = Number(
+      targetCard.querySelector('[data-role="maternity-amount"]')?.value
+    ) || 0;
+    totalCost = Math.max(0, totalCost - maternityAmount);
+  }
+
   totalCost = applyCalcSvoDiscount(totalCost);
   const monthlyPayment = totalCost / months;
 

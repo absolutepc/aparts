@@ -3833,6 +3833,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   paymentOptions: [
     { type: 'cash' },
     { type: 'noMarkup', years: 2 },
+    { type: 'installment', years: 3, markupPercent: 25, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 35, useMandatoryPayment: true },
+    { type: 'installment', years: 6, markupPercent: 40, useMandatoryPayment: true },
   ],
 
   floorPriceRanges: [
