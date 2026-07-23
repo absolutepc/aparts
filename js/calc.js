@@ -126,14 +126,8 @@ function initCalcPage() {
     }
   }
 
-  // Для этажных тарифов порядок уже задан (дороже → дешевле); иначе по возрастанию
-  const usedFloorPriceOptions = typeof getCalcFloorPriceOptions === 'function'
-    && typeof getPropertyFloorPriceRanges === 'function'
-    && getPropertyFloorPriceRanges(property).length > 0
-    && !(sectorGroup?.full > 0);
-  if (!usedFloorPriceOptions) {
-    prices.sort((a, b) => a.value - b.value);
-  }
+  // Всегда начинаем расчёт с минимальной доступной цены
+  prices.sort((a, b) => a.value - b.value);
 
   const priceSelectCash = document.getElementById('calcPriceSelectCash');
   const priceSelectInst = document.getElementById('calcPriceSelectInst');
@@ -149,9 +143,10 @@ function initCalcPage() {
 
   const syncAllUnitPriceSelects = (sourceSelect) => {
     const value = sourceSelect?.value;
-    if (value == null) return;
+    if (value == null || value === '') return;
     document.querySelectorAll('.calc-unit-price-select').forEach((select) => {
-      if (select !== sourceSelect && select.querySelector(`option[value="${CSS.escape(value)}"]`)) {
+      if (select === sourceSelect) return;
+      if ([...select.options].some((opt) => opt.value === value)) {
         select.value = value;
       }
     });

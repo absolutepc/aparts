@@ -1047,21 +1047,8 @@ function getCalcFloorPriceOptions(property, layout = null) {
     }
   });
 
-  options.sort((a, b) => b.value - a.value || a.floorMin - b.floorMin);
-
-  if (layout) {
-    const applicable = getApplicableFloorPrices(property, layout);
-    if (applicable.length) {
-      const preferred = Number(applicable[0].price);
-      const preferredIndex = options.findIndex((opt) => (
-        opt.value === preferred && opt.priceKind === 'from'
-      ));
-      if (preferredIndex > 0) {
-        const [preferredOption] = options.splice(preferredIndex, 1);
-        options.unshift(preferredOption);
-      }
-    }
-  }
+  // По умолчанию в калькуляторе — минимальная доступная цена
+  options.sort((a, b) => a.value - b.value || a.floorMin - b.floorMin);
 
   return options;
 }
