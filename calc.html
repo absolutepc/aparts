@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Калькулятор стоимости — Aparts</title>
-  <link rel="stylesheet" href="css/style.css?v=60">
+  <link rel="stylesheet" href="css/style.css?v=61">
 </head>
 <body>
   <div id="site-header"></div>
@@ -24,7 +24,24 @@
       </div>
 
       <div id="calcContent" class="calc-container" style="display: none; width: 100%; max-width: 100%;">
-        <div class="calc-results">
+        <div class="calc-svo-bar" id="calcSvoBar" style="display: none;">
+          <label class="calc-checkbox-label">
+            <input type="checkbox" id="calcUseSvoDiscount">
+            Скидка участникам СВО
+          </label>
+          <div class="calc-svo-choices" id="calcSvoChoices" style="display: none;">
+            <label class="calc-radio-label">
+              <input type="radio" name="calcSvoType" value="5" checked>
+              Обычная — 5%
+            </label>
+            <label class="calc-radio-label">
+              <input type="radio" name="calcSvoType" value="10">
+              Раненым — 10%
+            </label>
+          </div>
+        </div>
+
+        <div class="calc-results" id="calcResults">
           <div class="calc-result-card" id="calcCashCard">
             <h3>За наличный расчет</h3>
             <p class="calc-status" id="calcStatusCash" aria-live="polite"></p>
@@ -201,10 +218,10 @@
 
   <div id="site-footer"></div>
 
-  <script src="js/data.js?v=49"></script>
+  <script src="js/data.js?v=61"></script>
   <script src="js/app.js"></script>
   <script src="js/layout.js"></script>
-  <script src="js/calc.js?v=60"></script>
+  <script src="js/calc.js?v=61"></script>
   <script>
     initLayout('');
     initCalcPage();

@@ -53,6 +53,7 @@ const DISCOUNT_OPTIONS = {
   '5-10/no': '5-10% / нет',
   'no/3': 'нет / 3%',
   'no/no': 'нет / нет',
+  svo: 'СВО 5% / раненым 10%',
 };
 
 const MARKUP_BASIS_OPTIONS = {
@@ -260,7 +261,7 @@ const DEFAULT_PROPERTIES = [
     deliveryDate: '2027г',
     installmentTerm: 'до 6 лет',
     maternityCapital: 'no',
-  discounts: 'no/no',
+  discounts: 'svo',
     markupBasis: 'after',
     recalculation: 'no',
     noMarkupYears: 1,
@@ -1345,7 +1346,8 @@ function getRecalculationLabel(value) {
 /**
  * Явные варианты покупки для калькулятора.
  * type: 'cash' | 'noMarkup' | 'installment'
- * installment: years, downPaymentPercent, priceKey ('full'|'noDownPayment'|'installment30'|'floorTo'),
+ * installment: years, downPaymentPercent, markupPercent,
+ *              priceKey ('full'|'noDownPayment'|'installment30'|'floorTo'),
  *              useMandatoryPayment, title (optional)
  */
 function normalizePaymentOptions(options, property = null) {
@@ -1373,18 +1375,22 @@ function normalizePaymentOptions(options, property = null) {
       const years = Number(opt.years) || 0;
       if (years <= 0) return null;
       const downPaymentPercent = Math.max(0, Number(opt.downPaymentPercent) || 0);
+      const markupPercent = Math.max(0, Number(opt.markupPercent) || 0);
       const priceKey = String(
         opt.priceKey
-          || (downPaymentPercent > 0 ? 'installment30' : 'noDownPayment')
+          || (markupPercent > 0
+            ? 'full'
+            : (downPaymentPercent > 0 ? 'installment30' : 'noDownPayment'))
       ).trim();
       const useMandatoryPayment = opt.useMandatoryPayment != null
         ? Boolean(opt.useMandatoryPayment)
-        : downPaymentPercent === 0;
+        : (markupPercent > 0 || downPaymentPercent === 0);
       const title = String(opt.title || '').trim();
       return {
         type: 'installment',
         years,
         downPaymentPercent,
+        markupPercent,
         priceKey,
         useMandatoryPayment,
         ...(title ? { title } : {}),
@@ -3399,14 +3405,20 @@ const COMPLEX_PROPERTY_CONFIGS = {
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
   maternityCapital: 'no',
-  discounts: 'no/no',
+  discounts: 'svo',
   markupBasis: 'after',
   recalculation: 'no',
   noMarkupYears: 1,
   mandatoryPayment: 3000,
+  svoDiscount: true,
   paymentOptions: [
     { type: 'cash' },
     { type: 'noMarkup', years: 1 },
+    { type: 'installment', years: 2, markupPercent: 15, useMandatoryPayment: true },
+    { type: 'installment', years: 3, markupPercent: 25, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 35, useMandatoryPayment: true },
+    { type: 'installment', years: 6, markupPercent: 40, useMandatoryPayment: true },
   ],
 
   floorPriceRanges: [
@@ -4474,6 +4486,12 @@ function applyComplexConfigFromRegistry(property) {
   if (Array.isArray(config.paymentOptions)) {
     item.paymentOptions = normalizePaymentOptions(config.paymentOptions, item);
     if (!item.paymentOptions.length) delete item.paymentOptions;
+  }
+
+  if (config.svoDiscount != null) {
+    item.svoDiscount = Boolean(config.svoDiscount);
+  } else {
+    delete item.svoDiscount;
   }
 
   const images = repairPropertyImages({

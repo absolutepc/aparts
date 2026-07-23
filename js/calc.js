@@ -67,11 +67,16 @@ function initCalcPage() {
   const cashOption = paymentOptions.find(opt => opt.type === 'cash') || null;
   const noMarkupOption = paymentOptions.find(opt => opt.type === 'noMarkup') || null;
   const installmentNoDownOption = paymentOptions.find(
-    opt => opt.type === 'installment' && !(Number(opt.downPaymentPercent) > 0)
+    opt => opt.type === 'installment'
+      && !(Number(opt.downPaymentPercent) > 0)
+      && !(Number(opt.markupPercent) > 0)
   ) || null;
   const installmentWithDownOption = paymentOptions.find(
     opt => opt.type === 'installment' && Number(opt.downPaymentPercent) > 0
   ) || null;
+  const markupInstallmentOptions = paymentOptions.filter(
+    opt => opt.type === 'installment' && Number(opt.markupPercent) > 0
+  );
 
   // Prices for cash / short installment (полная оплата)
   const prices = [];
@@ -130,15 +135,17 @@ function initCalcPage() {
     };
 
     const recalculateAfterPriceChange = () => {
-      const animate = true;
-      if (cashOption) calculateCash(area, { animate });
-      if (noMarkupOption) calculateInst(area, property, noMarkupOption, { animate });
-      if (installmentNoDownOption) {
-        calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption, { animate });
-      }
-      if (installmentWithDownOption) {
-        calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption, { animate });
-      }
+      recalculateAllCalcCards({
+        area,
+        property,
+        targetLayout,
+        cashOption,
+        noMarkupOption,
+        installmentNoDownOption,
+        installmentWithDownOption,
+        markupInstallmentOptions,
+        animate: true,
+      });
     };
 
     if (priceSelectCash) {
@@ -210,6 +217,38 @@ function initCalcPage() {
   }
 
   const hasMaternityCapital = property.maternityCapital === 'yes';
+  const hasSvoDiscount = property.svoDiscount === true;
+
+  const svoBar = document.getElementById('calcSvoBar');
+  const useSvoDiscount = document.getElementById('calcUseSvoDiscount');
+  const svoChoices = document.getElementById('calcSvoChoices');
+  if (svoBar) {
+    svoBar.style.display = hasSvoDiscount ? '' : 'none';
+  }
+  if (hasSvoDiscount && useSvoDiscount && svoChoices) {
+    const onSvoChange = () => {
+      svoChoices.style.display = useSvoDiscount.checked ? '' : 'none';
+      recalculateAllCalcCards({
+        area,
+        property,
+        targetLayout,
+        cashOption,
+        noMarkupOption,
+        installmentNoDownOption,
+        installmentWithDownOption,
+        markupInstallmentOptions,
+        animate: true,
+      });
+    };
+    useSvoDiscount.addEventListener('change', onSvoChange);
+    document.querySelectorAll('input[name="calcSvoType"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        if (useSvoDiscount.checked) onSvoChange();
+      });
+    });
+  }
+
+  const markupCards = renderMarkupInstallmentCards(markupInstallmentOptions);
 
   const cashOptions = document.getElementById('calcOptionsCash');
   const instOptions = document.getElementById('calcOptionsInst');
@@ -317,11 +356,21 @@ function initCalcPage() {
       });
     }
   }
+  markupCards.forEach(({ card, statusId, option }) => {
+    animationQueue.push({
+      card,
+      statusId,
+      compute: () => calculateMarkupInstallment(area, property, option, { animate: false }),
+    });
+  });
 
   // Hide enabled cards until their turn; keep disabled cards hidden
-  [cashCard, instCard,
+  [
+    cashCard,
+    instCard,
     document.getElementById('calcInstallment6YearsCard'),
     document.getElementById('calcInstallment6Years30Card'),
+    ...markupCards.map(item => item.card),
   ].forEach((card) => {
     if (!card) return;
     const inQueue = animationQueue.some(item => item.card === card);
@@ -683,6 +732,159 @@ async function runCalcRevealSequence(queue) {
   }
 }
 
+function getCalcSvoDiscountPercent() {
+  const enabled = document.getElementById('calcUseSvoDiscount')?.checked;
+  if (!enabled) return 0;
+  const selected = document.querySelector('input[name="calcSvoType"]:checked');
+  return Math.max(0, Number(selected?.value) || 0);
+}
+
+function applyCalcSvoDiscount(amount) {
+  const percent = getCalcSvoDiscountPercent();
+  if (percent <= 0) return amount;
+  return Math.max(0, amount * (1 - percent / 100));
+}
+
+function getCalcBaseUnitPrice() {
+  const priceSelect = document.getElementById('calcPriceSelectCash')
+    || document.getElementById('calcPriceSelectInst');
+  return priceSelect ? Number(priceSelect.value) || 0 : 0;
+}
+
+function renderMarkupInstallmentCards(options) {
+  const results = document.getElementById('calcResults');
+  if (!results) return [];
+
+  results.querySelectorAll('.calc-markup-card').forEach(card => card.remove());
+  if (!Array.isArray(options) || !options.length) return [];
+
+  return options.map((option, index) => {
+    const years = Number(option.years) || 0;
+    const months = years * 12;
+    const markupPercent = Number(option.markupPercent) || 0;
+    const id = `markup${index}`;
+    const cardId = `calcMarkupCard-${id}`;
+    const statusId = `calcStatusMarkup-${id}`;
+    const title = option.title
+      || `Рассрочка на ${years} ${getYearWord(years)} с наценкой ${markupPercent}%`;
+
+    const card = document.createElement('div');
+    card.className = 'calc-result-card calc-markup-card';
+    card.id = cardId;
+    card.dataset.markupIndex = String(index);
+    card.dataset.years = String(years);
+    card.dataset.markupPercent = String(markupPercent);
+    card.innerHTML = `
+      <h3 id="calcMarkupTitle-${id}">${escapeHtml(title)}</h3>
+      <p class="calc-status" id="${statusId}" aria-live="polite"></p>
+      <div class="calc-formula">
+        <span class="calc-formula-item" data-role="area">0 м²</span>
+        <span class="calc-formula-op">×</span>
+        <span class="calc-formula-item" data-role="price">0</span>
+        <span data-role="mandatory-block" style="display: none;">
+          <span class="calc-formula-op">−</span>
+          <span class="calc-formula-item" data-role="mandatory">0</span>
+        </span>
+        <span class="calc-formula-op">+</span>
+        <span class="calc-formula-item" data-role="markup">${markupPercent}%</span>
+        <span class="calc-formula-op">÷</span>
+        <span class="calc-formula-item" data-role="months">${months} мес.</span>
+      </div>
+      <div class="calc-total">
+        <span class="calc-total-label">Итоговая стоимость:</span>
+        <span class="calc-total-value" data-role="total">0 ₽</span>
+      </div>
+      <div class="calc-total" data-role="mandatory-row" style="display: none;">
+        <span class="calc-total-label">Обязательный платеж:</span>
+        <span class="calc-total-value" data-role="mandatory-total">0 ₽</span>
+      </div>
+      <div class="calc-total">
+        <span class="calc-total-label">Ежемесячный платеж:</span>
+        <span class="calc-total-value" data-role="monthly">0 ₽</span>
+      </div>
+    `;
+    results.appendChild(card);
+    return { card, statusId, option, index };
+  });
+}
+
+function recalculateAllCalcCards({
+  area,
+  property,
+  targetLayout,
+  cashOption,
+  noMarkupOption,
+  installmentNoDownOption,
+  installmentWithDownOption,
+  markupInstallmentOptions,
+  animate = false,
+}) {
+  if (cashOption) calculateCash(area, { animate });
+  if (noMarkupOption) calculateInst(area, property, noMarkupOption, { animate });
+  if (installmentNoDownOption) {
+    calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption, { animate });
+  }
+  if (installmentWithDownOption) {
+    calculateInstallmentWithDown(area, property, targetLayout, installmentWithDownOption, { animate });
+  }
+  (markupInstallmentOptions || []).forEach((option) => {
+    calculateMarkupInstallment(area, property, option, { animate });
+  });
+}
+
+function calculateMarkupInstallment(area, property, option, options = {}) {
+  if (!option) return;
+  const animate = Boolean(options.animate);
+  const markupPercent = Number(option.markupPercent) || 0;
+  const years = Number(option.years) || 0;
+  const months = years * 12;
+  if (months <= 0) return;
+
+  const targetCard = document.querySelector(
+    `.calc-markup-card[data-years="${years}"][data-markup-percent="${markupPercent}"]`
+  );
+  if (!targetCard) return;
+
+  const price = getCalcBaseUnitPrice();
+  const mandatoryPayment = option.useMandatoryPayment === false
+    ? 0
+    : (Number(property.mandatoryPayment) || 0);
+  const mandatoryTotal = mandatoryPayment > 0 ? area * mandatoryPayment : 0;
+  const base = Math.max(0, area * price - mandatoryTotal);
+  let totalCost = base * (1 + markupPercent / 100);
+  totalCost = applyCalcSvoDiscount(totalCost);
+  const monthlyPayment = totalCost / months;
+
+  const areaEl = targetCard.querySelector('[data-role="area"]');
+  const priceEl = targetCard.querySelector('[data-role="price"]');
+  const mandatoryBlock = targetCard.querySelector('[data-role="mandatory-block"]');
+  const mandatoryEl = targetCard.querySelector('[data-role="mandatory"]');
+  const mandatoryRow = targetCard.querySelector('[data-role="mandatory-row"]');
+  const mandatoryTotalEl = targetCard.querySelector('[data-role="mandatory-total"]');
+  const totalEl = targetCard.querySelector('[data-role="total"]');
+  const monthlyEl = targetCard.querySelector('[data-role="monthly"]');
+
+  if (areaEl) areaEl.textContent = `${formatArea(area)} м²`;
+  if (priceEl) priceEl.textContent = `${formatPrice(price)}`;
+
+  if (mandatoryTotal > 0) {
+    if (mandatoryBlock) {
+      mandatoryBlock.style.display = 'inline-flex';
+      mandatoryBlock.style.alignItems = 'center';
+      mandatoryBlock.style.gap = '8px';
+    }
+    if (mandatoryEl) mandatoryEl.textContent = `${formatPrice(mandatoryTotal)}`;
+    if (mandatoryRow) mandatoryRow.style.display = '';
+    if (mandatoryTotalEl) setCalcValueText(mandatoryTotalEl, `${formatPrice(mandatoryTotal)}`, animate);
+  } else {
+    if (mandatoryBlock) mandatoryBlock.style.display = 'none';
+    if (mandatoryRow) mandatoryRow.style.display = 'none';
+  }
+
+  if (totalEl) setCalcValueText(totalEl, `${formatPrice(totalCost)}`, animate);
+  if (monthlyEl) setCalcValueText(monthlyEl, `${formatPrice(Math.round(monthlyPayment))}`, animate);
+}
+
 function resolveInstallmentUnitPrice(property, targetLayout, priceKey) {
   const key = String(priceKey || '').trim();
   let sectorGroup = null;
@@ -734,6 +936,7 @@ function calculateCash(area, options = {}) {
     const maternityAmount = Number(document.getElementById('calcMaternityAmountCash')?.value) || 0;
     totalCash = Math.max(0, totalCash - maternityAmount);
   }
+  totalCash = applyCalcSvoDiscount(totalCash);
 
   document.getElementById('calcFormulaCashArea').textContent = `${formatArea(area)} м²`;
   setCalcValueText('calcTotalCash', `${formatPrice(totalCash)}`, animate);
@@ -778,6 +981,9 @@ function calculateInst(area, property, option, options = {}) {
     amountToDivide = Math.max(0, amountToDivide - maternityAmount);
     totalCost = Math.max(0, totalCost - maternityAmount);
   }
+
+  amountToDivide = applyCalcSvoDiscount(amountToDivide);
+  totalCost = applyCalcSvoDiscount(totalCost);
 
   const monthlyPayment = amountToDivide / installmentMonths;
 
@@ -846,6 +1052,9 @@ function calculateInstallmentNoDown(area, property, targetLayout, option, option
     totalCost = Math.max(0, totalCost - maternityAmount);
   }
 
+  amountToDivide = applyCalcSvoDiscount(amountToDivide);
+  totalCost = applyCalcSvoDiscount(totalCost);
+
   const monthlyPayment = installmentMonths > 0 ? amountToDivide / installmentMonths : 0;
 
   document.getElementById('calcFormulaInst6YArea').textContent = `${formatArea(area)} м²`;
@@ -904,6 +1113,9 @@ function calculateInstallmentWithDown(area, property, targetLayout, option, opti
     amountToDivide = Math.max(0, amountToDivide - maternityAmount);
     totalCost = Math.max(0, totalCost - maternityAmount);
   }
+
+  amountToDivide = applyCalcSvoDiscount(amountToDivide);
+  totalCost = applyCalcSvoDiscount(totalCost);
 
   const monthlyPayment = installmentMonths > 0 ? amountToDivide / installmentMonths : 0;
 
