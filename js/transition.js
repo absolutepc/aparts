@@ -130,7 +130,7 @@ function showPageTransition(label, { animate = true } = {}) {
   const overlay = getPageTransitionOverlay();
   if (!overlay) return null;
 
-  overlay.style.display = '';
+  overlay.style.display = 'flex';
   setPageTransitionLabel(label);
   overlay.classList.remove('page-transition--hide');
   overlay.classList.add('page-transition--visible');
@@ -205,45 +205,17 @@ async function finishPageTransition(defaultLabel) {
   pageTransitionFinishing = true;
 
   const overlay = getPageTransitionOverlay();
-  if (!overlay) {
-    document.body.classList.remove('page-transition-active');
-    return;
-  }
+  document.body.classList.remove('page-transition-active');
+  if (!overlay) return;
 
   try {
-    const isNavEnter = overlay.dataset.transitionMode === 'nav';
-    const labelEl = overlay.querySelector('.page-transition__label');
-    const currentLabel = labelEl?.textContent.trim() || defaultLabel || 'Dune Base';
-
-    if (isNavEnter) {
-      document.body.classList.remove('page-transition-active');
-      overlay.classList.add('page-transition--hide');
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-      return;
-    }
-
-    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
-      return;
-    }
-
-    if (!overlay.classList.contains('page-transition--visible')) {
-      showPageTransition(currentLabel, { animate: true });
-    } else if (!overlay.classList.contains('page-transition--animate')
-      && !overlay.classList.contains('page-transition--ready')) {
-      requestAnimationFrame(() => overlay.classList.add('page-transition--animate'));
-    }
-
-    await waitForTransitionAssets(overlay);
-
-    if (pageTransitionNavigating || overlay.dataset.transitionMode === 'outgoing') {
-      return;
-    }
-
+    // При загрузке страницы не включаем блокирующий оверлей —
+    // иначе при ошибке JS контент остаётся невидимым.
+    if (defaultLabel) setPageTransitionLabel(defaultLabel);
     hidePageTransition(overlay);
   } catch (error) {
     console.warn(`${typeof SITE_NAME !== 'undefined' ? SITE_NAME : 'Dune Base'}: ошибка анимации перехода`, error);
-    if (!pageTransitionNavigating) hidePageTransition(overlay);
+    hidePageTransition(overlay);
   }
 }
 
