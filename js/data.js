@@ -693,7 +693,7 @@ const DEFAULT_PROPERTIES = [
     address: 'Пешеходный бульвар, 17 сектор',
     district: 'Новый район',
     developer: 'Квартал 777',
-    noMarkupYears: 1,
+    noMarkupYears: 2,
     mandatoryPayment: 3000,
     img: 'img/Лэвел/lvl 5.jpg',
     images: [
@@ -4165,12 +4165,15 @@ const COMPLEX_PROPERTY_CONFIGS = {
   discounts: 'no/no',
   markupBasis: 'after',
   recalculation: 'no',
-  noMarkupYears: 1,
+  noMarkupYears: 2,
   mandatoryPayment: 3000,
   paymentOptions: [
     { type: 'cash' },
-    { type: 'noMarkup', years: 1 },
-    { type: 'installment', years: 6, downPaymentPercent: 0, priceKey: 'floorTo' },
+    { type: 'noMarkup', years: 2, useMandatoryPayment: true },
+    { type: 'installment', years: 3, markupPercent: 20, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 25, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 6, markupPercent: 35, useMandatoryPayment: true },
   ],
 
   floorPriceRanges: [
