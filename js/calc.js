@@ -127,8 +127,11 @@ function initCalcPage() {
   }
 
   // Для этажных тарифов порядок уже задан (дороже → дешевле); иначе по возрастанию
-  const hasFloorPriceLabels = prices.some((item) => String(item.label || '').includes(' эт. · '));
-  if (!hasFloorPriceLabels) {
+  const usedFloorPriceOptions = typeof getCalcFloorPriceOptions === 'function'
+    && typeof getPropertyFloorPriceRanges === 'function'
+    && getPropertyFloorPriceRanges(property).length > 0
+    && !(sectorGroup?.full > 0);
+  if (!usedFloorPriceOptions) {
     prices.sort((a, b) => a.value - b.value);
   }
 
@@ -139,18 +142,43 @@ function initCalcPage() {
   // Одна цена (как у Ан-Нур по секторам) — фиксированный текст, без выпадающего меню
   const useFixedUnitPrice = prices.length <= 1;
 
-  if (prices.length > 0) {
-    const optionsHtml = prices.map(p => {
-      const optionValue = p.optionValue != null ? p.optionValue : String(p.value);
-      return `<option value="${escapeAttr(optionValue)}" data-price="${escapeAttr(String(p.value))}">${escapeHtml(p.label)}</option>`;
-    }).join('');
+  const buildUnitPriceOptionsHtml = (list) => list.map((p) => {
+    const optionValue = p.optionValue != null ? p.optionValue : String(p.value);
+    return `<option value="${escapeAttr(optionValue)}" data-price="${escapeAttr(String(p.value))}">${escapeHtml(p.label)}</option>`;
+  }).join('');
 
-    const syncFloorPriceSelects = (sourceSelect) => {
-      const value = sourceSelect?.value;
-      if (value == null) return;
-      if (priceSelectCash && priceSelectCash !== sourceSelect) priceSelectCash.value = value;
-      if (priceSelectInst && priceSelectInst !== sourceSelect) priceSelectInst.value = value;
-    };
+  const syncAllUnitPriceSelects = (sourceSelect) => {
+    const value = sourceSelect?.value;
+    if (value == null) return;
+    document.querySelectorAll('.calc-unit-price-select').forEach((select) => {
+      if (select !== sourceSelect && select.querySelector(`option[value="${CSS.escape(value)}"]`)) {
+        select.value = value;
+      }
+    });
+  };
+
+  const bindUnitPriceSelect = (select, labelEl, optionsHtml, onChange) => {
+    if (!select) return;
+    select.innerHTML = optionsHtml;
+    select.classList.add('calc-unit-price-select');
+    if (useFixedUnitPrice) {
+      select.style.display = 'none';
+      if (labelEl) {
+        labelEl.style.display = '';
+        labelEl.textContent = formatPrice(prices[0].value);
+      }
+      return;
+    }
+    select.style.display = '';
+    if (labelEl) labelEl.style.display = 'none';
+    select.addEventListener('change', () => {
+      syncAllUnitPriceSelects(select);
+      onChange();
+    });
+  };
+
+  if (prices.length > 0) {
+    const optionsHtml = buildUnitPriceOptionsHtml(prices);
 
     const recalculateAfterPriceChange = () => {
       recalculateAllCalcCards({
@@ -166,41 +194,8 @@ function initCalcPage() {
       });
     };
 
-    if (priceSelectCash) {
-      priceSelectCash.innerHTML = optionsHtml;
-      if (useFixedUnitPrice) {
-        priceSelectCash.style.display = 'none';
-        if (priceLabelCash) {
-          priceLabelCash.style.display = '';
-          priceLabelCash.textContent = formatPrice(prices[0].value);
-        }
-      } else {
-        priceSelectCash.style.display = '';
-        if (priceLabelCash) priceLabelCash.style.display = 'none';
-        priceSelectCash.addEventListener('change', () => {
-          syncFloorPriceSelects(priceSelectCash);
-          recalculateAfterPriceChange();
-        });
-      }
-    }
-
-    if (priceSelectInst) {
-      priceSelectInst.innerHTML = optionsHtml;
-      if (useFixedUnitPrice) {
-        priceSelectInst.style.display = 'none';
-        if (priceLabelInst) {
-          priceLabelInst.style.display = '';
-          priceLabelInst.textContent = formatPrice(prices[0].value);
-        }
-      } else {
-        priceSelectInst.style.display = '';
-        if (priceLabelInst) priceLabelInst.style.display = 'none';
-        priceSelectInst.addEventListener('change', () => {
-          syncFloorPriceSelects(priceSelectInst);
-          recalculateAfterPriceChange();
-        });
-      }
-    }
+    bindUnitPriceSelect(priceSelectCash, priceLabelCash, optionsHtml, recalculateAfterPriceChange);
+    bindUnitPriceSelect(priceSelectInst, priceLabelInst, optionsHtml, recalculateAfterPriceChange);
   } else {
     const emptyOption = '<option value="0">Цена не указана</option>';
     if (priceSelectCash) {
@@ -214,6 +209,28 @@ function initCalcPage() {
     if (priceLabelCash) priceLabelCash.style.display = 'none';
     if (priceLabelInst) priceLabelInst.style.display = 'none';
   }
+
+  const unitPriceSelectContext = {
+    optionsHtml: prices.length ? buildUnitPriceOptionsHtml(prices) : '',
+    useFixed: useFixedUnitPrice,
+    firstLabel: prices[0] ? formatPrice(prices[0].value) : '',
+    syncAll: syncAllUnitPriceSelects,
+    onChange: prices.length
+      ? () => {
+        recalculateAllCalcCards({
+          area,
+          property,
+          targetLayout,
+          cashOption,
+          noMarkupOption,
+          installmentNoDownOption,
+          installmentWithDownOption,
+          markupInstallmentOptions,
+          animate: true,
+        });
+      }
+      : null,
+  };
 
   const cashCard = document.getElementById('calcCashCard');
   if (cashCard) {
@@ -270,6 +287,7 @@ function initCalcPage() {
     hasMaternity: hasMaternityCapital,
     area,
     property,
+    unitPriceSelect: unitPriceSelectContext,
   });
 
   const cashOptions = document.getElementById('calcOptionsCash');
@@ -768,7 +786,8 @@ function applyCalcSvoDiscount(amount) {
 }
 
 function getCalcBaseUnitPrice() {
-  const priceSelect = document.getElementById('calcPriceSelectCash')
+  const priceSelect = document.querySelector('.calc-unit-price-select:not([style*="display: none"])')
+    || document.getElementById('calcPriceSelectCash')
     || document.getElementById('calcPriceSelectInst');
   return readCalcPriceSelect(priceSelect);
 }
@@ -849,7 +868,8 @@ function renderMarkupInstallmentCards(options, context = {}) {
       <div class="calc-formula">
         <span class="calc-formula-item" data-role="area">0 м²</span>
         <span class="calc-formula-op">×</span>
-        <span class="calc-formula-item" data-role="price">0</span>
+        <select class="calc-select calc-formula-select calc-unit-price-select" data-role="price-select" aria-label="Цена за м²"></select>
+        <span class="calc-formula-item" data-role="price" style="display: none;">0</span>
         ${formulaMiddleHtml}
         <span class="calc-formula-op">÷</span>
         <span class="calc-formula-item" data-role="months">${months} мес.</span>
@@ -869,6 +889,39 @@ function renderMarkupInstallmentCards(options, context = {}) {
       </div>
     `;
     results.appendChild(card);
+
+    const unitPriceSelect = context.unitPriceSelect || {};
+    const priceSelect = card.querySelector('[data-role="price-select"]');
+    const priceLabel = card.querySelector('[data-role="price"]');
+    if (priceSelect && unitPriceSelect.optionsHtml) {
+      priceSelect.innerHTML = unitPriceSelect.optionsHtml;
+      const sourceValue = document.getElementById('calcPriceSelectCash')?.value
+        || document.getElementById('calcPriceSelectInst')?.value;
+      if (sourceValue && priceSelect.querySelector(`option[value="${CSS.escape(sourceValue)}"]`)) {
+        priceSelect.value = sourceValue;
+      }
+      if (unitPriceSelect.useFixed) {
+        priceSelect.style.display = 'none';
+        if (priceLabel) {
+          priceLabel.style.display = '';
+          priceLabel.textContent = unitPriceSelect.firstLabel || '0';
+        }
+      } else {
+        priceSelect.style.display = '';
+        if (priceLabel) priceLabel.style.display = 'none';
+        priceSelect.addEventListener('change', () => {
+          if (typeof unitPriceSelect.syncAll === 'function') {
+            unitPriceSelect.syncAll(priceSelect);
+          }
+          if (typeof unitPriceSelect.onChange === 'function') {
+            unitPriceSelect.onChange();
+          }
+        });
+      }
+    } else if (priceSelect) {
+      priceSelect.style.display = 'none';
+      if (priceLabel) priceLabel.style.display = '';
+    }
 
     if (hasMaternity) {
       const useMaternity = card.querySelector('[data-role="use-maternity"]');
@@ -961,7 +1014,12 @@ function calculateMarkupInstallment(area, property, option, options = {}) {
   const monthlyEl = targetCard.querySelector('[data-role="monthly"]');
 
   if (areaEl) areaEl.textContent = `${formatArea(area)} м²`;
-  if (priceEl) priceEl.textContent = `${formatPrice(price)}`;
+  const priceSelect = targetCard.querySelector('[data-role="price-select"]');
+  if (priceSelect && priceSelect.style.display !== 'none') {
+    // Цена берётся из общего выбора; подпись в select уже актуальная
+  } else if (priceEl) {
+    priceEl.textContent = `${formatPrice(price)}`;
+  }
 
   if (mandatoryTotal > 0) {
     if (mandatoryBlock) {

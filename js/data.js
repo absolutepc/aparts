@@ -1014,31 +1014,32 @@ function getCalcFloorPriceOptions(property, layout = null) {
   const ranges = getPropertyFloorPriceRanges(property);
   if (!ranges.length) return [];
 
-  const columnLabels = getFloorPriceColumnLabels(property);
   const options = [];
+  const seenValues = new Set();
 
   ranges.forEach((range) => {
-    const floorLabel = formatFloorRangeCompactLabel(range);
-    if (!floorLabel) return;
-
     const fromPrice = Number(range.price);
     if (!(fromPrice > 0)) return;
 
-    options.push({
-      value: fromPrice,
-      optionValue: `${fromPrice}__${range.floorMin}_${range.floorMax}_from`,
-      label: `${floorLabel} эт. · ${columnLabels.from}: ${formatPrice(fromPrice)}`,
-      floorMin: range.floorMin,
-      floorMax: range.floorMax,
-      priceKind: 'from',
-    });
+    if (!seenValues.has(fromPrice)) {
+      seenValues.add(fromPrice);
+      options.push({
+        value: fromPrice,
+        optionValue: String(fromPrice),
+        label: formatPrice(fromPrice),
+        floorMin: range.floorMin,
+        floorMax: range.floorMax,
+        priceKind: 'from',
+      });
+    }
 
     const toPrice = getFloorPriceTo(fromPrice, property);
-    if (toPrice != null && toPrice > 0 && toPrice !== fromPrice) {
+    if (toPrice != null && toPrice > 0 && !seenValues.has(toPrice)) {
+      seenValues.add(toPrice);
       options.push({
         value: toPrice,
-        optionValue: `${toPrice}__${range.floorMin}_${range.floorMax}_to`,
-        label: `${floorLabel} эт. · ${columnLabels.to}: ${formatPrice(toPrice)}`,
+        optionValue: String(toPrice),
+        label: formatPrice(toPrice),
         floorMin: range.floorMin,
         floorMax: range.floorMax,
         priceKind: 'to',
