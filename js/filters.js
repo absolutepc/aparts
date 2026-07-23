@@ -84,9 +84,9 @@ function initPropertyCatalog(options) {
 
   renderCheckboxGroup(
     discountsFiltersEl,
-    Object.entries(DISCOUNT_OPTIONS).map(([value, label]) => ({
+    Object.entries(DISCOUNT_FILTER_OPTIONS).map(([value, label]) => ({
       value,
-      label: getDiscountLabel(value),
+      label: getDiscountFilterLabel(value),
     })),
     'discounts-filter'
   );

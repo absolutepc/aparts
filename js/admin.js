@@ -960,7 +960,7 @@ function renderPropertiesAdmin() {
               </select>
             </div>
             <div class="form-group">
-              <label>Скидки СВО / Социальные</label>
+              <label>Скидки</label>
               <select name="discounts">
                 <option value="">—</option>
                 ${Object.entries(DISCOUNT_OPTIONS).map(([value, label]) => `

@@ -56,6 +56,11 @@ const DISCOUNT_OPTIONS = {
   svo: 'СВО 5% / раненым 10%',
 };
 
+const DISCOUNT_FILTER_OPTIONS = {
+  svo: 'СВО',
+  social: 'Социальные',
+};
+
 const MARKUP_BASIS_OPTIONS = {
   after: 'После вычета',
   before: 'До вычета',
@@ -1508,6 +1513,29 @@ function getDiscountLabel(value) {
   return DISCOUNT_OPTIONS[value] || '';
 }
 
+function getDiscountFilterLabel(value) {
+  return DISCOUNT_FILTER_OPTIONS[value] || '';
+}
+
+/** Категории скидок для фильтра: svo | social */
+function getDiscountCategories(discountsValue) {
+  const value = String(discountsValue || '').trim();
+  if (!value || value === 'no/no') return [];
+
+  const categories = [];
+  if (value === 'svo' || value.startsWith('5-10/')) {
+    categories.push('svo');
+  }
+  if (value === 'social' || /\/3$/.test(value)) {
+    categories.push('social');
+  }
+  if (value.includes('/') && !value.startsWith('no/') && !categories.includes('svo')) {
+    const left = value.split('/')[0];
+    if (left && left !== 'no') categories.push('svo');
+  }
+  return categories;
+}
+
 function propertyMatchesOfferingFilters(property, filters = {}) {
   const noMarkupYears = Array.isArray(filters.noMarkupYears) ? filters.noMarkupYears : [];
   const mandatoryPayments = Array.isArray(filters.mandatoryPayments) ? filters.mandatoryPayments : [];
@@ -1524,8 +1552,11 @@ function propertyMatchesOfferingFilters(property, filters = {}) {
   if (maternityCapitals.length && !maternityCapitals.includes(String(property.maternityCapital))) {
     return false;
   }
-  if (discounts.length && !discounts.includes(String(property.discounts))) {
-    return false;
+  if (discounts.length) {
+    const categories = getDiscountCategories(property.discounts);
+    if (!discounts.some(value => categories.includes(value))) {
+      return false;
+    }
   }
   if (deliveryDates.length && !deliveryDates.includes(String(property.deliveryDate))) {
     return false;
@@ -1568,7 +1599,7 @@ function renderPropertyOfferingSpecs(property) {
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
     renderPropertySpecRow('Перерасчет', getRecalculationLabel(property.recalculation)),
     renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
-    renderPropertySpecRow('Скидки СВО / Социальные', getDiscountLabel(property.discounts)),
+    renderPropertySpecRow('Скидки', getDiscountLabel(property.discounts)),
     renderPropertySpecRow('Обязательный платёж', paymentLabel),
     renderPropertySpecRow('Район', property.district),
     renderPropertySpecRow('Адрес', property.address),
