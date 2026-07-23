@@ -3955,13 +3955,17 @@ const COMPLEX_PROPERTY_CONFIGS = {
   installmentTerm: 'до 5 лет',
   maternityCapital: 'yes',
   discounts: 'no/no',
-  markupBasis: 'after',
+  markupBasis: 'before',
   recalculation: 'no',
   noMarkupYears: 1,
   mandatoryPayment: 5000,
   paymentOptions: [
     { type: 'cash' },
-    { type: 'noMarkup', years: 1 },
+    { type: 'noMarkup', years: 1, useMandatoryPayment: true },
+    { type: 'installment', years: 2, markupPercent: 10, useMandatoryPayment: true },
+    { type: 'installment', years: 3, markupPercent: 20, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 35, useMandatoryPayment: true },
   ],
 
   floorPriceRanges: [
