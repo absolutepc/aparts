@@ -41,7 +41,7 @@ const MANDATORY_PAYMENT_OPTIONS = {
   12000: '12 000',
 };
 
-const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13', 'СК Экология'];
+const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13', 'СК Экология', 'Триумф'];
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -54,6 +54,7 @@ const DISCOUNT_OPTIONS = {
   'no/3': 'нет / 3%',
   'no/no': 'нет / нет',
   svo: 'СВО 5% / раненым 10%',
+  yes: 'Есть',
 };
 
 const DISCOUNT_FILTER_OPTIONS = {
@@ -787,7 +788,42 @@ const DEFAULT_PROPERTIES = [
     ],
     published: true,
   },
-  
+
+  {
+    id: 'jk9',
+    title: 'ЖК «Орион»',
+    description: 'ЖК Орион — новый жилой комплекс в Байсангуровском районе Грозного на улице Абдаллы бин Хусейна. Светлый фасад в современном неоклассическом стиле, панорамное остекление скруглённого угла, арки первого этажа и пентхаусы на верхних уровнях. Во дворе — благоустроенный парк, детская площадка и зелёные зоны. В продаже двухкомнатные, трёхкомнатные, четырёхкомнатные квартиры и пентхаусы. Застройщик — Триумф, срок сдачи — 2 квартал 2030 года.',
+    type: 'jk',
+    flatType: '2room',
+    totalApartments: 4,
+    flatVariants: [
+      { flatType: '2room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: '3room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: '4room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: 'penthouse', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+    ],
+    areaMin: 0,
+    areaMax: 0,
+    price: 68000,
+    address: 'ул. Абдаллы бин Хусейна 2, 6',
+    district: 'Байсангуровский',
+    developer: 'Триумф',
+    noMarkupYears: 2,
+    mandatoryPayment: 6000,
+    img: 'img/Орион/orion.jpg',
+    images: [
+      'img/Орион/orion 1.jpg',
+      'img/Орион/orion 2.jpg',
+      'img/Орион/orion 3.jpg',
+      'img/Орион/orion 4.jpg',
+      'img/Орион/orion 5.jpg',
+      'img/Орион/orion 6.jpg',
+      'img/Орион/orion 7.jpg',
+      'img/Орион/orion 8.jpg',
+    ],
+    published: true,
+  },
+
   {
     id: 'comm1',
     title: 'Офисное помещение в БЦ',
@@ -4321,6 +4357,39 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   },
 
+  sectors: null,
+  },
+
+  jk9: {
+  forceOfferingFromConfig: true,
+  developer: 'Триумф',
+  deliveryDate: '2 квартал 2030г',
+  installmentTerm: 'до 6 лет',
+  maternityCapital: 'yes',
+  discounts: 'yes',
+  markupBasis: 'after',
+  recalculation: 'yes',
+  noMarkupYears: 2,
+  mandatoryPayment: 6000,
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 2, useMandatoryPayment: true },
+    { type: 'installment', years: 3, markupPercent: 20, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 25, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 6, markupPercent: 35, useMandatoryPayment: true },
+  ],
+
+  floorPriceRanges: [
+    { floorMin: 3, floorMax: 5, price: 70000 },
+    { floorMin: 6, floorMax: 10, price: 69000 },
+    { floorMin: 11, floorMax: 22, price: 68000 },
+  ],
+  floorPriceColumnLabels: { from: 'Наличка / 50% взнос', to: 'Без взноса' },
+  floorPriceToOffset: 2000,
+  sectorHeading: 'Этаж',
+
+  layouts: null,
   sectors: null,
   },
 
