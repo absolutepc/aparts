@@ -810,7 +810,7 @@ const DEFAULT_PROPERTIES = [
     developer: 'Триумф',
     noMarkupYears: 2,
     mandatoryPayment: 6000,
-    img: 'img/Орион/orion.jpg',
+    img: 'img/Орион/orion 1.jpg',
     images: [
       'img/Орион/orion 1.jpg',
       'img/Орион/orion 2.jpg',
