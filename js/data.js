@@ -2934,7 +2934,11 @@ function renderComplexStatsTags(property) {
 }
 
 function renderComplexStatsTable(property, selectedVariant, options = {}) {
-  const hideFlatTypeStats = property?.id === 'jk1' || property?.id === 'jk3'|| property?.id === 'jk6'|| property?.id === 'jk7';
+  const hideFlatTypeStats = property?.id === 'jk1'
+    || property?.id === 'jk3'
+    || property?.id === 'jk6'
+    || property?.id === 'jk7'
+    || property?.id === 'jk9';
   if (selectedVariant || hideFlatTypeStats) {
     return '';
   }
