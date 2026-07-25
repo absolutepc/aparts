@@ -1273,6 +1273,7 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
 
   const compact = options.compact === true;
   const columnLabels = getFloorPriceColumnLabels(property);
+  const showToColumn = getFloorPriceToOffset(property) > 0;
   const sectionClass = compact
     ? 'property-floor-prices property-floor-prices--compact'
     : 'property-floor-prices';
@@ -1292,16 +1293,16 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
           <thead>
             <tr>
               <th>Этажи</th>
-              <th>${escapeHtml(columnLabels.from)}</th>
-              <th class="property-floor-prices-table-col-corner">${escapeHtml(columnLabels.to)}</th>
+              <th>${escapeHtml(showToColumn ? columnLabels.from : 'Цена')}</th>
+              ${showToColumn ? `<th class="property-floor-prices-table-col-corner">${escapeHtml(columnLabels.to)}</th>` : ''}
             </tr>
           </thead>
           <tbody>
             ${ranges.map((range) => `
               <tr>
                 <td>${escapeHtml(formatFloorRangeLabel(range))}</td>
-                <td>${formatFloorPriceFromLabel(range.price)}</td>
-                <td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price, property)}</td>
+                <td>${showToColumn ? formatFloorPriceFromLabel(range.price) : formatPrice(range.price)}</td>
+                ${showToColumn ? `<td class="property-floor-prices-table-col-corner">${formatFloorPriceToLabel(range.price, property)}</td>` : ''}
               </tr>
             `).join('')}
           </tbody>
