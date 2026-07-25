@@ -246,7 +246,9 @@ function initCalcPage() {
     }
   }
 
-  const hasMaternityCapital = property.maternityCapital === 'yes';
+  const maternityMinArea = Number(property.maternityMinArea) || 0;
+  const hasMaternityCapital = property.maternityCapital === 'yes'
+    && (!(maternityMinArea > 0) || area >= maternityMinArea);
   const hasSvoDiscount = property.svoDiscount === true;
 
   const svoBar = document.getElementById('calcSvoBar');
@@ -254,6 +256,31 @@ function initCalcPage() {
   const svoChoices = document.getElementById('calcSvoChoices');
   if (svoBar) {
     svoBar.style.display = hasSvoDiscount ? '' : 'none';
+    const svoBarLabel = svoBar.querySelector('.calc-checkbox-label');
+    if (svoBarLabel && hasSvoDiscount) {
+      const labelText = svoBarLabel.childNodes[svoBarLabel.childNodes.length - 1];
+      const customOptions = Array.isArray(property.svoDiscountOptions)
+        ? property.svoDiscountOptions.filter(opt => Number(opt?.value) > 0 && String(opt?.label || '').trim())
+        : [];
+      if (labelText && labelText.nodeType === Node.TEXT_NODE) {
+        labelText.textContent = customOptions.length > 1
+          ? ' Скидки'
+          : ' Скидка участникам СВО';
+      }
+    }
+  }
+  if (hasSvoDiscount && svoChoices) {
+    const customOptions = Array.isArray(property.svoDiscountOptions)
+      ? property.svoDiscountOptions.filter(opt => Number(opt?.value) > 0 && String(opt?.label || '').trim())
+      : [];
+    if (customOptions.length) {
+      svoChoices.innerHTML = customOptions.map((opt, index) => `
+        <label class="calc-radio-label">
+          <input type="radio" name="calcSvoType" value="${Number(opt.value)}"${index === 0 ? ' checked' : ''}>
+          ${escapeHtml(String(opt.label).trim())}
+        </label>
+      `).join('');
+    }
   }
   if (hasSvoDiscount && useSvoDiscount && svoChoices) {
     const onSvoChange = () => {

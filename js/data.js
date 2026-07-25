@@ -41,7 +41,7 @@ const MANDATORY_PAYMENT_OPTIONS = {
   12000: '12 000',
 };
 
-const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13', 'СК Экология', 'Триумф'];
+const DEVELOPER_LIST = ['Кормат строй', 'Квартал 777', 'Монолит', 'Фаворит 13', 'СК Экология', 'Триумф', 'Миг Строй-Проект'];
 
 const MATERNITY_CAPITAL_OPTIONS = {
   yes: 'Да',
@@ -54,6 +54,7 @@ const DISCOUNT_OPTIONS = {
   'no/3': 'нет / 3%',
   'no/no': 'нет / нет',
   svo: 'СВО 5% / раненым 10%',
+  'svo5/3': 'СВО 5% / инвалидам 3%',
   yes: 'Есть',
 };
 
@@ -826,6 +827,36 @@ const DEFAULT_PROPERTIES = [
   },
 
   {
+    id: 'jk10',
+    title: 'ЖК «Мичурина»',
+    description: 'ЖК Мичурина — жилой комплекс в Байсангуровском районе Грозного на улице Леонова. Два современных высотных дома с благоустроенной территорией, парком и парковкой. В продаже студии, однокомнатные, двухкомнатные и трёхкомнатные квартиры. Застройщик — Миг Строй-Проект, срок сдачи — 2 квартал 2030 года.',
+    type: 'jk',
+    flatType: 'studio',
+    totalApartments: 4,
+    flatVariants: [
+      { flatType: 'studio', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: '1room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: '2room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+      { flatType: '3room', totalApartments: 1, areaMin: 0, areaMax: 0, layouts: [] },
+    ],
+    areaMin: 0,
+    areaMax: 0,
+    price: 60000,
+    address: 'ул. Леонова, б/н',
+    district: 'Байсангуровский',
+    developer: 'Миг Строй-Проект',
+    noMarkupYears: 2,
+    mandatoryPayment: 3000,
+    img: 'img/Мичурина/michurina 1.jpg',
+    images: [
+      'img/Мичурина/michurina 1.jpg',
+      'img/Мичурина/michurina 2.jpg',
+      'img/Мичурина/michurina 3.jpg',
+    ],
+    published: true,
+  },
+
+  {
     id: 'comm1',
     title: 'Офисное помещение в БЦ',
     description: 'Открытая планировка, отдельный вход, подходит под офис или шоурум.',
@@ -1424,8 +1455,14 @@ function getMandatoryPaymentLabel(amount) {
   return formatted ? `${formatted} ₽/м²` : '';
 }
 
-function getMaternityCapitalLabel(value) {
-  return MATERNITY_CAPITAL_OPTIONS[value] || '';
+function getMaternityCapitalLabel(value, property = null) {
+  if (!MATERNITY_CAPITAL_OPTIONS[value] && value !== 'yes') return '';
+  if (value !== 'yes') return MATERNITY_CAPITAL_OPTIONS[value] || '';
+  const minArea = Number(property?.maternityMinArea);
+  if (Number.isFinite(minArea) && minArea > 0) {
+    return `от ${formatArea(minArea)} м²`;
+  }
+  return MATERNITY_CAPITAL_OPTIONS.yes;
 }
 
 function getMarkupBasisLabel(value) {
@@ -1611,10 +1648,10 @@ function getDiscountCategories(discountsValue) {
   if (!value || value === 'no/no') return [];
 
   const categories = [];
-  if (value === 'svo' || value.startsWith('5-10/')) {
+  if (value === 'svo' || value === 'svo5/3' || value.startsWith('5-10/') || value.startsWith('svo')) {
     categories.push('svo');
   }
-  if (value === 'social' || /\/3$/.test(value)) {
+  if (value === 'social' || value === 'svo5/3' || /\/3$/.test(value)) {
     categories.push('social');
   }
   if (value.includes('/') && !value.startsWith('no/') && !categories.includes('svo')) {
@@ -1686,7 +1723,7 @@ function renderPropertyOfferingSpecs(property) {
     renderPropertySpecRow('Без наценки', getNoMarkupYearsLabel(property.noMarkupYears)),
     renderPropertySpecRow('Наценка', getMarkupBasisLabel(property.markupBasis)),
     renderPropertySpecRow('Перерасчет', getRecalculationLabel(property.recalculation)),
-    renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital)),
+    renderPropertySpecRow('Материнский капитал', getMaternityCapitalLabel(property.maternityCapital, property)),
     renderPropertySpecRow('Скидки', getDiscountLabel(property.discounts)),
     renderPropertySpecRow('Обязательный платёж', paymentLabel),
     renderPropertySpecRow('Район', property.district),
@@ -2939,7 +2976,8 @@ function renderComplexStatsTable(property, selectedVariant, options = {}) {
     || property?.id === 'jk3'
     || property?.id === 'jk6'
     || property?.id === 'jk7'
-    || property?.id === 'jk9';
+    || property?.id === 'jk9'
+    || property?.id === 'jk10';
   if (selectedVariant || hideFlatTypeStats) {
     return '';
   }
@@ -4398,6 +4436,43 @@ const COMPLEX_PROPERTY_CONFIGS = {
   sectors: null,
   },
 
+  jk10: {
+  forceOfferingFromConfig: true,
+  developer: 'Миг Строй-Проект',
+  deliveryDate: '2 квартал 2030г',
+  installmentTerm: 'до 6 лет',
+  maternityCapital: 'yes',
+  maternityMinArea: 73,
+  discounts: 'svo5/3',
+  markupBasis: 'after',
+  recalculation: 'no',
+  noMarkupYears: 2,
+  mandatoryPayment: 3000,
+  svoDiscount: true,
+  svoDiscountOptions: [
+    { value: 5, label: 'СВО — 5%' },
+    { value: 3, label: 'Инвалидам — 3%' },
+  ],
+  paymentOptions: [
+    { type: 'cash' },
+    { type: 'noMarkup', years: 2, useMandatoryPayment: true },
+    { type: 'installment', years: 2, markupPercent: 15, useMandatoryPayment: true },
+    { type: 'installment', years: 3, markupPercent: 25, useMandatoryPayment: true },
+    { type: 'installment', years: 4, markupPercent: 30, useMandatoryPayment: true },
+    { type: 'installment', years: 5, markupPercent: 35, useMandatoryPayment: true },
+  ],
+
+  floorPriceRanges: [
+    { floorMin: 6, floorMax: 11, price: 63000 },
+    { floorMin: 12, floorMax: 18, price: 60000 },
+  ],
+  floorPriceToOffset: 0,
+  sectorHeading: 'Этаж',
+
+  layouts: null,
+  sectors: null,
+  },
+
 };
 
 for (const complexId of Object.keys(COMPLEX_PROPERTY_CONFIGS)) {
@@ -4596,6 +4671,10 @@ function getComplexPropertyDetailsFromConfig(config) {
       details[key] = value;
     }
   }
+  const maternityMinArea = Number(config?.maternityMinArea);
+  if (Number.isFinite(maternityMinArea) && maternityMinArea > 0) {
+    details.maternityMinArea = maternityMinArea;
+  }
   return details;
 }
 
@@ -4685,6 +4764,29 @@ function applyComplexConfigFromRegistry(property) {
     item.svoDiscount = Boolean(config.svoDiscount);
   } else {
     delete item.svoDiscount;
+  }
+
+  if (Array.isArray(config.svoDiscountOptions) && config.svoDiscountOptions.length) {
+    item.svoDiscountOptions = config.svoDiscountOptions
+      .map((opt) => {
+        const value = Number(opt?.value);
+        const label = String(opt?.label || '').trim();
+        if (!(value > 0) || !label) return null;
+        return { value, label };
+      })
+      .filter(Boolean);
+    if (!item.svoDiscountOptions.length) delete item.svoDiscountOptions;
+  } else {
+    delete item.svoDiscountOptions;
+  }
+
+  if (config.maternityMinArea != null) {
+    const maternityMinArea = Number(config.maternityMinArea);
+    if (Number.isFinite(maternityMinArea) && maternityMinArea > 0) {
+      item.maternityMinArea = maternityMinArea;
+    } else {
+      delete item.maternityMinArea;
+    }
   }
 
   const images = repairPropertyImages({
