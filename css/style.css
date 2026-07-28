@@ -893,12 +893,57 @@ main { flex: 1; }
   scrollbar-color: var(--border) transparent;
 }
 
-.filters-sidebar h3 {
+.filters-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 0 0 12px;
+  margin: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  text-align: left;
+  cursor: default;
+  pointer-events: none;
+}
+
+.filters-toggle-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.filters-toggle-count[hidden] {
+  display: none !important;
+}
+
+.filters-toggle-icon {
+  display: none;
+  margin-left: auto;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-right: 2px solid var(--text-secondary);
+  border-bottom: 2px solid var(--text-secondary);
+  transform: rotate(45deg);
+  transition: transform var(--transition);
+}
+
+.filters-sidebar-body {
+  display: block;
 }
 
 .filter-group {
@@ -1526,9 +1571,47 @@ main { flex: 1; }
   }
 
   .filters-sidebar {
-    position: static;
+    position: sticky;
+    top: var(--header-height);
     width: 100%;
     max-height: none;
+    padding: 12px 14px;
+    z-index: 60;
+  }
+
+  .filters-toggle {
+    margin: 0;
+    padding: 4px 0;
+    border-bottom: 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .filters-toggle-icon {
+    display: block;
+  }
+
+  .filters-sidebar:not(.is-collapsed) .filters-toggle {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .filters-sidebar:not(.is-collapsed) .filters-toggle-icon {
+    transform: rotate(225deg);
+  }
+
+  .filters-sidebar.is-collapsed {
+    overflow: visible;
+  }
+
+  .filters-sidebar.is-collapsed .filters-sidebar-body {
+    display: none;
+  }
+
+  .filters-sidebar:not(.is-collapsed) {
+    max-height: calc(100vh - var(--header-height) - 16px);
+    overflow-y: auto;
   }
 }
 

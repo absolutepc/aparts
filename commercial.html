@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Коммерческая недвижимость — Dune Base</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=63">
   <style>#page-transition{display:none}</style>
 </head>
 <body>
@@ -29,9 +29,14 @@
     </div>
 
     <div class="container page-layout">
-      <aside class="filters-sidebar" id="filtersSidebar">
-        <h3>Фильтры</h3>
+      <aside class="filters-sidebar is-collapsed" id="filtersSidebar">
+        <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filtersSidebarBody">
+          <span class="filters-toggle-text">Фильтры</span>
+          <span class="filters-toggle-count" id="filtersActiveCount" hidden></span>
+          <span class="filters-toggle-icon" aria-hidden="true"></span>
+        </button>
 
+        <div class="filters-sidebar-body" id="filtersSidebarBody">
         <div class="filter-group" id="areaFilterGroup">
           <label>Площадь, м²</label>
           <div class="filter-range-inputs">
@@ -76,6 +81,7 @@
         </div>
 
         <button class="btn btn-secondary btn-sm" id="resetFilters" style="width:100%;margin-top:8px">Сбросить фильтры</button>
+        </div>
       </aside>
 
       <div class="catalog-content">
@@ -101,7 +107,7 @@
   <script src="js/app.js"></script>
   <script src="js/transition.js?v=2"></script>
   <script src="js/layout.js"></script>
-  <script src="js/filters.js?v=47"></script>
+  <script src="js/filters.js?v=48"></script>
   <script src="js/properties.js"></script>
   <script>
     initLayout('commercial');

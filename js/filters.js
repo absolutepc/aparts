@@ -21,6 +21,8 @@ function initPropertyCatalog(options) {
   const listEl = document.getElementById('propertiesList');
   const resetBtn = document.getElementById('resetFilters');
   const sidebar = document.getElementById('filtersSidebar');
+  const filtersToggle = document.getElementById('filtersToggle');
+  const filtersActiveCount = document.getElementById('filtersActiveCount');
   const areaFilterGroup = document.getElementById('areaFilterGroup');
 
   if (flatTypeFilterGroup) {
@@ -31,6 +33,42 @@ function initPropertyCatalog(options) {
     const label = areaFilterGroup.querySelector('label');
     if (label) {
       label.textContent = 'Площадь, м²';
+    }
+  }
+
+  function isMobileFiltersViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function setFiltersExpanded(expanded) {
+    if (!sidebar || !filtersToggle) return;
+    sidebar.classList.toggle('is-collapsed', !expanded);
+    filtersToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  }
+
+  function countActiveFilters(state) {
+    let count = 0;
+    if (state.minValue != null && !Number.isNaN(state.minValue)) count += 1;
+    if (state.maxValue != null && !Number.isNaN(state.maxValue)) count += 1;
+    count += state.flatTypes.length;
+    count += state.noMarkupYears.length;
+    count += state.mandatoryPayments.length;
+    count += state.maternityCapitals.length;
+    count += state.discounts.length;
+    count += state.deliveryDates.length;
+    count += state.districts.length;
+    return count;
+  }
+
+  function updateFiltersActiveCount(state = getFilterState()) {
+    if (!filtersActiveCount) return;
+    const count = countActiveFilters(state);
+    if (count > 0) {
+      filtersActiveCount.hidden = false;
+      filtersActiveCount.textContent = String(count);
+    } else {
+      filtersActiveCount.hidden = true;
+      filtersActiveCount.textContent = '';
     }
   }
 
@@ -220,6 +258,8 @@ function initPropertyCatalog(options) {
         'По выбранным фильтрам ничего не найдено. Попробуйте изменить параметры.'
       );
     }
+
+    updateFiltersActiveCount(state);
   }
 
   function resetFilters() {
@@ -232,6 +272,20 @@ function initPropertyCatalog(options) {
     applyFilters();
   }
 
+  filtersToggle?.addEventListener('click', () => {
+    if (!isMobileFiltersViewport()) return;
+    const expanded = filtersToggle.getAttribute('aria-expanded') === 'true';
+    setFiltersExpanded(!expanded);
+  });
+
+  window.addEventListener('resize', () => {
+    if (!isMobileFiltersViewport()) {
+      setFiltersExpanded(true);
+    } else if (sidebar && !sidebar.classList.contains('is-collapsed') && filtersToggle?.getAttribute('aria-expanded') !== 'true') {
+      setFiltersExpanded(false);
+    }
+  });
+
   sidebar?.addEventListener('input', (event) => {
     if (event.target.matches('#areaMin, #areaMax')) applyFilters();
   });
@@ -242,6 +296,10 @@ function initPropertyCatalog(options) {
 
   sortSelect?.addEventListener('change', applyFilters);
   resetBtn?.addEventListener('click', resetFilters);
+
+  if (!isMobileFiltersViewport()) {
+    setFiltersExpanded(true);
+  }
 
   applyFilters();
 }
