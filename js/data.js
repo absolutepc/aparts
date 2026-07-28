@@ -871,7 +871,7 @@ const DEFAULT_PROPERTIES = [
     address: 'ул. Леонова, б/н',
     district: 'Байсангуровский',
     developer: 'Миг Строй-Проект',
-    noMarkupYears: 2,
+    noMarkupYears: 1,
     mandatoryPayment: 3000,
     img: 'img/Мичурина/michurina 1.jpg',
     images: [
@@ -4467,13 +4467,13 @@ const COMPLEX_PROPERTY_CONFIGS = {
   forceOfferingFromConfig: true,
   developer: 'Миг Строй-Проект',
   deliveryDate: '2 квартал 2030г',
-  installmentTerm: 'до 6 лет',
+  installmentTerm: 'до 5 лет',
   maternityCapital: 'yes',
   maternityMinArea: 73,
   discounts: 'svo5/3',
   markupBasis: 'after',
   recalculation: 'no',
-  noMarkupYears: 2,
+  noMarkupYears: 1,
   mandatoryPayment: 3000,
   svoDiscount: true,
   svoDiscountOptions: [
@@ -4482,7 +4482,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   ],
   paymentOptions: [
     { type: 'cash' },
-    { type: 'noMarkup', years: 2, useMandatoryPayment: true },
+    { type: 'noMarkup', years: 1, useMandatoryPayment: true },
     { type: 'installment', years: 2, markupPercent: 15, useMandatoryPayment: true },
     { type: 'installment', years: 3, markupPercent: 25, useMandatoryPayment: true },
     { type: 'installment', years: 4, markupPercent: 30, useMandatoryPayment: true },
