@@ -1576,7 +1576,7 @@ main { flex: 1; }
     width: 100%;
     max-height: none;
     padding: 12px 14px;
-    z-index: 60;
+    z-index: 40;
   }
 
   .filters-toggle {
@@ -1609,9 +1609,12 @@ main { flex: 1; }
     display: none;
   }
 
+  /* Expanded filters stay in normal flow so they push the catalog down */
   .filters-sidebar:not(.is-collapsed) {
-    max-height: calc(100vh - var(--header-height) - 16px);
-    overflow-y: auto;
+    position: static;
+    max-height: none;
+    overflow: visible;
+    z-index: auto;
   }
 }
 
