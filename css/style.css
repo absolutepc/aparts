@@ -1701,7 +1701,16 @@ main { flex: 1; }
   .hero-text h1 { font-size: 2.2rem; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-top { grid-template-columns: 1fr; }
-  .footer-bottom { flex-direction: column; align-items: flex-start; }
+  .footer-col--catalog,
+  .footer-col--service {
+    display: none;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
   .page-transition__label { font-size: 1.35rem; }
   .page-transition__logo { width: 96px; height: 96px; }
 }

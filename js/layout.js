@@ -44,7 +44,7 @@ function renderFooter() {
           </div>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col footer-col--catalog">
           <h4>Каталог</h4>
           <ul>
             <li><a href="complexes.html">ЖК и МФК</a></li>
@@ -53,7 +53,7 @@ function renderFooter() {
           </ul>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col footer-col--service">
           <h4>Сервис</h4>
           <ul>
             <li><a href="admin.html">Админ-панель</a></li>
@@ -63,7 +63,7 @@ function renderFooter() {
           </ul>
         </div>
 
-        <div class="footer-col">
+        <div class="footer-col footer-col--contacts">
           <h4>Контакты</h4>
           <ul>
             <li><a href="tel:+74951234567">+7 (495) 123-45-67</a></li>
