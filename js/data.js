@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v25';
-const DATA_JS_VERSION = '25';
+const STORE_KEY = 'aparts_data_v26';
+const DATA_JS_VERSION = '26';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -169,7 +169,7 @@ const DEFAULT_PROPERTIES = [
     price: 90000,
     address: 'Новый проспект Путина, 25 сектор',
     district: 'Новый район',
-    location: { lat: 43.319973, lng: 45.687192 },
+    location: { lat: 43.322564, lng: 45.674948 },
     developer: 'Монолит',
     noMarkupYears: 2,
     mandatoryPayment: 10000,
@@ -3266,6 +3266,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v25',
     'aparts_data_v24',
     'aparts_data_v23',
     'aparts_data_v22',
@@ -3494,7 +3495,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   forceOfferingFromConfig: true,
   address: 'Новый проспект Путина, 25 сектор',
   district: 'Новый район',
-  location: { lat: 43.319973, lng: 45.687192 },
+  location: { lat: 43.322564, lng: 45.674948 },
   developer: 'Монолит',
   img: 'img/Ан-Нур/Ан-нур 1.jpg',
   images: [
