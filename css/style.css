@@ -509,9 +509,65 @@ main { flex: 1; }
   margin-bottom: 20px;
 }
 
+.property-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .property-detail-price {
   font-size: 1.6rem;
   margin-bottom: 0;
+}
+
+.property-location {
+  margin: 28px 0 8px;
+}
+
+.property-location-head {
+  margin-bottom: 14px;
+}
+
+.property-location-title {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+}
+
+.property-location-address {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.property-location-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 280px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+}
+
+.property-location-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.property-location-external {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent, #8b1e2d);
+  text-decoration: none;
+}
+
+.property-location-external:hover {
+  text-decoration: underline;
 }
 
 .property-detail-desc {

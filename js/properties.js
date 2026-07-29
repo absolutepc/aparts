@@ -189,6 +189,7 @@ function initPropertyPage() {
     `;
 
   const pricePrefix = isComplex(property) ? 'от ' : '';
+  const hasLocation = Boolean(getPropertyLocation(property));
 
   container.innerHTML = `
     <div class="container property-detail-page">
@@ -204,7 +205,10 @@ function initPropertyPage() {
           ${renderPropertyDetailTitle(property, selectedVariant)}
           <div class="property-detail-head">
             <div class="property-price property-detail-price">${pricePrefix}${formatPrice(heroPrice)}</div>
-            <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
+            <div class="property-detail-actions">
+              ${hasLocation ? '<button type="button" class="btn btn-secondary" id="propertyLocationBtn" aria-expanded="false" aria-controls="propertyLocation">Локация</button>' : ''}
+              <a href="${backLink}" class="btn btn-secondary">← Назад к списку</a>
+            </div>
           </div>
           <div class="property-specs-table">
             ${renderPropertyOfferingSpecs(property)}
@@ -213,6 +217,8 @@ function initPropertyPage() {
           ${isComplex(property) ? renderPropertyPricesBlock(property, { compact: true }) : ''}
         </div>
       </div>
+
+      ${renderPropertyLocationBlock(property)}
 
       ${isComplex(property)
         ? renderPropertyFloorPlansBlock(property, selectedVariant?.flatType, selectedSector?.id)
@@ -223,10 +229,32 @@ function initPropertyPage() {
   bindPropertyGallery(container, property);
   bindFloorPlanLayoutPickers(container);
   bindPropertySectorPicker(container, property, selectedVariant?.flatType);
+  bindPropertyLocationToggle(container);
 
   if (selectedVariant?.flatType) {
     requestAnimationFrame(() => {
       document.getElementById('floor-plan-active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
   }
+}
+
+function bindPropertyLocationToggle(container) {
+  const button = container.querySelector('#propertyLocationBtn');
+  const section = container.querySelector('#propertyLocation');
+  if (!button || !section) return;
+
+  button.addEventListener('click', () => {
+    const willShow = section.hasAttribute('hidden');
+    if (willShow) {
+      section.removeAttribute('hidden');
+      button.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(() => {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      return;
+    }
+
+    section.setAttribute('hidden', '');
+    button.setAttribute('aria-expanded', 'false');
+  });
 }

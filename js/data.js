@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v20';
-const DATA_JS_VERSION = '20';
+const STORE_KEY = 'aparts_data_v21';
+const DATA_JS_VERSION = '21';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -169,6 +169,7 @@ const DEFAULT_PROPERTIES = [
     price: 90000,
     address: '​Проспект В.В. Путина, 22/4​',
     district: 'Новый район',
+    location: { lat: 43.3181647, lng: 45.6912537 },
     developer: 'Монолит',
     noMarkupYears: 2,
     mandatoryPayment: 10000,
@@ -264,6 +265,7 @@ const DEFAULT_PROPERTIES = [
     price: 71000,
     address: 'Грозный, улица Э.Э. Исмаилова, 35 стр.',
     district: 'Новый район',
+    location: { lat: 43.3325053, lng: 45.6712403 },
     developer: 'Кормат строй',
     deliveryDate: '2027г',
     installmentTerm: 'до 6 лет',
@@ -417,6 +419,7 @@ const DEFAULT_PROPERTIES = [
     price: 98000,
     address: 'В.В.Путина 001',
     district: 'Новый район',
+    location: { lat: 43.3185, lng: 45.692 },
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -492,6 +495,7 @@ const DEFAULT_PROPERTIES = [
     price: 65000,
     address: 'Проспект А.А. Кадырова 201',
     district: 'Байсангуровский',
+    location: { lat: 43.2906338, lng: 45.7195759 },
     developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 4000,
@@ -540,6 +544,7 @@ const DEFAULT_PROPERTIES = [
     price: 59000,
     address: 'Грозный, ул. Кабардинская',
     district: 'Центр',
+    location: { lat: 43.3247925, lng: 45.6979967 },
     developer: 'СК Экология',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -624,6 +629,7 @@ const DEFAULT_PROPERTIES = [
     price: 88000,
     address: 'Пешеходный бульвар, 17 сектор',
     district: 'Новый район',
+    location: { lat: 43.3200857, lng: 45.6901857 },
     developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 5000,
@@ -694,6 +700,7 @@ const DEFAULT_PROPERTIES = [
     price: 82000,
     address: 'Пешеходный бульвар, 17 сектор',
     district: 'Новый район',
+    location: { lat: 43.3203, lng: 45.6905 },
     developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 3000,
@@ -778,6 +785,7 @@ const DEFAULT_PROPERTIES = [
     price: 88000,
     address: 'Пешеходный бульвар, 17 сектор',
     district: 'Новый район',
+    location: { lat: 43.3199, lng: 45.6899 },
     developer: 'СК Триумф',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -809,6 +817,7 @@ const DEFAULT_PROPERTIES = [
     price: 68000,
     address: 'ул. Абдаллы бин Хусейна 2, 6',
     district: 'Байсангуровский',
+    location: { lat: 43.2861914, lng: 45.7028593 },
     developer: 'Триумф',
     noMarkupYears: 2,
     mandatoryPayment: 6000,
@@ -870,6 +879,7 @@ const DEFAULT_PROPERTIES = [
     price: 60000,
     address: 'ул. Леонова, б/н',
     district: 'Байсангуровский',
+    location: { lat: 43.2988703, lng: 45.7316678 },
     developer: 'Миг Строй-Проект',
     noMarkupYears: 1,
     mandatoryPayment: 3000,
@@ -3469,6 +3479,7 @@ function logoutUser() {
 const COMPLEX_PROPERTY_CONFIGS = {
   jk1: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.3181647, lng: 45.6912537 },
   developer: 'Монолит',
   img: 'img/Ан-Нур/Ан-нур 1.jpg',
   images: [
@@ -3605,6 +3616,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk2: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.3325053, lng: 45.6712403 },
   developer: 'Кормат строй',
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
@@ -3812,6 +3824,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   },
 
   jk3: {
+  location: { lat: 43.3185, lng: 45.692 },
     developer: 'Квартал 777',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -4025,6 +4038,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk4: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.2906338, lng: 45.7195759 },
   developer: 'Квартал 777',
   deliveryDate: '3 квартал 2028г',
   installmentTerm: 'до 6 лет',
@@ -4115,6 +4129,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk5: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.3247925, lng: 45.6979967 },
   developer: 'СК Экология',
   deliveryDate: '2029г',
   installmentTerm: 'до 5 лет',
@@ -4189,6 +4204,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk6: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.3200857, lng: 45.6901857 },
   developer: 'Квартал 777',
   deliveryDate: '3 квартал 2027г',
   installmentTerm: 'до 6 лет',
@@ -4315,6 +4331,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk7: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.3203, lng: 45.6905 },
   developer: 'Квартал 777',
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
@@ -4432,6 +4449,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk9: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.2861914, lng: 45.7028593 },
   developer: 'Триумф',
   deliveryDate: '2 квартал 2030г',
   installmentTerm: 'до 6 лет',
@@ -4465,6 +4483,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk10: {
   forceOfferingFromConfig: true,
+  location: { lat: 43.2988703, lng: 45.7316678 },
   developer: 'Миг Строй-Проект',
   deliveryDate: '2 квартал 2030г',
   installmentTerm: 'до 5 лет',
@@ -4758,6 +4777,68 @@ function applyComplexLayoutDetailsToSectors(sectors, config) {
   });
 }
 
+function normalizePropertyLocation(location) {
+  if (!location || typeof location !== 'object') return null;
+  const lat = Number(location.lat);
+  const lng = Number(location.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
+function getPropertyLocation(property) {
+  const fromProperty = normalizePropertyLocation(property?.location);
+  if (fromProperty) return fromProperty;
+  const config = COMPLEX_PROPERTY_CONFIGS[property?.id];
+  return normalizePropertyLocation(config?.location);
+}
+
+function getPropertyMapEmbedUrl(property, zoom = 16) {
+  const location = getPropertyLocation(property);
+  if (!location) return '';
+  const z = Number(zoom);
+  const mapZoom = Number.isFinite(z) && z >= 1 && z <= 21 ? Math.round(z) : 16;
+  const ll = `${location.lng},${location.lat}`;
+  return `https://yandex.ru/map-widget/v1/?ll=${ll}&z=${mapZoom}&pt=${ll},pm2rdm`;
+}
+
+function getPropertyMapExternalUrl(property) {
+  const location = getPropertyLocation(property);
+  if (!location) return '';
+  const text = encodeURIComponent(property?.address || property?.title || 'ЖК');
+  return `https://yandex.ru/maps/?pt=${location.lng},${location.lat}&z=16&l=map&text=${text}`;
+}
+
+function renderPropertyLocationBlock(property) {
+  const location = getPropertyLocation(property);
+  const embedUrl = getPropertyMapEmbedUrl(property);
+  if (!location || !embedUrl) return '';
+
+  const address = String(property?.address || '').trim();
+  const externalUrl = getPropertyMapExternalUrl(property);
+  const title = escapeHtml(property?.title || 'ЖК');
+
+  return `
+    <section class="property-location" id="propertyLocation" hidden>
+      <div class="property-location-head">
+        <h2 class="property-location-title">Локация</h2>
+        ${address ? `<p class="property-location-address">${escapeHtml(address)}</p>` : ''}
+      </div>
+      <div class="property-location-map">
+        <iframe
+          class="property-location-iframe"
+          src="${escapeHtml(embedUrl)}"
+          title="Карта: ${title}"
+          loading="lazy"
+          allowfullscreen
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+      ${externalUrl ? `<a class="property-location-external" href="${escapeHtml(externalUrl)}" target="_blank" rel="noopener noreferrer">Открыть в Яндекс.Картах</a>` : ''}
+    </section>
+  `;
+}
+
 function getComplexPropertyDetailsFromConfig(config) {
   const details = {};
   for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'discounts', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment']) {
@@ -4769,6 +4850,10 @@ function getComplexPropertyDetailsFromConfig(config) {
   const maternityMinArea = Number(config?.maternityMinArea);
   if (Number.isFinite(maternityMinArea) && maternityMinArea > 0) {
     details.maternityMinArea = maternityMinArea;
+  }
+  const location = normalizePropertyLocation(config?.location);
+  if (location) {
+    details.location = location;
   }
   return details;
 }
@@ -4882,6 +4967,15 @@ function applyComplexConfigFromRegistry(property) {
     } else {
       delete item.maternityMinArea;
     }
+  }
+
+  const location = normalizePropertyLocation(config.location)
+    || normalizePropertyLocation(item.location)
+    || normalizePropertyLocation(defaults?.location);
+  if (location) {
+    item.location = location;
+  } else {
+    delete item.location;
   }
 
   const images = repairPropertyImages({
