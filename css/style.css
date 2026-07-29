@@ -1626,13 +1626,15 @@ main { flex: 1; }
     grid-template-columns: 1fr;
   }
 
+  /* Never sticky on mobile: sticky bar overlays catalog while scrolling/swiping */
   .filters-sidebar {
-    position: sticky;
-    top: var(--header-height);
+    position: static;
+    top: auto;
     width: 100%;
     max-height: none;
+    overflow: visible;
     padding: 12px 14px;
-    z-index: 40;
+    z-index: auto;
   }
 
   .filters-toggle {
@@ -1657,20 +1659,8 @@ main { flex: 1; }
     transform: rotate(225deg);
   }
 
-  .filters-sidebar.is-collapsed {
-    overflow: visible;
-  }
-
   .filters-sidebar.is-collapsed .filters-sidebar-body {
     display: none;
-  }
-
-  /* Expanded filters stay in normal flow so they push the catalog down */
-  .filters-sidebar:not(.is-collapsed) {
-    position: static;
-    max-height: none;
-    overflow: visible;
-    z-index: auto;
   }
 }
 
