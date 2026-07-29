@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v22';
-const DATA_JS_VERSION = '22';
+const STORE_KEY = 'aparts_data_v23';
+const DATA_JS_VERSION = '23';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -2665,9 +2665,11 @@ function mergePropertyDetails(property, defaults) {
 function preservePropertyContentFields(target, source) {
   if (!target || !source) return target;
 
-  const forceCatalogPrice = Boolean(COMPLEX_PROPERTY_CONFIGS[target.id]?.forceOfferingFromConfig);
+  const config = COMPLEX_PROPERTY_CONFIGS[target.id];
+  const forceCatalogPrice = Boolean(config?.forceOfferingFromConfig);
+  // For forced complexes, address/district come from data.js (defaults/config), not localStorage
   const keys = forceCatalogPrice
-    ? ['title', 'description', 'address', 'district', 'published']
+    ? ['title', 'description', 'published']
     : ['title', 'description', 'address', 'district', 'price', 'published'];
 
   for (const key of keys) {
@@ -3263,7 +3265,14 @@ function initStore() {
 function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
-  const recentKeys = ['aparts_data_v19', 'aparts_data_v18', 'aparts_data_v17'];
+  const recentKeys = [
+    'aparts_data_v22',
+    'aparts_data_v21',
+    'aparts_data_v20',
+    'aparts_data_v19',
+    'aparts_data_v18',
+    'aparts_data_v17',
+  ];
   for (const key of recentKeys) {
     const raw = localStorage.getItem(key);
     if (!raw) continue;
@@ -3339,6 +3348,8 @@ function getProperties() {
         if (!source) return true;
         return property.type !== source.type
           || property.description !== (source.description ?? '')
+          || property.address !== (source.address ?? '')
+          || property.district !== (source.district ?? '')
           || property.img !== source.img
           || JSON.stringify(property.images) !== JSON.stringify(source.images)
           || property.flatType !== source.flatType
@@ -3479,6 +3490,8 @@ function logoutUser() {
 const COMPLEX_PROPERTY_CONFIGS = {
   jk1: {
   forceOfferingFromConfig: true,
+  address: 'Новый проспект Путина, 25 сектор',
+  district: 'Новый район',
   location: { lat: 43.3181647, lng: 45.6912537 },
   developer: 'Монолит',
   img: 'img/Ан-Нур/Ан-нур 1.jpg',
@@ -4841,7 +4854,7 @@ function renderPropertyLocationBlock(property) {
 
 function getComplexPropertyDetailsFromConfig(config) {
   const details = {};
-  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'discounts', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment']) {
+  for (const key of ['developer', 'deliveryDate', 'installmentTerm', 'maternityCapital', 'discounts', 'markupBasis', 'recalculation', 'noMarkupYears', 'mandatoryPayment', 'address', 'district']) {
     const value = config?.[key];
     if (value != null && String(value).trim() !== '') {
       details[key] = value;
@@ -4894,6 +4907,10 @@ function applyComplexConfigFromRegistry(property) {
   if (config.forceOfferingFromConfig) {
     Object.assign(item, getComplexPropertyDetailsFromConfig(config));
     item.recalculation = config.recalculation || 'no';
+    const address = String(config.address ?? defaults?.address ?? '').trim();
+    if (address) item.address = address;
+    const district = String(config.district ?? defaults?.district ?? '').trim();
+    if (district) item.district = district;
     if (config.sectorPriceGroups) {
       item.sectorPriceGroups = normalizeSectorPriceGroups(config.sectorPriceGroups);
       delete item.floorPriceRanges;
