@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v21';
-const DATA_JS_VERSION = '21';
+const STORE_KEY = 'aparts_data_v22';
+const DATA_JS_VERSION = '22';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -167,7 +167,7 @@ const DEFAULT_PROPERTIES = [
     areaMin: 52,
     areaMax: 95,
     price: 90000,
-    address: '​Проспект В.В. Путина, 22/4​',
+    address: 'Новый проспект Путина, 25 сектор',
     district: 'Новый район',
     location: { lat: 43.3181647, lng: 45.6912537 },
     developer: 'Монолит',
