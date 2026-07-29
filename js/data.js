@@ -4801,10 +4801,10 @@ function normalizePropertyLocation(location) {
 }
 
 function getPropertyLocation(property) {
-  const fromProperty = normalizePropertyLocation(property?.location);
-  if (fromProperty) return fromProperty;
   const config = COMPLEX_PROPERTY_CONFIGS[property?.id];
-  return normalizePropertyLocation(config?.location);
+  const fromConfig = normalizePropertyLocation(config?.location);
+  if (fromConfig) return fromConfig;
+  return normalizePropertyLocation(property?.location);
 }
 
 function getPropertyMapEmbedUrl(property, zoom = 16) {
