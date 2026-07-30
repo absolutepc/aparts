@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v28';
-const DATA_JS_VERSION = '28';
+const STORE_KEY = 'aparts_data_v29';
+const DATA_JS_VERSION = '29';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -783,9 +783,9 @@ const DEFAULT_PROPERTIES = [
     areaMin: 51.4,
     areaMax: 110.4,
     price: 88000,
-    address: 'Пешеходный бульвар, 17 сектор',
-    district: 'Новый район',
-    location: { lat: 43.3199, lng: 45.6899 },
+    address: 'ул. Санкт-Петербургская / ул. Асланбека Шерипова / ул. Д.Б. Абдурахманова',
+    district: 'Центр',
+    location: { lat: 43.309556, lng: 45.704439 },
     developer: 'СК Триумф',
     noMarkupYears: 1,
     mandatoryPayment: 5000,
@@ -2667,10 +2667,16 @@ function preservePropertyContentFields(target, source) {
 
   const config = COMPLEX_PROPERTY_CONFIGS[target.id];
   const forceCatalogPrice = Boolean(config?.forceOfferingFromConfig);
-  // For forced complexes, address/district come from data.js (defaults/config), not localStorage
-  const keys = forceCatalogPrice
+  // Address/district from COMPLEX_PROPERTY_CONFIGS override localStorage
+  let keys = forceCatalogPrice
     ? ['title', 'description', 'published']
     : ['title', 'description', 'address', 'district', 'price', 'published'];
+  if (config?.address != null && String(config.address).trim() !== '') {
+    keys = keys.filter((key) => key !== 'address');
+  }
+  if (config?.district != null && String(config.district).trim() !== '') {
+    keys = keys.filter((key) => key !== 'district');
+  }
 
   for (const key of keys) {
     if (Object.prototype.hasOwnProperty.call(source, key)) {
@@ -3266,6 +3272,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v28',
     'aparts_data_v27',
     'aparts_data_v26',
     'aparts_data_v25',
@@ -4469,6 +4476,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
   sectors: null,
   },
 
+  jk8: {
+  address: 'ул. Санкт-Петербургская / ул. Асланбека Шерипова / ул. Д.Б. Абдурахманова',
+  district: 'Центр',
+  location: { lat: 43.309556, lng: 45.704439 },
+  },
+
   jk9: {
   forceOfferingFromConfig: true,
   location: { lat: 43.2861914, lng: 45.7028593 },
@@ -4949,6 +4962,10 @@ function applyComplexConfigFromRegistry(property) {
   } else {
     const details = getComplexPropertyDetailsFromConfig(config);
     for (const [key, value] of Object.entries(details)) {
+      if (key === 'address' || key === 'district' || key === 'location') {
+        item[key] = value;
+        continue;
+      }
       if (item[key] == null || String(item[key]).trim() === '') {
         item[key] = value;
       }
