@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v26';
-const DATA_JS_VERSION = '26';
+const STORE_KEY = 'aparts_data_v27';
+const DATA_JS_VERSION = '27';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -627,9 +627,9 @@ const DEFAULT_PROPERTIES = [
     areaMin: 51.4,
     areaMax: 110.4,
     price: 88000,
-    address: 'Пешеходный бульвар, 17 сектор',
+    address: 'ул. Э.Э. Исмаилова',
     district: 'Новый район',
-    location: { lat: 43.3200857, lng: 45.6901857 },
+    location: { lat: 43.325141, lng: 45.672222 },
     developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 5000,
@@ -3266,6 +3266,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v26',
     'aparts_data_v25',
     'aparts_data_v24',
     'aparts_data_v23',
@@ -4220,7 +4221,9 @@ const COMPLEX_PROPERTY_CONFIGS = {
 
   jk6: {
   forceOfferingFromConfig: true,
-  location: { lat: 43.3200857, lng: 45.6901857 },
+  address: 'ул. Э.Э. Исмаилова',
+  district: 'Новый район',
+  location: { lat: 43.325141, lng: 45.672222 },
   developer: 'Квартал 777',
   deliveryDate: '3 квартал 2027г',
   installmentTerm: 'до 6 лет',
