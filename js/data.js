@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v30';
-const DATA_JS_VERSION = '30';
+const STORE_KEY = 'aparts_data_v31';
+const DATA_JS_VERSION = '31';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -700,7 +700,7 @@ const DEFAULT_PROPERTIES = [
     price: 82000,
     address: '3-й Гаражный пер. / Гаражная ул.',
     district: 'Новый район',
-    location: { lat: 43.332300, lng: 45.668622 },
+    location: { lat: 43.332649, lng: 45.667912 },
     developer: 'Квартал 777',
     noMarkupYears: 2,
     mandatoryPayment: 3000,
@@ -3272,6 +3272,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v30',
     'aparts_data_v29',
     'aparts_data_v28',
     'aparts_data_v27',
@@ -4361,7 +4362,7 @@ const COMPLEX_PROPERTY_CONFIGS = {
   forceOfferingFromConfig: true,
   address: '3-й Гаражный пер. / Гаражная ул.',
   district: 'Новый район',
-  location: { lat: 43.332300, lng: 45.668622 },
+  location: { lat: 43.332649, lng: 45.667912 },
   developer: 'Квартал 777',
   deliveryDate: '2027г',
   installmentTerm: 'до 6 лет',
