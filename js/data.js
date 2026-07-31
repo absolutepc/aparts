@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v31';
-const DATA_JS_VERSION = '31';
+const STORE_KEY = 'aparts_data_v32';
+const DATA_JS_VERSION = '32';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -96,9 +96,9 @@ const DEFAULT_PROPERTIES = [
     description: 'ЖК Ан Нур Грозный ЖК Ан Нур в Грозном – Жилой комплекс представляет собой впечатляющее сочетание восточного стиля и современных технологий в строительстве. Этот комплекс является одним из визитных карточек города и привлекает внимание как местных жителей, так и туристов.Архитектурный дизайн Ан Нур в Грозном воплощает в себе величие и элегантность восточных традиций. Здания комплекса возвышаются над Грозным с изящными куполами, изысканными арками и изогнутыми линиями, характерными для восточного стиля. Фасады зданий украшены красивыми резными узорами и узнаваемыми орнаментами, которые придают комплексу неповторимый вид.Одним из особых элементов ЖК Ан Нур является внутренний двор, оформленный в традиционном восточном стиле. Этот уютный и красиво оформленный двор становится местом отдыха и общения для жителей комплекса.',
     type: 'jk',
     flatType: '1room',
-    totalApartments: 120,
+    totalApartments: 92,
     flatVariants: [
-      { flatType: '1room', totalApartments: 58, areaMin: 52, areaMax: 67,layouts: [
+      { flatType: '1room', totalApartments: 45, areaMin: 52, areaMax: 67,layouts: [
         { key: 'Б-И', label: '1И - 61м²', areaMin: 61, areaMax: 61, planImg: 'img/Ан-Нур/an-be 1i.jpg' },
 
         { key: 'В-A', label: '1A - 67м²', areaMin: 67, areaMax: 67, planImg: 'img/Ан-Нур/an-avdj 1a.jpg' },
@@ -124,7 +124,9 @@ const DEFAULT_PROPERTIES = [
 
       ]  },
 
-      { flatType: '2room', totalApartments: 54, areaMin: 57, areaMax: 84, layouts: [
+      { flatType: '2room', totalApartments: 41, areaMin: 57, areaMax: 84, layouts: [
+        { key: 'А-Б', label: '2Б - 57м²', areaMin: 57, areaMax: 57, planImg: 'img/Ан-Нур/an-avdj 2b.jpg' },
+
         { key: 'Д', label: '2Б - 84м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2b.jpg' },
         { key: 'Е', label: '2В - 82м²', areaMin: 84, areaMax: 84, planImg: 'img/Ан-Нур/an-be 2v.jpg' },
         { key: 'Ё', label: '2Г - 82м²', areaMin: 82, areaMax: 82, planImg: 'img/Ан-Нур/an-be 2g.jpg' },
@@ -153,7 +155,7 @@ const DEFAULT_PROPERTIES = [
         { key: 'Ж-Б', label: '2Б - 57м²', areaMin: 58, areaMax: 58, planImg: 'img/Ан-Нур/an-avdj 2b.jpg' },
       ] },
 
-      { flatType: '3room', totalApartments: 10, areaMin: 93, areaMax: 95, layouts: [
+      { flatType: '3room', totalApartments: 6, areaMin: 93, areaMax: 95, layouts: [
         { key: 'В-A', label: '3A - 94м²', areaMin: 94, areaMax: 94, planImg: 'img/Ан-Нур/an-avdj 3a.jpg' },
         { key: 'В-Б', label: '3Б - 93м²', areaMin: 93, areaMax: 93, planImg: 'img/Ан-Нур/an-avdj 3b.jpg' },
 
@@ -3272,6 +3274,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v31',
     'aparts_data_v30',
     'aparts_data_v29',
     'aparts_data_v28',
@@ -3536,55 +3539,56 @@ const COMPLEX_PROPERTY_CONFIGS = {
   ],
 
   // Сектор → полная оплата / рассрочка 30% / без взноса
+  // Остатки синхронизированы с Excel Ан-Нур (белые = доступны, красные = проданы)
   sectorPriceGroups: [
     { sectors: ['Б', 'В', 'Г'], full: 90000, installment30: 100000, noDownPayment: 107000 },
     { sectors: ['Д', 'Е'], full: 100000, installment30: 110000, noDownPayment: 107000 },
     { sectors: ['Ж'], full: 110000, installment30: 120000, noDownPayment: 130000 },
+    { sectors: ['А'], full: 120000, installment30: 130000, noDownPayment: 140000 },
   ],
 
   // Порядок секторов на странице объекта
-  sectorOrder: ['Б', 'В', 'Г', 'Д', 'Е', 'Ж'],
+  sectorOrder: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж'],
 
   // Сектор → тип квартир → ключ планировки → данные (по flatVariants выше)
   layouts: {
+    'А': {
+      '2room': {
+        'А-Б': { totalApartments: 1, availableFloors: '10' },
+      },
+    },
+
     'Б': {
       '1room': {
-        'Б-И': { totalApartments: 2, availableFloors: '15-16' },
+        'Б-И': { totalApartments: 1, availableFloors: '16' },
       },
       '2room': {
         '\u0414': { totalApartments: 4, availableFloors: '12-13, 15-16' },
         '\u0415': { totalApartments: 4, availableFloors: '10, 14-16' },
         '\u0401': { totalApartments: 1, availableFloors: '16' },
-        '\u0416': { totalApartments: 3, availableFloors: '12, 14-15' },
-        '\u0417': { totalApartments: 1, availableFloors: '12' },
+        '\u0416': { totalApartments: 2, availableFloors: '12, 14' },
+        '\u0417': { totalApartments: 3, availableFloors: '12, 15-16' },
         '\u0418': { totalApartments: 3, availableFloors: '14-16' },
-        '\u0419': { totalApartments: 4, availableFloors: '10, 13, 15-16' },
-        '\u041a': { totalApartments: 1, availableFloors: '16' },
+        '\u0419': { totalApartments: 2, availableFloors: '13, 16' },
       },
     },
 
     'В': {
       '1room': {
         'В-A': { totalApartments: 4, availableFloors: '13-16' },
-        'В-Б': { totalApartments: 2, availableFloors: '15-16' },
-        'В-В': { totalApartments: 3, availableFloors: '14-16' },
+        'В-Б': { totalApartments: 1, availableFloors: '16' },
+        'В-В': { totalApartments: 2, availableFloors: '15-16' },
         'В-Г': { totalApartments: 4, availableFloors: '12-13, 15-16' },
       },
       '3room': {
-        'В-A': { totalApartments: 3, availableFloors: '13, 15-16' },
-        'В-Б': { totalApartments: 3, availableFloors: '13-15' },
+        'В-A': { totalApartments: 2, availableFloors: '15-16' },
+        'В-Б': { totalApartments: 2, availableFloors: '14-15' },
       },
     },
 
     'Г': {
       '1room': {
-        'Г-Г': { totalApartments: 2, availableFloors: '15-16' },
-      },
-      '2room': {
-        'Г-Г': { totalApartments: 1, availableFloors: '15' },
-      },
-      '3room': {
-        B: { totalApartments: 1, availableFloors: '16' },
+        'Г-Г': { totalApartments: 1, availableFloors: '16' },
       },
     },
 
@@ -3596,11 +3600,11 @@ const COMPLEX_PROPERTY_CONFIGS = {
         'Д-Г': { totalApartments: 5, availableFloors: '12-16' },
       },
       '2room': {
-        'Д-A': { totalApartments: 2, availableFloors: '14, 16' },
+        'Д-A': { totalApartments: 1, availableFloors: '16' },
         'Д-Б': { totalApartments: 1, availableFloors: '16' },
       },
       '3room': {
-        'Д-Б': { totalApartments: 3, availableFloors: '14-16' },
+        'Д-Б': { totalApartments: 2, availableFloors: '14, 16' },
       },
     },
 
@@ -3609,13 +3613,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
         'Е-Д': { totalApartments: 2, availableFloors: '15-16' },
         'Е-Е': { totalApartments: 1, availableFloors: '16' },
         'Е-Ж': { totalApartments: 1, availableFloors: '16' },
-        'Е-И': { totalApartments: 1, availableFloors: '16' },
       },
       '2room': {
         'Е-Б': { totalApartments: 2, availableFloors: '15-16' },
         'Е-В': { totalApartments: 3, availableFloors: '14-16' },
-        'Е-Г': { totalApartments: 2, availableFloors: '13, 16' },
-        'Е-Д': { totalApartments: 3, availableFloors: '14-16' },
+        'Е-Г': { totalApartments: 1, availableFloors: '16' },
+        'Е-Д': { totalApartments: 2, availableFloors: '15-16' },
         'Е-Ж': { totalApartments: 3, availableFloors: '13, 15-16' },
         'Е-И': { totalApartments: 1, availableFloors: '13' },
         'Е-К': { totalApartments: 2, availableFloors: '15-16' },
@@ -3627,12 +3630,12 @@ const COMPLEX_PROPERTY_CONFIGS = {
     'Ж': {
       '1room': {
         'Ж-Б': { totalApartments: 4, availableFloors: '12-13, 15-16' },
-        'Ж-В': { totalApartments: 4, availableFloors: '10-11, 14-15' },
-        'Ж-Г': { totalApartments: 7, availableFloors: '8, 10-11, 13-16' },
+        'Ж-В': { totalApartments: 3, availableFloors: '10-11, 15' },
+        'Ж-Г': { totalApartments: 6, availableFloors: '8, 11, 13-16' },
       },
       '2room': {
-        'Ж-А': { totalApartments: 4, availableFloors: '9, 13-15' },
-        'Ж-Б': { totalApartments: 3, availableFloors: '13-14, 16' },
+        'Ж-А': { totalApartments: 1, availableFloors: '9' },
+        'Ж-Б': { totalApartments: 1, availableFloors: '16' },
       },
     },
   },
