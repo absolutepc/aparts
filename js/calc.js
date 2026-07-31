@@ -66,7 +66,7 @@ function initCalcPage() {
 
   const cashOption = paymentOptions.find(opt => opt.type === 'cash') || null;
   const noMarkupOption = paymentOptions.find(opt => opt.type === 'noMarkup') || null;
-  const installmentNoDownOption = paymentOptions.find(
+  let installmentNoDownOption = paymentOptions.find(
     opt => opt.type === 'installment'
       && !(Number(opt.downPaymentPercent) > 0)
       && !(Number(opt.markupPercent) > 0)
@@ -87,6 +87,11 @@ function initCalcPage() {
       resolveLayoutSectorTitle(targetLayout) || targetSector?.title
     )
     : null;
+
+  // Для сектора без цены «без взноса» этот вариант покупки не предлагаем
+  if (installmentNoDownOption && sectorGroup && !(Number(sectorGroup.noDownPayment) > 0)) {
+    installmentNoDownOption = null;
+  }
 
   if (sectorGroup?.full > 0) {
     prices.push({ value: sectorGroup.full, label: formatPrice(sectorGroup.full) });
@@ -407,6 +412,10 @@ function initCalcPage() {
         compute: () => calculateInstallmentNoDown(area, property, targetLayout, installmentNoDownOption),
       });
     }
+  } else {
+    const card = document.getElementById('calcInstallment6YearsCard');
+    if (card) card.style.display = 'none';
+    if (instNoDownOptions) instNoDownOptions.style.display = 'none';
   }
   if (installmentWithDownOption) {
     const card = document.getElementById('calcInstallment6Years30Card');

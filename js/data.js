@@ -1,5 +1,5 @@
-const STORE_KEY = 'aparts_data_v32';
-const DATA_JS_VERSION = '32';
+const STORE_KEY = 'aparts_data_v33';
+const DATA_JS_VERSION = '33';
 const USER_KEY = 'aparts_user';
 const SITE_NAME = 'Dune Base';
 const DEFAULT_IMG = 'img/default.svg';
@@ -1209,12 +1209,16 @@ function normalizeSectorPriceGroup(group) {
 
   const full = Number(group.full);
   const installment30 = Number(group.installment30);
-  const noDownPayment = Number(group.noDownPayment);
-  if (![full, installment30, noDownPayment].every((price) => Number.isFinite(price) && price > 0)) {
+  if (![full, installment30].every((price) => Number.isFinite(price) && price > 0)) {
     return null;
   }
 
-  return { sectors, full, installment30, noDownPayment };
+  const normalized = { sectors, full, installment30 };
+  const noDownPayment = Number(group.noDownPayment);
+  if (Number.isFinite(noDownPayment) && noDownPayment > 0) {
+    normalized.noDownPayment = noDownPayment;
+  }
+  return normalized;
 }
 
 function normalizeSectorPriceGroups(groups) {
@@ -1280,7 +1284,7 @@ function renderPropertySectorPricesBlock(property, options = {}) {
                 <td>${escapeHtml(formatSectorPriceGroupLabel(group))}</td>
                 <td>${formatPrice(group.full)}</td>
                 <td>${formatPrice(group.installment30)}</td>
-                <td>${formatPrice(group.noDownPayment)}</td>
+                <td>${group.noDownPayment > 0 ? formatPrice(group.noDownPayment) : '—'}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -1353,7 +1357,14 @@ function renderPropertyFloorPricesBlock(property, options = {}) {
 function renderLayoutPriceSpecs(property, layout, variant) {
   const sectorGroup = getSectorPriceGroupForSector(property, resolveLayoutSectorTitle(layout));
   if (sectorGroup) {
-    return `<span class="floor-plan-spec-value floor-plan-spec-value--multiline">Полная оплата: ${formatPrice(sectorGroup.full)}<br>Рассрочка 30%: ${formatPrice(sectorGroup.installment30)}<br>Без взноса: ${formatPrice(sectorGroup.noDownPayment)}</span>`;
+    const priceLines = [
+      `Полная оплата: ${formatPrice(sectorGroup.full)}`,
+      `Рассрочка 30%: ${formatPrice(sectorGroup.installment30)}`,
+    ];
+    if (sectorGroup.noDownPayment > 0) {
+      priceLines.push(`Без взноса: ${formatPrice(sectorGroup.noDownPayment)}`);
+    }
+    return `<span class="floor-plan-spec-value floor-plan-spec-value--multiline">${priceLines.join('<br>')}</span>`;
   }
 
   const applicablePrices = getApplicableFloorPrices(property, layout);
@@ -3274,6 +3285,7 @@ function migrateStore() {
   if (localStorage.getItem(STORE_KEY)) return;
 
   const recentKeys = [
+    'aparts_data_v32',
     'aparts_data_v31',
     'aparts_data_v30',
     'aparts_data_v29',
@@ -3541,10 +3553,10 @@ const COMPLEX_PROPERTY_CONFIGS = {
   // Сектор → полная оплата / рассрочка 30% / без взноса
   // Остатки синхронизированы с Excel Ан-Нур (белые = доступны, красные = проданы)
   sectorPriceGroups: [
+    { sectors: ['А'], full: 120000, installment30: 130000 },
     { sectors: ['Б', 'В', 'Г'], full: 90000, installment30: 100000, noDownPayment: 107000 },
     { sectors: ['Д', 'Е'], full: 100000, installment30: 110000, noDownPayment: 107000 },
     { sectors: ['Ж'], full: 110000, installment30: 120000, noDownPayment: 130000 },
-    { sectors: ['А'], full: 120000, installment30: 130000, noDownPayment: 140000 },
   ],
 
   // Порядок секторов на странице объекта
